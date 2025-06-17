@@ -1,5 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+from uuid import uuid4
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -19,6 +22,9 @@ class Organization(db.Model):
     users = db.relationship('Users', backref='organization', foreign_keys='Users.org_id')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f'<Organization {self.name}>'
+
 
 class Teacher(db.Model):
     __tablename__ = 'teacher'
@@ -30,15 +36,21 @@ class Teacher(db.Model):
     teacher_children = db.relationship('TeacherChild', backref='teacher', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f'<Teacher {self.subject}>'
+
 
 class LessonUpdates(db.Model):
     __tablename__ = 'lesson_updates'
     
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher.teacher_id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     lesson = db.Column(db.String(255))
     summary = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<LessonUpdate {self.lesson}>'
 
 
 class Child(db.Model):
@@ -46,10 +58,10 @@ class Child(db.Model):
     
     child_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
-    dob = db.Column(db.Integer)
+    dob = db.Column(db.Date)
     class_ = db.Column('class', db.Integer)
     school = db.Column(db.String(255))
-    gender = db.Column(db.String(255))
+    gender = db.Column(db.String(10))
     unique = db.Column(db.String(255))
     habits = db.relationship('Habit', backref='child', lazy=True)
     badges = db.relationship('Badge', backref='child', lazy=True)
@@ -59,6 +71,9 @@ class Child(db.Model):
     teacher_links = db.relationship('TeacherChild', backref='child', lazy=True)
     parent_links = db.relationship('ParentChild', backref='child', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Child {self.user_id}>'
 
 
 class Habit(db.Model):
@@ -71,15 +86,21 @@ class Habit(db.Model):
     is_done = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Date when the habit was recorded
 
+    def __repr__(self):
+        return f'<Habit {self.habit}>'
+
 
 class Badge(db.Model):
     __tablename__ = 'badge'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     badge = db.Column(db.String(255))
     level = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow) # Date when the badge was awarded
+    awarded_at = db.Column(db.DateTime, default=datetime.utcnow) # Date when the badge was awarded
+
+    def __repr__(self):
+        return f'<Badge {self.badge}>'
 
 
 class Skill(db.Model):
@@ -90,9 +111,11 @@ class Skill(db.Model):
     skill_name = db.Column(db.String(255))
     video_url = db.Column(db.String(255))
     is_learned = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Date when the skill was added
     # Date when the skill was completed
     completion_date = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f'<Skill {self.skill_name}>'
 
 
 class ToDoList(db.Model):
@@ -102,11 +125,14 @@ class ToDoList(db.Model):
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     to_do = db.Column(db.String(255))
     description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_done = db.Column(db.Boolean, default=False)
     is_daily = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     completion_date = db.Column(db.DateTime, nullable=True)  # Date when the task was completed
-    
+
+    def __repr__(self):
+        return f'<ToDo {self.to_do}>'
+
 class GratitudeEntries(db.Model):
     __tablename__ = 'gratitude_entries'
 
@@ -114,7 +140,9 @@ class GratitudeEntries(db.Model):
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     gratitude_text = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, nullable=True)  # Date when the task was completed
+
+    def __repr__(self):
+        return f'<GratitudeEntry {self.entry_id}>'
 
 
 
@@ -125,7 +153,9 @@ class TeacherChild(db.Model):
     teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher.teacher_id'))
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     linked_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<TeacherChild {self.teacher_id}-{self.child_id}>'
 
 
 class Parent(db.Model):
@@ -137,6 +167,9 @@ class Parent(db.Model):
     parent_links = db.relationship('ParentChild', backref='parent', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f'<Parent {self.user_id}>'
+
 
 class ParentChild(db.Model):
     __tablename__ = 'parent_child'
@@ -144,7 +177,10 @@ class ParentChild(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     parent_id = db.Column(UUID(as_uuid=True), db.ForeignKey('parent.parent_id'))
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    linked_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<ParentChild {self.parent_id}-{self.child_id}>'
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -154,7 +190,7 @@ class Users(db.Model):
     password = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
-    role_type = db.Column(db.String(255))
+    role_type = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     # Organization this user belongs to

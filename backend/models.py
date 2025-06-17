@@ -17,6 +17,7 @@ class Organization(db.Model):
     creator = db.relationship('Users', foreign_keys=[created_by], backref='organizations_created')
     # Users belonging to this organization
     users = db.relationship('Users', backref='organization', foreign_keys='Users.org_id')
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Teacher(db.Model):
@@ -27,6 +28,7 @@ class Teacher(db.Model):
     subject = db.Column(db.String(255))
     lessons = db.relationship('LessonUpdates', backref='teacher', lazy=True)
     teacher_children = db.relationship('TeacherChild', backref='teacher', lazy=True)
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class LessonUpdates(db.Model):
@@ -56,6 +58,7 @@ class Child(db.Model):
     gratitudes = db.relationship('GratitudeEntries', backref='child', lazy=True)
     teacher_links = db.relationship('TeacherChild', backref='child', lazy=True)
     parent_links = db.relationship('ParentChild', backref='child', lazy=True)
+    date_of_joining = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Habit(db.Model):
@@ -66,6 +69,7 @@ class Habit(db.Model):
     habit = db.Column(db.String(255))
     is_daily = db.Column(db.String(10))
     is_done = db.Column(db.Boolean, default=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)  # Date when the habit was recorded
 
 
 class Badge(db.Model):
@@ -75,6 +79,7 @@ class Badge(db.Model):
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     badge = db.Column(db.String(255))
     level = db.Column(db.String(255))
+    date = db.Column(db.DateTime, default=datetime.utcnow) # Date when the badge was awarded
 
 
 class Skill(db.Model):
@@ -99,7 +104,7 @@ class ToDoList(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_done = db.Column(db.Boolean, default=False)
     is_daily = db.Column(db.Boolean, default=False)
-
+    completion_date = db.Column(db.DateTime, nullable=True)  # Date when the task was completed
 
 class GratitudeEntries(db.Model):
     __tablename__ = 'gratitude_entries'
@@ -110,6 +115,7 @@ class GratitudeEntries(db.Model):
     gratitude_text = db.Column(db.Text)
 
 
+
 class TeacherChild(db.Model):
     __tablename__ = 'teacher_child'
 
@@ -117,6 +123,7 @@ class TeacherChild(db.Model):
     teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher.teacher_id'))
     child_id = db.Column(UUID(as_uuid=True), db.ForeignKey('child.child_id'))
     linked_at = db.Column(db.DateTime, default=datetime.utcnow)
+    linked_date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Parent(db.Model):
@@ -126,6 +133,7 @@ class Parent(db.Model):
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
     phone_number = db.Column(db.String(20))
     parent_links = db.relationship('ParentChild', backref='parent', lazy=True)
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class ParentChild(db.Model):
@@ -153,3 +161,4 @@ class Users(db.Model):
     teacher = db.relationship('Teacher', backref='user', uselist=False)
     child = db.relationship('Child', backref='user', uselist=False)
     parent = db.relationship('Parent', backref='user', uselist=False)
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)

@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
 from models import *
-
+import random
+import string
 
 jwt = JWTManager()
 
@@ -28,6 +29,20 @@ def validate_password(password):
         return False, "Password must contain at least one number"
     return True, "Password is valid"
 
+def generate_unique_key(model, field='unique_key', length=4):
+    """Generates a unique key like AD81-652W for a given model and field."""
+    characters = string.ascii_uppercase + string.digits
+
+    while True:
+        part1 = ''.join(random.choices(characters, k=length))
+        part2 = ''.join(random.choices(characters, k=length))
+        unique_key = f"{part1}-{part2}"
+
+        # Check uniqueness in the database
+        existing = db.session.query(model).filter(getattr(model, field) == unique_key).first()
+        if not existing:
+            return unique_key
+        
 
 # JWT Error handlers
 @jwt.expired_token_loader
@@ -43,10 +58,9 @@ def missing_token_callback(error):
     return jsonify({'message': 'Authorization token is required'}), 401
 
 
-class Signup(Resource):
+class SignupOrganization(Resource):
     """
-    User registration endpoint
-    This endpoint allows users to register by providing their email, password, and name.
+    This endpoint allows new users to register an organization.
     It validates the email format and password strength before creating a new user.
     returns a JWT access token and refresh token upon successful registration.
     """
@@ -55,7 +69,7 @@ class Signup(Resource):
             data = request.get_json()
 
             # Validate required fields
-            required_fields = ['email', 'password', 'first_name', 'role_type']
+            required_fields = ['email', 'password', 'first_name', 'last_name', 'organization_name', 'phone_number', 'address']
             for field in required_fields:
                 if not data.get(field):
                     return {'error': f'{field} is required'}, 400
@@ -63,8 +77,10 @@ class Signup(Resource):
             email = data['email'].lower().strip()
             password = data['password']
             first_name = data['first_name'].strip()
-            last_name = data.get('last_name', '').strip()
-            role_type = data['role_type'].lower()
+            last_name = data['last_name'].strip()
+            organization_name = data['organization_name'].strip()
+            phone_number = data['phone_number']
+            address = data['address']
             
             # Validate email format
             if not validate_email(email):
@@ -75,11 +91,6 @@ class Signup(Resource):
             if not is_valid_password:
                 return {'error': password_message}, 400
 
-            # Validate role type
-            valid_roles = ['teacher', 'parent', 'child', 'admin']
-            if role_type not in valid_roles:
-                return {'error': f'Role must be one of: {", ".join(valid_roles)}'}, 400
-            
             # Check if user already exists
             existing_user = Users.query.filter_by(email=email).first()
             if existing_user:
@@ -92,10 +103,19 @@ class Signup(Resource):
                 password=hashed_password,
                 first_name=first_name,
                 last_name=last_name,
-                role_type=role_type,
+                role_type="admin",
             )
-            
             db.session.add(new_user)
+            db.session.flush()
+
+            # Create organization
+            new_organization = Organization(
+                name=organization_name,
+                phone_number=phone_number,
+                address=address,
+                created_by=new_user.user_id
+            )
+            db.session.add(new_organization)
             db.session.commit()
 
             # Create access and refresh tokens
@@ -103,12 +123,146 @@ class Signup(Resource):
             refresh_token = create_refresh_token(identity=str(new_user.user_id))
 
             return {
-                'message': 'User created successfully',
-                'user': new_user.email,
+                'message': 'Organization registered successfully',
+                'user_email': new_user.email,
+                'role': new_user.role_type,
+                'organization': new_organization.name,
                 'access_token': access_token,
                 'refresh_token': refresh_token
             }, 201 
         
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class SignupChild(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+
+            # Required fields for child
+            user_fields = ['email', 'password', 'first_name', 'last_name', 'dob', 'class', 'school_name', 'gender']
+            for field in user_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+
+            email = data['email'].lower().strip()
+            password = data['password']
+            first_name = data['first_name'].strip()
+            last_name = data['last_name'].strip()
+
+            # Validate email and password
+            if not validate_email(email):
+                return {'error': 'Invalid email format'}, 400
+            is_valid_password, msg = validate_password(password)
+            if not is_valid_password:
+                return {'error': msg}, 400
+
+            if Users.query.filter_by(email=email).first():
+                return {'error': 'User with this email already exists'}, 409
+
+            hashed_password = generate_password_hash(password)
+            new_user = Users(
+                email=email,
+                password=hashed_password,
+                first_name=first_name,
+                last_name=last_name,
+                role_type='child'
+            )
+            db.session.add(new_user)
+            db.session.flush()  # Get user_id
+
+            # Create Child
+            new_child = Child(
+                user_id=new_user.user_id,
+                dob=datetime.strptime(data['dob'], "%Y-%m-%d").date(),
+                class_=data['class'],
+                school_name=data['school_name'],
+                gender=data['gender'],
+                unique_key=generate_unique_key(Child)
+            )
+            db.session.add(new_child)
+            db.session.commit()
+
+            # Tokens
+            access_token = create_access_token(identity=str(new_user.user_id))
+            refresh_token = create_refresh_token(identity=str(new_user.user_id))
+
+            return {
+                'message': 'Child registered successfully',
+                'user_email': new_user.email,
+                'role': new_user.role_type,
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class SignupParent(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+
+            # Required fields for Users
+            user_fields = ['email', 'password', 'first_name', 'last_name', 'phone_number']
+            for field in user_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+
+            email = data['email'].lower().strip()
+            password = data['password']
+            first_name = data['first_name'].strip()
+            last_name = data['last_name'].strip()
+            phone_number = data['phone_number']
+
+            # Email and password validation
+            if not validate_email(email):
+                return {'error': 'Invalid email format'}, 400
+
+            is_valid_password, msg = validate_password(password)
+            if not is_valid_password:
+                return {'error': msg}, 400
+
+            # Check for existing user
+            if Users.query.filter_by(email=email).first():
+                return {'error': 'User with this email already exists'}, 409
+
+            # Create user
+            hashed_password = generate_password_hash(password)
+            new_user = Users(
+                email=email,
+                password=hashed_password,
+                first_name=first_name,
+                last_name=last_name,
+                role_type='parent'
+            )
+            db.session.add(new_user)
+            db.session.flush()
+
+            # Create parent profile
+            new_parent = Parent(
+                user_id=new_user.user_id,
+                phone_number=phone_number
+            )
+            db.session.add(new_parent)
+            db.session.commit()
+
+            # Create tokens
+            access_token = create_access_token(identity=str(new_user.user_id))
+            refresh_token = create_refresh_token(identity=str(new_user.user_id))
+
+            return {
+                'message': 'Parent registered successfully',
+                'user_email': new_user.email,
+                'role': new_user.role_type,
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }, 201
+
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500

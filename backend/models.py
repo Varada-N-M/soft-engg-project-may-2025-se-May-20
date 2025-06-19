@@ -10,14 +10,10 @@ class Organization(db.Model):
     
     org_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    phone_number = db.Column(db.String(20), nullable=True)
-    address = db.Column(db.Text, nullable=True)
-    # Who created this organization
+    phone_number = db.Column(db.String(20), nullable=False)
+    address = db.Column(db.Text, nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    # Creator relationship
     creator = db.relationship('Users', foreign_keys=[created_by], backref='organizations_created')
-    # Users belonging to this organization
-    # users = db.relationship('Users', backref='organization', foreign_keys='Users.org_id')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -30,6 +26,7 @@ class Teacher(db.Model):
     teacher_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     subject = db.Column(db.String(255))
+    school_name = db.Column(db.String(255))
     lessons = db.relationship('LessonUpdates', backref='teacher', lazy=True)
     teacher_children = db.relationship('TeacherChild', backref='teacher', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -58,9 +55,11 @@ class Child(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     dob = db.Column(db.Date)
     class_ = db.Column('class', db.Integer)
-    school = db.Column(db.String(255))
+    school_name = db.Column(db.String(255))
     gender = db.Column(db.String(10))
-    unique = db.Column(db.String(255))
+    unique_key = db.Column(db.String(255))
+    is_linked = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     habits = db.relationship('Habit', backref='child', lazy=True)
     badges = db.relationship('Badge', backref='child', lazy=True)
     skills = db.relationship('Skill', backref='child', lazy=True)
@@ -68,7 +67,6 @@ class Child(db.Model):
     gratitudes = db.relationship('GratitudeEntries', backref='child', lazy=True)
     teacher_links = db.relationship('TeacherChild', backref='child', lazy=True)
     parent_links = db.relationship('ParentChild', backref='child', lazy=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Child {self.user_id}>'
@@ -95,7 +93,7 @@ class Badge(db.Model):
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
     badge = db.Column(db.String(255))
     level = db.Column(db.String(255))
-    awarded_at = db.Column(db.DateTime, default=datetime.utcnow) # Date when the badge was awarded
+    awarded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Badge {self.badge}>'
@@ -185,13 +183,11 @@ class Users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    role_type = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=True)
-    # Organization this user belongs to
-    # org_id = db.Column(db.Integer, db.ForeignKey('organization.org_id'))
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    role_type = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     # One-to-one relationships for roles
     teacher = db.relationship('Teacher', backref='user', uselist=False)
     child = db.relationship('Child', backref='user', uselist=False)

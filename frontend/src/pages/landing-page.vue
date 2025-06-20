@@ -4,10 +4,6 @@
       <div class="full-page-div">
         <div class="navbar">
           <div class="logo">Cool Kids</div>
-          <div class="auth-buttons">
-            <div class="login-btn">SignUp</div>
-            <div class="login-btn">Login</div>
-          </div>
         </div>
         <div class="content">
           <div class="hero-section">
@@ -132,7 +128,6 @@ const handleGetStarted = () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Butterfly+Kids&family=Manrope:wght@200..800&display=swap');
 
 html, body {
   margin: 0;
@@ -184,7 +179,6 @@ html, body {
   border: 1px solid rgba(0, 0, 0, 0.2);
   padding: 10px 20px;
   border-radius: 25px;
-  font-family: Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -208,7 +202,6 @@ html, body {
   border-radius: 25px;
   width: 200px;
   text-align: center;
-  font-family: Arial, sans-serif;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -218,7 +211,7 @@ html, body {
 
 .content {
   font-size: 20px;
-  font-family: Arial, sans-serif;
+  font-family: "Manrope", sans-serif;
   flex: 1;
   overflow-y: auto;
   display: flex;

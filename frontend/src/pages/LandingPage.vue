@@ -132,7 +132,7 @@ const handleGetStarted = () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Butterfly+Kids&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Butterfly+Kids&family=Manrope:wght@200..800&display=swap');
 
 html, body {
   margin: 0;

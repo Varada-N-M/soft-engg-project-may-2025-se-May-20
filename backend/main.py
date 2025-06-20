@@ -6,7 +6,8 @@ from api import jwt
 from urls import api
 
 app = Flask(__name__)
-CORS(app)
+# Add frontend URLs here
+CORS(app, origins=['http://localhost:5173'])
 
 app.config.from_object(config['default'])
 

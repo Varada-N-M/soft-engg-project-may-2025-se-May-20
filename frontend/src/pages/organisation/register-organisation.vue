@@ -200,7 +200,7 @@
 
 
         <!-- Login link -->
-         <div class="mt-6 text-center">
+        <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             Already have an organization account?
             <a href="/org/login" class="font-semibold text-blue-600 hover:text-blue-800 transition-colors">
@@ -263,16 +263,13 @@ const handleSubmit = async () => {
       message: result.message || 'Organization registered successfully! Welcome to CoolKids! 🎉',
       data: result
     }
-    // Reset form on success
-    formData.value = {
-      email: '',
-      password: '',
-      first_name: '',
-      last_name: '',
-      organization_name: '',
-      phone_number: '',
-      address: ''
-    }
+
+    localStorage.setItem('refreshToken', result.refresh_token)
+    localStorage.setItem('accessToken', result.access_token)
+    localStorage.setItem('role', result.role)
+
+    this.$router.push('/org/home')
+
   } catch (error) {
     response.value = {
       success: false,

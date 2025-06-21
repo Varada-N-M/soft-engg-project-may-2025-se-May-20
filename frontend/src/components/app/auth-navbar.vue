@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white shadow-lg border-b-2 border-gray-200 sticky top-0 z-50">
+  <header class="bg-white  border-b-2 border-gray-200 sticky top-0 z-50">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
@@ -315,7 +315,7 @@ const currentUser = ref({
   avatar: null
 })
 
-// Mock notifications - replace with actual notifications from your API
+// Mock notifications - replace it with actual notifications from your API
 const notifications = ref([
   {
     id: 1,

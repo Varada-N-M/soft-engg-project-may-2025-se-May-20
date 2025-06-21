@@ -1,13 +1,10 @@
 <template>
-  <header class="bg-white shadow-lg border-b-2 border-gray-200 sticky top-0 z-50">
+  <header class="bg-white border-b-2 border-gray-200 sticky top-0 z-50">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
         <div class="flex items-center space-x-4">
           <router-link to="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-              <BookOpenIcon class="w-6 h-6 text-white" />
-            </div>
             <div class="hidden sm:block">
               <h1 class="text-2xl font-black  font-fancy  text-gray-800">
                 CoolKids

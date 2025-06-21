@@ -3,11 +3,11 @@
     <div class="wrapper">
       <div class="full-page-div">
         <div class="navbar">
-          <div class="logo">Cool Kids</div>
+          <div class="logo font-semibold"><logo/></div>
         </div>
         <div class="content">
           <div class="hero-section">
-            <h1 class="hero-title">Welcome to Cool Kids</h1>
+            <h1 class="hero-title">Welcome to <logo/></h1>
             <p class="hero-subtitle">
               The ultimate platform designed for every member of the educational community.
               Discover features tailored specifically for students, teachers, parents, and administrators.
@@ -110,7 +110,7 @@
       <div class="cta-section">
         <h2 class="cta-title">Ready to Transform Education?</h2>
         <p style="font-size: 18px; color: #7f8c8d; margin-bottom: 30px;">
-          Join thousands of schools, teachers, students, and parents who trust Cool Kids for their educational needs.
+          Join thousands of schools, teachers, students, and parents who trust CoolKids for their educational needs.
         </p>
         <button class="cta-button" @click="handleGetStarted">
           Get Started Today
@@ -122,12 +122,15 @@
 
 <script setup>
 
+import Logo from "@/components/partials/logo.vue";
+
 const handleGetStarted = () => {
-  alert('Welcome to Cool Kids! Sign up to get started.');
+  alert('Welcome to CoolKids! Sign up to get started.');
 };
 </script>
 
 <style scoped>
+@reference '@/css/index.css';
 
 html, body {
   margin: 0;
@@ -150,7 +153,7 @@ html, body {
   padding: 20px;
   flex: 1;
   box-sizing: border-box;
-  font-family: "Butterfly Kids", cursive;
+  @apply font-fancy;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -161,8 +164,8 @@ html, body {
   justify-content: space-between;
   align-items: center;
   font-size: 35px;
-  font-family: "Butterfly Kids", cursive;
   margin-bottom: 20px;
+  @apply font-fancy;
 }
 
 .logo {
@@ -228,7 +231,7 @@ html, body {
 }
 
 .hero-title {
-  font-family: "Butterfly Kids", cursive;
+  @apply font-fancy;
   font-size: 48px;
   color: #2c3e50;
   margin-bottom: 15px;
@@ -320,7 +323,7 @@ html, body {
 }
 
 .user-type-title {
-  font-family: "Butterfly Kids", cursive;
+  @apply font-fancy;
   font-size: 60px;
   color: #2c3e50;
   margin-bottom: 15px;
@@ -364,7 +367,7 @@ html, body {
 }
 
 .cta-title {
-  font-family: "Butterfly Kids", cursive;
+  @apply font-fancy;
   font-size: 36px;
   color: #2c3e50;
   margin-bottom: 20px;

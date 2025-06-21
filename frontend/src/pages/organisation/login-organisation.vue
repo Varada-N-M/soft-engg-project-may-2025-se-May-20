@@ -229,10 +229,9 @@ const handleLogin = async () => {
 
     if (apiResponse.data) {
       // Store tokens in localStorage
-      localStorage.setItem('access_token', apiResponse.data.access_token)
-      localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
-      localStorage.setItem('user_email', apiResponse.data.user)
-      localStorage.setItem('user_type', 'organization')
+      localStorage.setItem('accessToken', apiResponse.data.access_token)
+      localStorage.setItem('refreshToken', apiResponse.data.refresh_token)
+      localStorage.setItem('role', apiResponse.data.role)
 
       // Store remember me preference
       if (formData.value.rememberMe) {
@@ -246,8 +245,8 @@ const handleLogin = async () => {
 
       // Redirect to organization dashboard after a short delay
       setTimeout(() => {
-        router.push('/org/dashboard')
-      }, 1500)
+        router.push('/org/home')
+      }, 500)
     }
   } catch (error) {
     console.error('Login error:', error)

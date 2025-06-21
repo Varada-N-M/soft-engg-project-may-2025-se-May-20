@@ -7,6 +7,7 @@ import RegisterOrganisation from '../pages/organisation/register-organisation.vu
 import RegisterParent from '../pages/parent/register-parent.vue';
 import LoginParent from "../pages/parent/login-parent.vue";
 import LoginOrganisation from "../pages/organisation/login-organisation.vue";
+import HomeOrganisation from "../pages/organisation/home-organisation.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -20,6 +21,7 @@ const routes = [
     // BEGIN ORG SECTION
     {path: '/org/register', component: RegisterOrganisation},
     {path: '/org/login', component: LoginOrganisation},
+    {path: '/org/home', component: HomeOrganisation},
     // END ORG SECTION
 
 

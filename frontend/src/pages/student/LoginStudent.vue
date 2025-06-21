@@ -86,7 +86,7 @@
               class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-4 rounded-xl hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
           >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              🚀 Let's Start Learning!
+              🚀 Login
             </span>
             <span v-else class="flex items-center justify-center">
                <Loader class="animate-spin"/>

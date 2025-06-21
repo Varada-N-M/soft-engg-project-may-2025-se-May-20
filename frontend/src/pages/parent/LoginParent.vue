@@ -143,7 +143,7 @@
 import {ref, computed, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
-import api from '@/plugins/axios.js'
+import axios from '@/plugins/axios.js'
 import SignInLinks from "@/components/partials/SignInLinks.vue";
 import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import {Card} from "@/components/ui/card/index.js";
@@ -210,7 +210,7 @@ const handleLogin = async () => {
       role: 'parent'
     }
 
-    const apiResponse = await api.post('/api/login', loginData)
+    const apiResponse = await axios.post('/api/login', loginData)
 
     if (apiResponse.data) {
       // Store tokens in localStorage

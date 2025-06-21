@@ -13,5 +13,5 @@
 
 </template>
 <script setup lang="ts">
-import OrgDashboardLayout from "@/components/partials/org-dashboard-layout.vue";
+import OrgDashboardLayout from "@/components/partials/OrgDashboardLayout.vue";
 </script>

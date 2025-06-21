@@ -24,7 +24,7 @@
 
     <div class="w-full max-w-lg">
       <!-- Main registration card -->
-      <div class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+      <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
         <!-- Decorative top wave -->
         <div
             class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-3xl"></div>
@@ -57,12 +57,11 @@
               <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">
                 👤 First Name *
               </label>
-              <input
+              <Input
                   id="firstName"
                   v-model="formData.first_name"
                   type="text"
                   placeholder="Your first name"
-                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                   :class="getInputClasses('first_name')"
                   required
               />
@@ -73,12 +72,11 @@
               <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">
                 👤 Last Name *
               </label>
-              <input
+              <Input
                   id="lastName"
                   v-model="formData.last_name"
                   type="text"
                   placeholder="Your last name"
-                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                   :class="getInputClasses('last_name')"
                   required
               />
@@ -91,12 +89,11 @@
             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
               📧 Email Address *
             </label>
-            <input
+            <Input
                 id="email"
                 v-model="formData.email"
                 type="email"
                 placeholder="your.email@example.com"
-                class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                 :class="getInputClasses('email')"
                 required
             />
@@ -109,12 +106,11 @@
             <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">
               📱 Phone Number *
             </label>
-            <input
+            <Input
                 id="phoneNumber"
                 v-model="formData.phone_number"
                 type="tel"
                 placeholder="1234567890"
-                class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                 :class="getInputClasses('phone_number')"
                 required
             />
@@ -128,12 +124,11 @@
               🔒 Password *
             </label>
             <div class="relative">
-              <input
+              <Input
                   id="password"
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="Create a secure password"
-                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400 pr-12"
                   :class="getInputClasses('password')"
                   required
               />
@@ -216,13 +211,9 @@
         </div>
 
         <!-- Fun characters at bottom -->
-        <div class="mt-6 flex justify-center space-x-4">
-          <div class="text-2xl animate-bounce" style="animation-delay: 0s">👨‍👩‍👧‍👦</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.2s">💕</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.4s">📚</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.6s">🌟</div>
-        </div>
-      </div>
+        <EmojiBounceAnimation :emojis="['👨‍👩‍👧‍👦','💕','📚','🌟']"/>
+
+      </Card>
 
       <!-- Footer text -->
       <div class="text-center mt-6">
@@ -238,6 +229,8 @@
 import {ref, computed, watch} from 'vue'
 import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
 import api from '@/plugins/axios'
+import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
+import {Input} from "@/components/ui/input/index.js";
 
 // Reactive data
 const formData = ref({
@@ -396,22 +389,5 @@ watch(formData, (newData, oldData) => {
 </script>
 
 <style scoped>
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0, 0, 0);
-  }
-  40%, 43% {
-    transform: translate3d(0, -30px, 0);
-  }
-  70% {
-    transform: translate3d(0, -15px, 0);
-  }
-  90% {
-    transform: translate3d(0, -4px, 0);
-  }
-}
 
-.animate-bounce {
-  animation: bounce 2s infinite;
-}
 </style>

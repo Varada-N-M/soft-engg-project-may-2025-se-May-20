@@ -122,7 +122,7 @@
 
 <script setup>
 
-import Logo from "@/components/partials/logo.vue";
+import Logo from "@/components/partials/Logo.vue";
 
 const handleGetStarted = () => {
   alert('Welcome to CoolKids! Sign up to get started.');
@@ -209,7 +209,7 @@ html, body {
   font-weight: 500;
   cursor: pointer;
   backdrop-filter: blur(6px);
-  transition: all 0.3s ease; 
+  transition: all 0.3s ease;
 }
 
 .content {
@@ -252,7 +252,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 25px;
-  padding: 40px 20px; 
+  padding: 40px 20px;
 }
 
 .section-title {

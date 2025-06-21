@@ -1,13 +1,15 @@
 import {createWebHistory, createRouter} from 'vue-router'
 
-import LandingPage from '../pages/landing-page.vue'
-import LoginStudent from '../pages/student/login-student.vue';
-import RegisterStudent from '../pages/student/register-student.vue';
-import RegisterOrganisation from '../pages/organisation/register-organisation.vue';
-import RegisterParent from '../pages/parent/register-parent.vue';
-import LoginParent from "../pages/parent/login-parent.vue";
-import LoginOrganisation from "../pages/organisation/login-organisation.vue";
-import HomeOrganisation from "../pages/organisation/home-organisation.vue";
+import LandingPage from '../pages/LandingPage.vue'
+import LoginStudent from '../pages/student/LoginStudent.vue';
+import RegisterStudent from '../pages/student/RegisterStudent.vue';
+import RegisterOrganisation from '../pages/organisation/RegisterOrganisation.vue';
+import RegisterParent from '../pages/parent/RegisterParent.vue';
+import LoginParent from "../pages/parent/LoginParent.vue";
+import LoginOrganisation from "../pages/organisation/LoginOrganisation.vue";
+import HomeOrganisation from "../pages/organisation/HomeOrganisation.vue";
+import HomeStudent from "../pages/student/HomeStudent.vue";
+import Badges from "../pages/student/Badges.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -15,6 +17,8 @@ const routes = [
     // BEGIN STUDENT SECTION
     {path: '/student/login', component: LoginStudent},
     {path: '/student/register', component: RegisterStudent},
+    {path: '/student/home', component: HomeStudent},
+    {path: '/student/badges', component: Badges},
     // END STUDENT SECTION
 
 

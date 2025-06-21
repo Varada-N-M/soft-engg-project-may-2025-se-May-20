@@ -1,32 +1,24 @@
 <template>
   <div
-      class="min-h-screen bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-300 flex items-center justify-center p-4">
+      class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-300 flex items-center justify-center p-4">
     <!-- Floating decorative elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-20 left-10 w-16 h-16 bg-yellow-300 rounded-full opacity-60 animate-bounce"></div>
-      <div class="absolute top-40 right-20 w-12 h-12 bg-green-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 0.5s"></div>
-      <div class="absolute bottom-32 left-20 w-20 h-20 bg-blue-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 1s"></div>
-      <div class="absolute bottom-20 right-10 w-14 h-14 bg-red-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 1.5s"></div>
-    </div>
+    <FloatingDecorativeElements/>
 
     <div class="w-full max-w-md">
       <!-- Main login card -->
-      <div class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+      <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
         <!-- Decorative top wave -->
         <div
-            class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-3xl"></div>
+            class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-3xl"></div>
 
         <!-- App logo and title -->
         <div class="relative z-10 text-center mb-8 pt-4">
           <div
-              class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <HeartIcon class="w-10 h-10 text-white"/>
+              class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <BuildingIcon class="w-10 h-10 text-white"/>
           </div>
-          <h1 class="text-3xl font-bold font-fancy text-gray-800 mb-2">CoolKids</h1>
-          <p class="text-gray-600 text-sm">Parent Login - Welcome back!</p>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2 font-fancy">CoolKids</h1>
+          <p class="text-gray-600 text-sm">Organization Login - Admin Access</p>
         </div>
 
         <!-- Response Alert -->
@@ -45,13 +37,13 @@
             <!-- Email field -->
             <div class="relative">
               <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                📧 Email Address
+                📧 Organization Email
               </label>
               <input
                   id="email"
                   v-model="formData.email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="admin@yourorganization.com"
                   class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
                   :class="getInputClasses('email')"
                   required
@@ -87,35 +79,15 @@
             </div>
           </div>
 
-          <!-- Remember me and forgot password -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <input
-                  id="remember"
-                  v-model="formData.rememberMe"
-                  type="checkbox"
-                  class="w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500"
-              />
-              <label for="remember" class="ml-2 text-sm text-gray-700">
-                Remember me
-              </label>
-            </div>
-            <router-link
-                to="/forgot-password"
-                class="text-sm text-pink-600 hover:text-pink-800 transition-colors"
-            >
-              Forgot password?
-            </router-link>
-          </div>
 
           <!-- Login button -->
           <button
               type="submit"
               :disabled="isLoading"
-              class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              💝 Sign In as Parent
+              🏢 Sign In to Organization
             </span>
             <span v-else class="flex items-center justify-center">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -132,32 +104,25 @@
         <!-- Sign up link -->
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
-            Don't have a parent account?
+            Don't have an organization account?
             <router-link
-                to="/parent/register"
-                class="font-semibold text-pink-600 hover:text-pink-800 transition-colors"
+                to="/org/register"
+                class="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
             >
-              Create one here
+              Register your organization
             </router-link>
           </p>
         </div>
 
         <!-- Other login types -->
-        <sign-in-links active-link="parent"/>
+        <sign-in-links active-link="org"/>
 
-        <!-- Fun characters at bottom -->
-        <div class="mt-6 flex justify-center space-x-4">
-          <div class="text-2xl animate-bounce" style="animation-delay: 0s">👨‍👩‍👧‍👦</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.2s">💕</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.4s">📚</div>
-          <div class="text-2xl animate-bounce" style="animation-delay: 0.6s">🌟</div>
-        </div>
-      </div>
+      </Card>
 
       <!-- Footer text -->
       <div class="text-center mt-6">
         <p class="text-white text-sm opacity-80">
-          Supporting your child's learning journey every step of the way
+          Empowering educational institutions to deliver exceptional learning experiences
         </p>
       </div>
     </div>
@@ -165,11 +130,13 @@
 </template>
 
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
-import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
-import api from '@/plugins/axios.js'
-import SignInLinks from "@/components/partials/sign-in-links.vue";
+import {BuildingIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
+import axios from '@/plugins/axios.js'
+import SignInLinks from "@/components/partials/SignInLinks.vue";
+import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
+import {Card} from "@/components/ui/card/index.js";
 
 // Router
 const router = useRouter()
@@ -196,7 +163,7 @@ const alertClasses = computed(() => {
 
 // Methods
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-pink-400'
+  const baseClasses = 'focus:border-blue-400'
   const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
   return `${baseClasses} ${errorClasses}`
 }
@@ -229,31 +196,28 @@ const handleLogin = async () => {
   try {
     const loginData = {
       email: formData.value.email,
-      password: formData.value.password
+      password: formData.value.password,
+      role: 'organisation'
     }
 
-    const apiResponse = await api.post('/api/login', loginData)
+    const apiResponse = await axios.post('/api/login', loginData)
 
     if (apiResponse.data) {
       // Store tokens in localStorage
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
-      localStorage.setItem('user_email', apiResponse.data.user)
+      localStorage.setItem('role', apiResponse.data.role)
 
-      // Store remember me preference
-      if (formData.value.rememberMe) {
-        localStorage.setItem('remember_me', 'true')
-      }
 
       response.value = {
         success: true,
         message: apiResponse.data.message || 'Login successful! Welcome back! 🎉'
       }
 
-      // Redirect to parent home after a short delay
+      // Redirect to organization dashboard after a short delay
       setTimeout(() => {
-        router.push('/parent/home')
-      }, 1500)
+        router.push('/org/home')
+      }, 500)
     }
   } catch (error) {
     console.error('Login error:', error)
@@ -298,24 +262,7 @@ watch(formData, clearErrors, {deep: true})
 </script>
 
 <style scoped>
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0, 0, 0);
-  }
-  40%, 43% {
-    transform: translate3d(0, -30px, 0);
-  }
-  70% {
-    transform: translate3d(0, -15px, 0);
-  }
-  90% {
-    transform: translate3d(0, -4px, 0);
-  }
-}
 
-.animate-bounce {
-  animation: bounce 2s infinite;
-}
 
 .transition-colors {
   transition-property: color, background-color, border-color;
@@ -323,9 +270,5 @@ watch(formData, clearErrors, {deep: true})
   transition-duration: 150ms;
 }
 
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
+
 </style>

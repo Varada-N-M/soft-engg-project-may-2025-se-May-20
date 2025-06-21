@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <span class="font-semibold">CoolKids</span>
+    <span class="font-semibold font-fancy">CoolKids</span>
 </template>
 
 <style scoped>

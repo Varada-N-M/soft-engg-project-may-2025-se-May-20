@@ -12,19 +12,19 @@ const api = axios.create({
  * Get token from localStorage (or Vuex/Pinia)
  */
 function getAccessToken() {
-    return localStorage.getItem('accessToken')
+    return localStorage.getItem('access_token')
 }
 
 function getRefreshToken() {
-    return localStorage.getItem('refreshToken')
+    return localStorage.getItem('refresh_token')
 }
 
 /**
  * Save new tokens
  */
 function saveTokens({accessToken, refreshToken}) {
-    if (accessToken) localStorage.setItem('accessToken', accessToken)
-    if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+    if (accessToken) localStorage.setItem('access_token', accessToken)
+    if (refreshToken) localStorage.setItem('refresh_token', refreshToken)
 }
 
 // 🟢 Request interceptor — attach access token
@@ -91,8 +91,8 @@ api.interceptors.response.use(
             } catch (refreshError) {
                 processQueue(refreshError, null)
                 // optionally, logout
-                localStorage.removeItem('accessToken')
-                localStorage.removeItem('refreshToken')
+                localStorage.removeItem('access_token')
+                localStorage.removeItem('refresh_token')
                 // window.location.href = '/login'
                 return Promise.reject(refreshError)
             } finally {

@@ -13,7 +13,7 @@
               Discover features tailored specifically for students, teachers, parents, and administrators.
             </p>
             <div class="center-wrapper">
-              <button class="start-btn">Get Started</button>
+              <router-link to="/student/login" class="start-btn">Get Started</router-link>
             </div>
           </div>
         </div>
@@ -146,17 +146,22 @@ html, body {
 }
 
 .full-page-div {
-  background: linear-gradient(135deg, #8bffa8 20%, #3cc8da 65% 100%);
+  background:  linear-gradient(
+      135deg,
+      rgba(139, 255, 168, 0.75) 20%, /* 50% opacity green */
+      rgba(60, 200, 218, 0.75) 100%  /* 50% opacity blue */
+  ),
+  url("/src/assets/bg-landing-page.png") center/cover no-repeat;
   border-radius: 12px;
   color: black;
   margin: 10px;
   padding: 20px;
   flex: 1;
   box-sizing: border-box;
-  @apply font-fancy;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  @apply font-fancy;
 }
 
 .navbar {

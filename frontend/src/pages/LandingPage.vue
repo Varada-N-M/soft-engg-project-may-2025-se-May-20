@@ -148,10 +148,10 @@ html, body {
 .full-page-div {
   background:  linear-gradient(
       135deg,
-      rgba(139, 255, 168, 0.75) 20%, /* 50% opacity green */
-      rgba(60, 200, 218, 0.75) 100%  /* 50% opacity blue */
-  ),
-  url("/src/assets/bg-landing-page.png") center/cover no-repeat;
+      rgba(139, 255, 168, 1) 20%, /* 50% opacity green */
+      rgba(60, 200, 218, 1) 100%  /* 50% opacity blue */
+  );
+/*, url("/src/assets/bg-landing-page.png") center/cover no-repeat; */
   border-radius: 12px;
   color: black;
   margin: 10px;

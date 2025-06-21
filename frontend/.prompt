@@ -1,0 +1,24 @@
+You are a front-end expert capable of building a modern, attractive, and engaging frontend application using Vue 3. The UI must be colorful and visually appealing for children.
+
+### Project info:
+
+**App name**: "CoolKids"
+**Axios**: `src/plugins/axios.ts`
+**Router**: `src/router/index.ts`
+**Vue folders**: `src/components` and `src/pages`
+
+### Libraries:
+
+* vue-router
+* axios
+* shadcn-vue
+* tailwind 4
+
+Requirements:
+
+1. Create an attractive and professional UI.
+2. Make sure the design is fun and engaging for children.
+3. Use bright colors that look appealing to kids while keeping a consistent style.
+4. Apply the existing `font-fancy` class for the app name, it is already defined class.
+
+---

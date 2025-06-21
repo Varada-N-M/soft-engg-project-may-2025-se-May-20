@@ -1,15 +1,44 @@
-import { createMemoryHistory, createRouter } from 'vue-router'
+import {createWebHistory, createRouter} from 'vue-router'
 
 import LandingPage from '../pages/LandingPage.vue'
+import LoginStudent from '../pages/student/LoginStudent.vue';
+import RegisterStudent from '../pages/student/RegisterStudent.vue';
+import RegisterOrganisation from '../pages/organisation/RegisterOrganisation.vue';
+import RegisterParent from '../pages/parent/RegisterParent.vue';
+import LoginParent from "../pages/parent/LoginParent.vue";
+import LoginOrganisation from "../pages/organisation/LoginOrganisation.vue";
+import HomeOrganisation from "../pages/organisation/HomeOrganisation.vue";
+import HomeStudent from "../pages/student/HomeStudent.vue";
+import Badges from "../pages/student/Badges.vue";
 
 const routes = [
-  { path: '/', component: LandingPage },
+    {path: '/', component: LandingPage},
+
+    // BEGIN STUDENT SECTION
+    {path: '/student/login', component: LoginStudent},
+    {path: '/student/register', component: RegisterStudent},
+    {path: '/student/home', component: HomeStudent},
+    {path: '/student/badges', component: Badges},
+    // END STUDENT SECTION
+
+
+    // BEGIN ORG SECTION
+    {path: '/org/register', component: RegisterOrganisation},
+    {path: '/org/login', component: LoginOrganisation},
+    {path: '/org/home', component: HomeOrganisation},
+    // END ORG SECTION
+
+
+    // BEGIN PARENT SECTION
+    {path: '/parent/register', component: RegisterParent},
+    {path: '/parent/login', component: LoginParent},
+    // END PARENT SECTION
 
 ]
 
 const router = createRouter({
-  history: createMemoryHistory(),
-  routes,
+    history: createWebHistory(),
+    routes,
 })
 
 export default router;

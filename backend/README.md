@@ -1,3 +1,5 @@
+
+
 ## Local development setup
 ### Create a virtual environment
 
@@ -27,3 +29,15 @@ or
 python main.py
 ```
 Default server URL: ```http://127.0.0.1:5000```
+
+
+## Database Migration
+To freshly migrate (delete and recreate) the database tables, run:
+
+```bash
+python migrate.py
+```
+
+You will be prompted for confirmation before the database is deleted and recreated.
+
+---

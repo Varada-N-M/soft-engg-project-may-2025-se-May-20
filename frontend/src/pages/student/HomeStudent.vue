@@ -105,22 +105,7 @@
             <div class="space-y-4">
               <div v-for="lesson in currentLessons" :key="lesson.id"
                    class="flex items-center p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-4"
-                     :style="{ backgroundColor: lesson.color }">
-                  {{ lesson.emoji }}
-                </div>
-                <div class="flex-1">
-                  <h4 class="font-semibold text-gray-800">{{ lesson.title }}</h4>
-                  <p class="text-sm text-gray-600">{{ lesson.description }}</p>
-                  <div class="mt-2">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                      <div class="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                           :style="{ width: `${lesson.progress}%` }"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">{{ lesson.progress }}% complete</p>
-                  </div>
-                </div>
-                <ChevronRightIcon class="w-5 h-5 text-gray-400"/>
+                <StudentTaskListItem :lesson="lesson"/>
               </div>
             </div>
           </div>
@@ -229,6 +214,7 @@ import {
 } from 'lucide-vue-next'
 import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
+import StudentTaskListItem from "@/components/app/StudentTaskListItem.vue";
 
 // Router
 const router = useRouter()

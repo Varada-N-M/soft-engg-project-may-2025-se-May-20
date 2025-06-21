@@ -231,6 +231,7 @@ import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from '
 import api from '@/plugins/axios'
 import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import {Input} from "@/components/ui/input/index.js";
+import {Card} from "@/components/ui/card/index.js";
 
 // Reactive data
 const formData = ref({

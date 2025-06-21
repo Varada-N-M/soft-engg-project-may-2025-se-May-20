@@ -359,8 +359,6 @@ const isFormValid = computed(() => {
       formData.value.school_name &&
       formData.value.gender &&
       formData.value.password &&
-      formData.value.agreeToTerms &&
-      formData.value.parentConsent &&
       passwordStrength.value >= 2 &&
       Object.keys(errors.value).length === 0
 })
@@ -388,37 +386,9 @@ const getInputClasses = (field) => {
   return `${baseClasses} ${errorClasses}`
 }
 
-const validateForm = () => {
-  const newErrors = {}
-
-  if (!formData.value.email) {
-    newErrors.email = 'Email is required'
-  } else if (!/\S+@\S+\.\S+/.test(formData.value.email)) {
-    newErrors.email = 'Email is invalid'
-  }
-
-  if (!formData.value.password) {
-    newErrors.password = 'Password is required'
-  } else if (formData.value.password.length < 6) {
-    newErrors.password = 'Password must be at least 6 characters'
-  }
-
-  if (!formData.value.first_name) newErrors.first_name = 'First name is required'
-  if (!formData.value.last_name) newErrors.last_name = 'Last name is required'
-  if (!formData.value.dob) newErrors.dob = 'Date of birth is required'
-  if (!formData.value.class) newErrors.class = 'Class is required'
-  if (!formData.value.school_name) newErrors.school_name = 'School name is required'
-  if (!formData.value.gender) newErrors.gender = 'Gender is required'
-
-  if (!formData.value.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the terms'
-  if (!formData.value.parentConsent) newErrors.parentConsent = 'Parent consent is required'
-
-  errors.value = newErrors
-  return Object.keys(newErrors).length === 0
-}
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+
 
   isLoading.value = true
   response.value = null
@@ -444,41 +414,23 @@ const handleSubmit = async () => {
         data: apiResponse.data
       }
 
-      // Reset form on success
-      formData.value = {
-        email: '',
-        password: '',
-        first_name: '',
-        last_name: '',
-        dob: '',
-        class: '',
-        school_name: '',
-        gender: '',
-        agreeToTerms: false,
-        parentConsent: false
-      }
-      errors.value = {}
+      localStorage.setItem('access_token', apiResponse.data.access_token)
+      localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
+      localStorage.setItem('user_email', apiResponse.data.user)
+      localStorage.setItem('user_type', 'student')
 
       // Redirect to login after success
       setTimeout(() => {
-        router.push('/login')
-      }, 2000)
+        router.push('/student/home')
+      }, 500)
     }
   } catch (error) {
-    console.error('Registration error:', error)
-
     let errorMessage = 'Registration failed. Please try again.'
-
     if (error.response) {
-      if (error.response.status === 422) {
-        errorMessage = 'Please check all your information and try again.'
-      } else if (error.response.data && error.response.data.message) {
-        errorMessage = error.response.data.message
-      }
+      errorMessage = error.response.data.error
     } else if (error.request) {
       errorMessage = 'Network error. Please check your connection and try again.'
     }
-
     response.value = {
       success: false,
       message: errorMessage
@@ -523,8 +475,6 @@ watch(formData, (newData, oldData) => {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
-
-
 
 
 </style>

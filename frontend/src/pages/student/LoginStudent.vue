@@ -98,7 +98,9 @@
         <!-- Sign up link -->
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
-            New to <logo/> ?
+            New to
+            <logo/>
+            ?
             <a href="/student/register" class="font-semibold text-purple-600 hover:text-purple-800 transition-colors">
               Create an account
             </a>
@@ -205,7 +207,6 @@ const handleLogin = async () => {
       localStorage.setItem('user_email', apiResponse.data.user)
       localStorage.setItem('user_type', 'student')
 
-
       response.value = {
         success: true,
         message: apiResponse.data.message || 'Welcome back! Ready to learn? 🎉'
@@ -213,8 +214,8 @@ const handleLogin = async () => {
 
       // Redirect to student dashboard after a short delay
       setTimeout(() => {
-        router.push('/student/dashboard')
-      }, 1500)
+        router.push('/student/home')
+      }, 500)
     }
   } catch (error) {
     console.error('Login error:', error)

@@ -1,13 +1,16 @@
-from flask import request, jsonify
-from flask_restful import Resource
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, create_refresh_token
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
-import re
-from models import *
 import random
+import re
 import string
+from datetime import date, datetime, timedelta, timezone
+
+from flask import jsonify, request
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt_identity,
+                                jwt_required)
+from flask_restful import Resource
+from flask_sqlalchemy import SQLAlchemy
+from models import *
+from werkzeug.security import check_password_hash, generate_password_hash
 
 jwt = JWTManager()
 
@@ -446,6 +449,9 @@ class GratitudeEntry(Resource):
             return {'error': 'Internal server error', 'details': str(e)}, 500
         
         
+        
+        
+
         
         
 

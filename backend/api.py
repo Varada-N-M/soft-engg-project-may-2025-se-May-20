@@ -382,7 +382,6 @@ class GratitudeEntry(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
-
     @jwt_required()
     def get(self):
         """
@@ -447,10 +446,112 @@ class GratitudeEntry(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def put(self, entry_id):
+        """
+        Update a specific gratitude entry for the logged-in child user.
+        URL: /gratitude/<int:entry_id>
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+
+            if not user:
+                return {'error': 'Only active child users can update gratitude entries'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the entry and verify ownership
+            entry = GratitudeEntries.query.filter_by(
+                entry_id=entry_id,
+                child_id=child.child_id
+            ).first()
+
+            if not entry:
+                return {'error': 'Gratitude entry not found or access denied'}, 404
+
+            data = request.get_json()
+            gratitude_text = data.get('gratitude_text', '').strip()
+
+            if not gratitude_text:
+                return {'error': 'Gratitude text is required'}, 400
+
+            # Update the entry
+            entry.gratitude_text = gratitude_text
+            entry.updated_at = datetime.now(timezone.utc)  # Add this field to your model if needed
+            
+            db.session.commit()
+
+            return {
+                'message': 'Gratitude entry updated successfully',
+                'entry_id': entry.entry_id,
+                'created_at': entry.created_at.isoformat(),
+                'updated_at': entry.updated_at.isoformat() if hasattr(entry, 'updated_at') else None,
+                'gratitude_text': entry.gratitude_text
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def delete(self, entry_id):
+        """
+        Delete a specific gratitude entry for the logged-in child user.
+        URL: /gratitude/<int:entry_id>
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+
+            if not user:
+                return {'error': 'Only active child users can delete gratitude entries'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the entry and verify ownership
+            entry = GratitudeEntries.query.filter_by(
+                entry_id=entry_id,
+                child_id=child.child_id
+            ).first()
+
+            if not entry:
+                return {'error': 'Gratitude entry not found or access denied'}, 404
+
+            # Store entry details for response before deletion
+            entry_details = {
+                'entry_id': entry.entry_id,
+                'created_at': entry.created_at.isoformat(),
+                'gratitude_text': entry.gratitude_text
+            }
+
+            # Delete the entry
+            db.session.delete(entry)
+            db.session.commit()
+
+            return {
+                'message': 'Gratitude entry deleted successfully',
+                'deleted_entry': entry_details
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
         
         
         
-        
+
+
+
+
+
+
+
 
         
         

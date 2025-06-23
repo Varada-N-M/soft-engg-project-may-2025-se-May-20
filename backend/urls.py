@@ -9,4 +9,8 @@ api.add_resource(RefreshToken, '/api/refresh-token')
 api.add_resource(SignupChild, '/api/child/register')
 api.add_resource(SignupParent, '/api/parent/register')
 api.add_resource(SignupOrganization, '/api/organization/register')
-api.add_resource(GratitudeEntry, '/api/gratitude')
+api.add_resource(GratitudeEntry,
+    '/api/gratitude',                # For GET (list), POST (create)
+    '/api/gratitude/<int:entry_id>' # For PUT (update), DELETE (delete)
+)
+

@@ -1,5 +1,5 @@
-from flask_restful import Api
 from api import *
+from flask_restful import Api
 
 api = Api()
 
@@ -9,3 +9,5 @@ api.add_resource(RefreshToken, '/api/refresh-token')
 api.add_resource(SignupChild, '/api/child/register')
 api.add_resource(SignupParent, '/api/parent/register')
 api.add_resource(SignupOrganization, '/api/organization/register')
+api.add_resource(GratitudeEntry, '/api/child/gratitude', '/api/child/gratitude/<int:entry_id>')
+

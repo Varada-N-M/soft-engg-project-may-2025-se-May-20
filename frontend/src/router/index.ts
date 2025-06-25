@@ -10,6 +10,7 @@ import LoginOrganisation from "../pages/organisation/LoginOrganisation.vue";
 import HomeOrganisation from "../pages/organisation/HomeOrganisation.vue";
 import HomeStudent from "../pages/student/HomeStudent.vue";
 import Badges from "../pages/student/Badges.vue";
+import LessonUpdates from "../pages/student/LessonUpdates.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -19,6 +20,7 @@ const routes = [
     {path: '/student/register', component: RegisterStudent},
     {path: '/student/home', component: HomeStudent},
     {path: '/student/badges', component: Badges},
+    {path: '/student/lesson-updates', component: LessonUpdates},
     // END STUDENT SECTION
 
 

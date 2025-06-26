@@ -1,4 +1,4 @@
-### Checkpoint:
+### Checkpoints:
 
 * [ ] This branch is up to date with the `main` branch.
 * [ ] The code is easy to read and contains comments to help other developers understand it.
@@ -6,7 +6,7 @@
 * [ ] Front changes are there.
 * [ ] Backend changes are there.
 
-### Change Overview : 
+### Changes Overview : 
 
 
 ### Task No : 

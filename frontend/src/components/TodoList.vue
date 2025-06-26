@@ -3,12 +3,12 @@
     <!-- Fun Header with Rainbow Background -->
     <div class="header">
       <div class="header-content">
-        <h1 class="main-title">🌟 My Super Cool Tasks! 🌟</h1>
+        <h1 class="main-title font-fancy">🌟 My Super Cool Tasks! 🌟</h1>
         <div class="stats-display" v-if="stats">
-          <div class="stat-badge">📊 Total: {{ stats.total }}</div>
-          <div class="stat-badge">✅ Done: {{ stats.completed }}</div>
-          <div class="stat-badge">⏳ Pending: {{ stats.pending }}</div>
-          <div class="stat-badge">🔄 Daily: {{ stats.daily_tasks }}</div>
+          <div class="stat-badge stat-total">📊 Total: {{ stats.total }}</div>
+          <div class="stat-badge stat-done">✅ Done: {{ stats.completed }}</div>
+          <div class="stat-badge stat-pending">⏳ Pending: {{ stats.pending }}</div>
+          <div class="stat-badge stat-daily">🔄 Daily: {{ stats.daily_tasks }}</div>
         </div>
       </div>
     </div>
@@ -116,7 +116,7 @@
       </div>
       <div class="bulk-buttons">
         <button @click="bulkComplete" class="btn btn-sm btn-green">✅ Mark Complete</button>
-        <button @click="bulkDelete" class="btn btn-sm btn-red">🗑️ Delete</button>
+        <button @click="bulkDelete" class="btn btn-sm btn-teal">🗑️ Delete</button>
         <button @click="clearSelection" class="btn btn-sm btn-gray">❌ Clear Selection</button>
       </div>
     </div>
@@ -153,10 +153,12 @@
         :class="{ 
           'completed': todo.is_done, 
           'daily-task': todo.is_daily,
-          'todo-pink': todo.list_id % 4 === 0,
-          'todo-blue': todo.list_id % 4 === 1,
-          'todo-green': todo.list_id % 4 === 2,
-          'todo-purple': todo.list_id % 4 === 3
+          'todo-pink': todo.list_id % 6 === 0,
+          'todo-purple': todo.list_id % 6 === 1,
+          'todo-green': todo.list_id % 6 === 2,
+          'todo-violet': todo.list_id % 6 === 3,
+          'todo-orange': todo.list_id % 6 === 4,
+          'todo-teal': todo.list_id % 6 === 5
         }"
       >
         <div class="todo-content">
@@ -194,8 +196,8 @@
           >
             {{ todo.is_done ? '↩️ Undo' : '✅ Done!' }}
           </button>
-          <button @click="editTodo(todo)" class="btn btn-sm btn-blue action-btn">✏️ Edit</button>
-          <button @click="deleteTodo(todo.list_id)" class="btn btn-sm btn-red action-btn">🗑️ Delete</button>
+          <button @click="editTodo(todo)" class="btn btn-sm btn-purple action-btn">✏️ Edit</button>
+          <button @click="deleteTodo(todo.list_id)" class="btn btn-sm btn-teal action-btn">🗑️ Delete</button>
         </div>
       </div>
     </div>
@@ -601,25 +603,54 @@ export default {
 </script>
 
 <style scoped>
-/* Base Container */
+/* Base Container - Matching CoolKids gradient */
 .todo-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 25%, #0077b6 50%, #7209b7 75%, #a663cc 100%);
   min-height: 100vh;
+  position: relative;
 }
 
-/* Fun Header */
+.todo-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(114, 9, 183, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(0, 180, 216, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Fun Header - CoolKids colors */
 .header {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-  background-size: 300% 300%;
-  animation: rainbow 3s ease infinite;
-  border-radius: 25px;
-  padding: 25px;
+  background: linear-gradient(45deg, #00d4aa, #00b4d8, #0077b6, #7209b7, #a663cc, #feca57);
+  background-size: 400% 400%;
+  animation: rainbow 4s ease infinite;
+  border-radius: 30px;
+  padding: 30px;
   margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 3s infinite;
 }
 
 @keyframes rainbow {
@@ -628,20 +659,34 @@ export default {
   100% { background-position: 0% 50%; }
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .main-title {
   color: white;
   margin: 0;
-  font-size: 2.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 2.8rem;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
   font-weight: bold;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
 }
 
 .stats-display {
@@ -651,31 +696,57 @@ export default {
 }
 
 .stat-badge {
-  background: rgba(255, 255, 255, 0.2);
   color: white;
-  padding: 10px 15px;
+  padding: 12px 18px;
   border-radius: 25px;
   font-size: 14px;
   font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease;
 }
 
-/* Fun Form Card */
+.stat-badge:hover {
+  transform: translateY(-3px);
+}
+
+.stat-total { background: linear-gradient(135deg, #7209b7 0%, #a663cc 100%); }
+.stat-done { background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%); }
+.stat-pending { background: linear-gradient(135deg, #0077b6 0%, #7209b7 100%); }
+.stat-daily { background: linear-gradient(135deg, #00b4d8 0%, #a663cc 100%); }
+
+/* Fun Form Card - CoolKids purple gradient */
 .todo-form-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 25px;
-  padding: 30px;
+  background: linear-gradient(135deg, #7209b7 0%, #a663cc 100%);
+  border-radius: 30px;
+  padding: 35px;
   margin-bottom: 30px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  border: 4px solid #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.todo-form-card::before {
+  content: '✨';
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 2rem;
+  animation: twinkle 2s infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
 }
 
 .form-title {
   margin-top: 0;
   margin-bottom: 25px;
   color: white;
-  font-size: 1.8rem;
+  font-size: 2rem;
   text-align: center;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -686,30 +757,31 @@ export default {
 
 .fun-label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: bold;
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .fun-input {
   width: 100%;
-  padding: 15px 20px;
-  border: 3px solid #fff;
-  border-radius: 20px;
+  padding: 18px 25px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
   font-size: 16px;
   font-family: inherit;
   background: rgba(255, 255, 255, 0.95);
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .fun-input:focus {
   outline: none;
-  border-color: #feca57;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  border-color: #00d4aa;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  background: white;
 }
 
 .form-row {
@@ -729,24 +801,30 @@ export default {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   color: white;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.fun-checkbox:hover {
+  transform: scale(1.05);
 }
 
 .checkbox-text {
-  margin-left: 10px;
+  margin-left: 12px;
 }
 
 .rainbow-check {
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
   border: 3px solid #fff;
-  border-radius: 8px;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  border-radius: 10px;
+  background: linear-gradient(45deg, #00d4aa, #00b4d8, #7209b7);
   position: relative;
   margin-right: 5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-checkbox {
@@ -761,12 +839,13 @@ export default {
   transform: translate(-50%, -50%);
   color: white;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Fun Buttons */
+/* Enhanced Buttons - CoolKids colors */
 .btn {
-  padding: 12px 25px;
+  padding: 15px 30px;
   border: none;
   border-radius: 25px;
   cursor: pointer;
@@ -777,12 +856,29 @@ export default {
   text-align: center;
   display: inline-block;
   text-decoration: none;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
 }
 
 .btn:disabled {
@@ -792,44 +888,39 @@ export default {
 }
 
 .btn-rainbow {
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-  background-size: 300% 300%;
+  background: linear-gradient(45deg, #00d4aa, #00b4d8, #0077b6, #7209b7, #a663cc, #feca57);
+  background-size: 400% 400%;
   animation: rainbow 3s ease infinite;
   color: white;
 }
 
 .btn-green {
-  background: linear-gradient(45deg, #4CAF50, #8BC34A);
-  color: white;
-}
-
-.btn-blue {
-  background: linear-gradient(45deg, #2196F3, #03DAC6);
-  color: white;
-}
-
-.btn-red {
-  background: linear-gradient(45deg, #f44336, #ff9800);
-  color: white;
-}
-
-.btn-orange {
-  background: linear-gradient(45deg, #ff9800, #ffc107);
+  background: linear-gradient(45deg, #00d4aa, #38ef7d);
   color: white;
 }
 
 .btn-purple {
-  background: linear-gradient(45deg, #9c27b0, #673ab7);
+  background: linear-gradient(45deg, #7209b7, #a663cc);
+  color: white;
+}
+
+.btn-teal {
+  background: linear-gradient(45deg, #00d4aa, #00b4d8);
+  color: white;
+}
+
+.btn-orange {
+  background: linear-gradient(45deg, #ff9a56, #ffad56);
   color: white;
 }
 
 .btn-gray {
-  background: linear-gradient(45deg, #607d8b, #9e9e9e);
+  background: linear-gradient(45deg, #bdc3c7, #2c3e50);
   color: white;
 }
 
 .btn-sm {
-  padding: 8px 16px;
+  padding: 10px 20px;
   font-size: 14px;
 }
 
@@ -838,50 +929,53 @@ export default {
 }
 
 .btn-big {
-  padding: 18px 35px;
-  font-size: 18px;
+  padding: 20px 40px;
+  font-size: 20px;
 }
 
-/* Colorful Filters */
+/* Enhanced Filters - CoolKids teal gradient */
 .filters {
   display: flex;
   gap: 25px;
   margin-bottom: 25px;
-  padding: 25px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  padding: 30px;
+  background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%);
+  border-radius: 25px;
   align-items: end;
   flex-wrap: wrap;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 3px solid #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .filter-label {
-  font-size: 14px;
-  color: #333;
+  font-size: 16px;
+  color: white;
   font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .fun-select, .filter-input {
-  padding: 10px 15px;
-  border: 2px solid #ddd;
-  border-radius: 15px;
+  padding: 12px 18px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
   font-size: 14px;
   font-family: inherit;
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .fun-select:focus, .filter-input:focus {
   outline: none;
-  border-color: #4ecdc4;
-  box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+  border-color: #7209b7;
+  box-shadow: 0 0 15px rgba(114, 9, 183, 0.4);
+  background: white;
 }
 
 .date-filter-group {
@@ -890,43 +984,45 @@ export default {
   align-items: center;
 }
 
-/* Fun Bulk Actions */
+/* Enhanced Bulk Actions - CoolKids gradient */
 .bulk-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
   margin-bottom: 25px;
-  padding: 20px;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  border-radius: 20px;
+  padding: 25px;
+  background: linear-gradient(135deg, #0077b6 0%, #7209b7 100%);
+  border-radius: 25px;
   color: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
   flex-wrap: wrap;
+  border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .bulk-info {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .bulk-buttons {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-/* Loading Animation */
+/* Enhanced Loading */
 .loading {
   text-align: center;
-  padding: 50px;
+  padding: 60px;
   color: white;
 }
 
 .loading-spinner {
-  font-size: 3rem;
-  animation: spin 2s linear infinite;
-  margin-bottom: 20px;
+  font-size: 4rem;
+  animation: spin 2s linear infinite, pulse 1.5s ease-in-out infinite alternate;
+  margin-bottom: 25px;
 }
 
 @keyframes spin {
@@ -934,45 +1030,51 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-.loading-text {
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
 }
 
-/* Colorful Messages */
+.loading-text {
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Messages - CoolKids colors */
 .error-message, .success-message {
-  padding: 20px 25px;
-  border-radius: 20px;
+  padding: 25px 30px;
+  border-radius: 25px;
   margin-bottom: 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
-  font-size: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .error-message {
-  background: linear-gradient(45deg, #f44336, #ff9800);
+  background: linear-gradient(45deg, #00d4aa, #0077b6);
   color: white;
 }
 
 .success-message {
-  background: linear-gradient(45deg, #4CAF50, #8BC34A);
+  background: linear-gradient(45deg, #00d4aa, #38ef7d);
   color: white;
 }
 
 .close-btn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   font-size: 20px;
   cursor: pointer;
-  padding: 5px;
+  padding: 8px;
   color: inherit;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -980,87 +1082,111 @@ export default {
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
-/* Empty State */
+/* Enhanced Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: white;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 25px;
   backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .empty-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
+  font-size: 5rem;
+  margin-bottom: 25px;
+  animation: bounce 2s infinite;
 }
 
 .empty-title {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .empty-text {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Colorful Todo List */
+/* Enhanced Todo List - CoolKids colors */
 .todo-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .todo-item {
-  border-radius: 20px;
-  padding: 25px;
+  border-radius: 25px;
+  padding: 30px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
   border: 3px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.todo-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00d4aa, #00b4d8, #0077b6, #7209b7, #a663cc);
 }
 
 .todo-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 .todo-pink {
-  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-}
-
-.todo-blue {
-  background: linear-gradient(135deg, #4ecdc4, #44a08d);
-}
-
-.todo-green {
-  background: linear-gradient(135deg, #96ceb4, #8bc34a);
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
 }
 
 .todo-purple {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #7209b7 0%, #a663cc 100%);
+}
+
+.todo-green {
+  background: linear-gradient(135deg, #00d4aa 0%, #38ef7d 100%);
+}
+
+.todo-violet {
+  background: linear-gradient(135deg, #a663cc 0%, #764ba2 100%);
+}
+
+.todo-orange {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.todo-teal {
+  background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%);
 }
 
 .todo-item.completed {
-  opacity: 0.7;
+  opacity: 0.8;
   transform: scale(0.98);
 }
 
 .todo-item.daily-task {
   border-left: 8px solid #feca57;
+  box-shadow: 0 15px 40px rgba(254, 202, 87, 0.3);
 }
 
 .todo-content {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 20px;
   flex: 1;
 }
 
@@ -1069,100 +1195,105 @@ export default {
 }
 
 .todo-title {
-  margin: 0 0 10px 0;
-  font-size: 1.3rem;
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .todo-emoji {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  animation: bounce 2s infinite;
 }
 
 .todo-item.completed .todo-title {
   text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .todo-description {
-  margin: 0 0 15px 0;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.6;
-  font-size: 1rem;
+  margin: 0 0 20px 0;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .todo-meta {
   display: flex;
   gap: 20px;
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.8);
   flex-wrap: wrap;
 }
 
 .daily-badge {
-  background: linear-gradient(45deg, #feca57, #ff9ff3);
+  background: linear-gradient(135deg, #feca57, #ff9ff3);
   color: white;
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: 11px;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .todo-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
   flex-wrap: wrap;
 }
 
 .action-btn {
-  min-width: 80px;
+  min-width: 90px;
 }
 
-/* Fun Modal */
+/* Enhanced Modal - CoolKids purple */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
 }
 
 .fun-modal {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 25px;
-  padding: 30px;
+  background: linear-gradient(135deg, #7209b7 0%, #a663cc 100%);
+  border-radius: 30px;
+  padding: 40px;
   width: 90%;
-  max-width: 500px;
+  max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 4px solid #fff;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  position: relative;
 }
 
 .modal-title {
   margin-top: 0;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   color: white;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .modal-actions {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   justify-content: center;
-  margin-top: 25px;
+  margin-top: 30px;
   flex-wrap: wrap;
 }
 
@@ -1173,7 +1304,7 @@ export default {
   }
   
   .main-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
   
   .header-content {
@@ -1197,7 +1328,7 @@ export default {
   
   .todo-item {
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
   }
   
   .todo-content {
@@ -1210,13 +1341,13 @@ export default {
   
   .form-options {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .main-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   
   .todo-actions {
@@ -1225,6 +1356,10 @@ export default {
   
   .action-btn {
     width: 100%;
+  }
+  
+  .stats-display {
+    justify-content: center;
   }
 }
 </style>

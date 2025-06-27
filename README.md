@@ -5,7 +5,7 @@
 A script `run_all.sh` is provided to automate setup and run both backend and frontend servers.
 
 ### Steps:
-1. Open a terminal in the project root directory.
+1. Open a terminal in the project root directory (for Windows use Git Bash).
 2. Make the script executable (first time only):
    ```bash
    chmod +x run_all.sh

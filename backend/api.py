@@ -2,7 +2,7 @@ import random
 import re
 import string
 from datetime import date, datetime, timedelta, timezone
-
+from sqlalchemy import func
 from flask import jsonify, request
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 create_refresh_token, get_jwt_identity,
@@ -339,6 +339,7 @@ class RefreshToken(Resource):
         
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+       
         
 class GratitudeEntry(Resource):
     @jwt_required()
@@ -481,15 +482,14 @@ class GratitudeEntry(Resource):
 
             # Update the entry
             entry.gratitude_text = gratitude_text
-            entry.updated_at = datetime.now(timezone.utc)  # Add this field to your model if needed
+            entry.updated_at = datetime.now(timezone.utc)
             
             db.session.commit()
 
             return {
                 'message': 'Gratitude entry updated successfully',
                 'entry_id': entry.entry_id,
-                'created_at': entry.created_at.isoformat(),
-                'updated_at': entry.updated_at.isoformat() if hasattr(entry, 'updated_at') else None,
+                'created_at': entry.updated_at.isoformat(),
                 'gratitude_text': entry.gratitude_text
             }, 200
 

@@ -1,21 +1,28 @@
 #!/bin/bash
-# This script sets up and runs both backend and frontend servers
+
+# Graceful cleanup on Ctrl+C
+cleanup() {
+    echo "Shutting down servers..."
+    kill "$BACKEND_PID" 2>/dev/null
+    kill "$FRONTEND_PID" 2>/dev/null
+    wait "$BACKEND_PID" 2>/dev/null
+    wait "$FRONTEND_PID" 2>/dev/null
+    exit 0
+}
+
+# Trap Ctrl+C
+trap cleanup SIGINT
 
 # Backend setup
-cd backend
+cd backend || exit
 
-# Create virtual environment if not exists
 if [ ! -d "env" ]; then
     python3 -m venv env
 fi
 
-# Activate virtual environment
 source env/bin/activate
-
-# Install Python dependencies
 pip install -r requirements.txt
 
-# Create .env file if not exists
 if [ ! -f ".env" ]; then
     echo "# Add your environment variables here" > .env
 fi
@@ -24,13 +31,22 @@ fi
 flask --app main --debug run &
 BACKEND_PID=$!
 
-cd ../frontend
-
-# Install Node dependencies
+cd ../frontend || exit
 npm install
 
-# Start frontend server
-npm run dev
+# Start frontend server in background
+npm run dev &
+FRONTEND_PID=$!
 
-# When frontend server stops, kill backend
-kill $BACKEND_PID
+# Wait for either process to exit
+while true; do
+    sleep 1
+    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+        echo "Backend server exited."
+        cleanup
+    fi
+    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+        echo "Frontend server exited."
+        cleanup
+    fi
+done

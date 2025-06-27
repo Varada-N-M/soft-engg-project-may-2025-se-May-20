@@ -12,6 +12,8 @@ import HomeStudent from "../pages/student/HomeStudent.vue";
 import Badges from "../pages/student/Badges.vue";
 import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
+import AddTeacher from "../pages/organisation/AddTeacher.vue";
+import TeachersList from "../pages/organisation/TeachersList.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -30,6 +32,8 @@ const routes = [
     {path: '/org/register', component: RegisterOrganisation},
     {path: '/org/login', component: LoginOrganisation},
     {path: '/org/home', component: HomeOrganisation},
+    {path: '/org/add-teacher', component: AddTeacher},
+    {path: '/org/teachers', component: TeachersList},
     // END ORG SECTION
 
 

@@ -12,6 +12,8 @@ import HomeStudent from "../pages/student/HomeStudent.vue";
 import Badges from "../pages/student/Badges.vue";
 import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
+import ChildReport from '../pages/parent/ChildReport.vue';
+import LinkChild from '../pages/parent/LinkChild.vue';
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -36,6 +38,8 @@ const routes = [
     // BEGIN PARENT SECTION
     {path: '/parent/register', component: RegisterParent},
     {path: '/parent/login', component: LoginParent},
+    {path: '/parent/child-report', component: ChildReport},
+    {path: '/parent/link-child', component: LinkChild},
     // END PARENT SECTION
 
 ]

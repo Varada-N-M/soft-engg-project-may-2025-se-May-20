@@ -12,6 +12,7 @@ import HomeStudent from "../pages/student/HomeStudent.vue";
 import Badges from "../pages/student/Badges.vue";
 import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
+import StudentJournal from "../pages/student/StudentJournal.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -23,6 +24,7 @@ const routes = [
     {path: '/student/badges', component: Badges},
     {path: '/student/habit', component: Habit},
     {path: '/student/lesson-updates', component: LessonUpdates},
+    {path: '/student/journal', component: StudentJournal},
     // END STUDENT SECTION
 
 

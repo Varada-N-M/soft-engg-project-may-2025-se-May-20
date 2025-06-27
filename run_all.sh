@@ -6,11 +6,15 @@ cd backend
 
 # Create virtual environment if not exists
 if [ ! -d "env" ]; then
-    python3 -m venv env
+    python -m venv env
 fi
 
 # Activate virtual environment
-source env/bin/activate
+source env/Scripts/activate
+
+# Install Flask
+env/Scripts/python.exe -m pip install flask
+
 
 # Install Python dependencies
 pip install -r requirements.txt

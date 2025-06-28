@@ -1,0 +1,59 @@
+    Teacher stat card
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Total Teachers</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.total }}</p>
+              </div>
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users class="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Active Teachers</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.active }}</p>
+              </div>
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <UserCheck class="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Schools Covered</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.schools }}</p>
+              </div>
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <School class="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-600">New This Month</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.newThisMonth }}</p>
+              </div>
+              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <TrendingUp class="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>

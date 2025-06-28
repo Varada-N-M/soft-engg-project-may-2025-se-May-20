@@ -12,6 +12,7 @@ import HomeStudent from "../pages/student/HomeStudent.vue";
 import Badges from "../pages/student/Badges.vue";
 import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
+import StudentJournal from "../pages/student/StudentJournal.vue";
 import ChildReport from '../pages/parent/ChildReport.vue';
 import LinkChild from '../pages/parent/LinkChild.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
@@ -27,6 +28,7 @@ const routes = [
     {path: '/student/badges', component: Badges},
     {path: '/student/habit', component: Habit},
     {path: '/student/lesson-updates', component: LessonUpdates},
+    {path: '/student/journal', component: StudentJournal},
     // END STUDENT SECTION
 
 

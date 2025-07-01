@@ -1,7 +1,4 @@
 node_modules/
-<<<<<<< HEAD
 .ideavenv/
-=======
 .idea
 frontend/.unused
->>>>>>> origin

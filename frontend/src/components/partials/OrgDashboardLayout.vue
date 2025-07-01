@@ -1,6 +1,5 @@
-
 <script setup lang="ts">
-import AppSidebar from '@/components/ui/app-sidebar/AppSidebar.vue'
+import OrganisationSidebar from '@/components/ui/app-sidebar/OrganisationSidebar.vue'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,27 +17,15 @@ import {
 </script>
 
 <template>
-  <SidebarProvider>
-    <AppSidebar/>
+  <SidebarProvider :default-open="false" >
+    <OrganisationSidebar/>
     <SidebarInset>
       <header
           class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1"/>
           <Separator orientation="vertical" class="mr-2 h-4"/>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator class="hidden md:block"/>
-              <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <slot name="breadcrumb"></slot>
         </div>
       </header>
       <slot/>

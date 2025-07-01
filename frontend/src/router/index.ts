@@ -15,6 +15,11 @@ import LessonUpdates from "../pages/student/LessonUpdates.vue";
 import SurveyPage from "../pages/student/SurveyPage.vue";
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
 import path from 'path';
+import StudentJournal from "../pages/student/StudentJournal.vue";
+import ChildReport from '../pages/parent/ChildReport.vue';
+import LinkChild from '../pages/parent/LinkChild.vue';
+import AddTeacher from "../pages/organisation/AddTeacher.vue";
+import TeachersList from "../pages/organisation/TeachersList.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -27,6 +32,7 @@ const routes = [
     {path: '/student/habit', component: Habit},
     {path: '/student/lesson-updates', component: LessonUpdates},
     {path: '/student/survey', component: SurveyPage},
+    {path: '/student/journal', component: StudentJournal},
     // END STUDENT SECTION
 
 
@@ -35,12 +41,16 @@ const routes = [
     {path: '/org/login', component: LoginOrganisation},
     {path: '/org/home', component: HomeOrganisation},
     {path: '/org/survey-report', component: SurveyReport},
+    {path: '/org/add-teacher', component: AddTeacher},
+    {path: '/org/teachers', component: TeachersList},
     // END ORG SECTION
 
 
     // BEGIN PARENT SECTION
     {path: '/parent/register', component: RegisterParent},
     {path: '/parent/login', component: LoginParent},
+    {path: '/parent/child-report', component: ChildReport},
+    {path: '/parent/link-child', component: LinkChild},
     // END PARENT SECTION
 
 

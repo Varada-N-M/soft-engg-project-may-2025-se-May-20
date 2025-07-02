@@ -213,7 +213,7 @@
     </div>
 
     <!-- Weekly Report Modal/Page -->
-    <div v-if="showWeeklyReport" class="max-w-6xl mx-auto">
+    <div v-if="showWeeklyReport" class="max-w-6xl mx-auto mt-10">
       <!-- Header -->
       <div class="bg-white bg-opacity-95 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl">
         <div class="flex items-center justify-between">

@@ -2,3 +2,10 @@ node_modules/
 .ideavenv/
 .idea
 frontend/.unused
+env
+/env
+/__pycache__
+__pycache__
+*.db
+*.sqlite3
+*.log

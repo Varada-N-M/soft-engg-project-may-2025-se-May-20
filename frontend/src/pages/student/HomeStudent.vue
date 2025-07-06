@@ -182,6 +182,30 @@
                 <div class="bg-green-100 rounded-xl p-4 text-center hover:bg-green-200 transition-colors cursor-pointer">
                   <div class="text-2xl mb-2">📚</div>
                   <p class="text-sm font-medium text-gray-700">Stories</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  🏆 Latest Badges
+                </h2>
+                <button class="text-purple-500 hover:text-purple-600 font-medium text-sm">View All</button>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                  <div class="text-2xl">🏅</div>
+                  <div>
+                    <h4 class="font-medium text-gray-800">Math Master</h4>
+                    <p class="text-xs text-gray-600">Solved 50 math problems</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <div class="text-2xl">📖</div>
+                  <div>
+                    <h4 class="font-medium text-gray-800">Story Explorer</h4>
+                    <p class="text-xs text-gray-600">Read 10 stories</p>
                   </div>
                 </div>
               </div>

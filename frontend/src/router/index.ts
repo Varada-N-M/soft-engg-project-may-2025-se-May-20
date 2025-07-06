@@ -6,6 +6,7 @@ import RegisterStudent from '../pages/student/RegisterStudent.vue';
 import RegisterOrganisation from '../pages/organisation/RegisterOrganisation.vue';
 import RegisterParent from '../pages/parent/RegisterParent.vue';
 import LoginParent from "../pages/parent/LoginParent.vue";
+import ParentHome from "../pages/parent/ParentHome.vue";
 import LoginOrganisation from "../pages/organisation/LoginOrganisation.vue";
 import HomeOrganisation from "../pages/organisation/HomeOrganisation.vue";
 import HomeStudent from "../pages/student/HomeStudent.vue";
@@ -13,10 +14,10 @@ import Badges from "../pages/student/Badges.vue";
 import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
 import SurveyPage from "../pages/student/SurveyPage.vue";
+import WeeklyReport from "../pages/student/WeeklyReport.vue";
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
 import path from 'path';
 import StudentJournal from "../pages/student/StudentJournal.vue";
-import ChildReport from '../pages/parent/ChildReport.vue';
 import LinkChild from '../pages/parent/LinkChild.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
@@ -33,6 +34,7 @@ const routes = [
     {path: '/student/lesson-updates', component: LessonUpdates},
     {path: '/student/survey', component: SurveyPage},
     {path: '/student/journal', component: StudentJournal},
+    {path: '/student/weekly-report', component: WeeklyReport},
     // END STUDENT SECTION
 
 
@@ -49,7 +51,7 @@ const routes = [
     // BEGIN PARENT SECTION
     {path: '/parent/register', component: RegisterParent},
     {path: '/parent/login', component: LoginParent},
-    {path: '/parent/child-report', component: ChildReport},
+    {path: '/parent/home', component: ParentHome},
     {path: '/parent/link-child', component: LinkChild},
     // END PARENT SECTION
 

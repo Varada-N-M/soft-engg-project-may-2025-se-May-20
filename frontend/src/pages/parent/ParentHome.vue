@@ -39,6 +39,9 @@
 
             SafeSteps
           </button>
+          <router-link to="/parent/link-child" class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left text-gray-600 hover:bg-gray-100">
+            Link Child
+          </router-link>
         </nav>
       </div>
     </div>

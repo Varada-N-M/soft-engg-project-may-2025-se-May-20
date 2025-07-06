@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white border-b-2 border-gray-200 sticky top-0 z-10">
+  <header class="bg-white bg-opacity-40 backdrop-blur-sm border-b-2 border-gray-200 sticky top-3 z-10 mx-auto max-w-7xl rounded-[35px]">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
@@ -138,9 +138,9 @@
             <!-- Get Started Button -->
             <router-link
                 to="/"
-                class="bg-gradient-to-r from-blue-500 to-pink-500 text-white px-6 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                class="bg-gradient-to-r from-blue-500 to-pink-500 text-white px-6 py-2 font-medium hover:from-blue-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg rounded-[20px]"
             >
-              🚀 Get Started
+              Get Started
             </router-link>
           </div>
         </div>

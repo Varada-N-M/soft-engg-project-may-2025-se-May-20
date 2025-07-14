@@ -1,6 +1,3 @@
-import random
-import re
-import string
 from datetime import date, datetime, timedelta, timezone
 from sqlalchemy import func
 from flask import jsonify, request
@@ -10,44 +7,14 @@ from flask_jwt_extended import (JWTManager, create_access_token,
 from flask_restful import Resource
 from flask_sqlalchemy import SQLAlchemy
 from models import *
+from utils import *
 from werkzeug.security import check_password_hash, generate_password_hash
+
 
 jwt = JWTManager()
 
-# Utility functions
-def validate_email(email):
-    """Validate email format"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
 
-def validate_password(password):
-    """Validate password strength"""
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-    if not re.search(r'[A-Z]', password):
-        return False, "Password must contain at least one uppercase letter"
-    if not re.search(r'[a-z]', password):
-        return False, "Password must contain at least one lowercase letter"
-    if not re.search(r'\d', password):
-        return False, "Password must contain at least one number"
-    return True, "Password is valid"
-
-def generate_unique_key(model, field='unique_key', length=4):
-    """Generates a unique key like AD81-652W for a given model and field."""
-    characters = string.ascii_uppercase + string.digits
-
-    while True:
-        part1 = ''.join(random.choices(characters, k=length))
-        part2 = ''.join(random.choices(characters, k=length))
-        unique_key = f"{part1}-{part2}"
-
-        # Check uniqueness in the database
-        existing = db.session.query(model).filter(getattr(model, field) == unique_key).first()
-        if not existing:
-            return unique_key
-        
-
-# JWT Error handlers
+# --- JWT Error handlers --- #
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
     return jsonify({'message': 'Token has expired'}), 401
@@ -61,6 +28,7 @@ def missing_token_callback(error):
     return jsonify({'message': 'Authorization token is required'}), 401
 
 
+# --- API Endpoints --- # 
 class SignupOrganization(Resource):
     """
     This endpoint allows new users to register an organization.
@@ -106,7 +74,7 @@ class SignupOrganization(Resource):
                 password=hashed_password,
                 first_name=first_name,
                 last_name=last_name,
-                role_type="admin",
+                role_type=UserRole.ORGANIZATION,
             )
             db.session.add(new_user)
             db.session.flush()
@@ -128,7 +96,7 @@ class SignupOrganization(Resource):
             return {
                 'message': 'Organization registered successfully',
                 'user_email': new_user.email,
-                'role': new_user.role_type,
+                'role': new_user.role_type.value,
                 'organization': new_organization.name,
                 'access_token': access_token,
                 'refresh_token': refresh_token
@@ -171,7 +139,7 @@ class SignupChild(Resource):
                 password=hashed_password,
                 first_name=first_name,
                 last_name=last_name,
-                role_type='child'
+                role_type=UserRole.CHILD
             )
             db.session.add(new_user)
             db.session.flush()  # Get user_id
@@ -195,7 +163,7 @@ class SignupChild(Resource):
             return {
                 'message': 'Child registered successfully',
                 'user_email': new_user.email,
-                'role': new_user.role_type,
+                'role': new_user.role_type.value,
                 'access_token': access_token,
                 'refresh_token': refresh_token
             }, 201
@@ -241,7 +209,7 @@ class SignupParent(Resource):
                 password=hashed_password,
                 first_name=first_name,
                 last_name=last_name,
-                role_type='parent'
+                role_type= UserRole.PARENT
             )
             db.session.add(new_user)
             db.session.flush()
@@ -261,7 +229,7 @@ class SignupParent(Resource):
             return {
                 'message': 'Parent registered successfully',
                 'user_email': new_user.email,
-                'role': new_user.role_type,
+                'role': new_user.role_type.value,
                 'access_token': access_token,
                 'refresh_token': refresh_token
             }, 201
@@ -349,7 +317,7 @@ class GratitudeEntry(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
 
             if not user:
                 return {'error': 'Only active child users can post gratitude entries'}, 403
@@ -394,7 +362,7 @@ class GratitudeEntry(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
 
             if not user:
                 return {'error': 'Only active child users can view gratitude entries'}, 403
@@ -456,7 +424,7 @@ class GratitudeEntry(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
 
             if not user:
                 return {'error': 'Only active child users can update gratitude entries'}, 403
@@ -505,7 +473,7 @@ class GratitudeEntry(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type='child').first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
 
             if not user:
                 return {'error': 'Only active child users can delete gratitude entries'}, 403

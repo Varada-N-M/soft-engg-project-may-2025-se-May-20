@@ -1,9 +1,20 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from enum import Enum
 
 db = SQLAlchemy()
 
+# User roles
+class UserRole(Enum):
+    ADMIN = "admin"
+    CHILD = "child"
+    PARENT = "parent"
+    TEACHER = "teacher"
+    ORGANIZATION = "organization"
+
+
+# --- DB Models --- #
 
 class Organization(db.Model):
     __tablename__ = 'organization'
@@ -26,7 +37,8 @@ class Teacher(db.Model):
     teacher_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     subject = db.Column(db.String(255))
-    school_name = db.Column(db.String(255))
+    school_id = db.Column(db.Integer, db.ForeignKey('school.school_id'), nullable=False)
+    school = db.relationship('School', backref='teachers', lazy=True)
     lessons = db.relationship('LessonUpdates', backref='teacher', lazy=True)
     teacher_children = db.relationship('TeacherChild', backref='teacher', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -60,6 +72,9 @@ class Child(db.Model):
     unique_key = db.Column(db.String(255))
     is_linked = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    streak = db.Column(db.Integer, default=0)
+    xp_points = db.Column(db.Integer, default=0)
+
     habits = db.relationship('Habit', backref='child', lazy=True)
     badges = db.relationship('Badge', backref='child', lazy=True)
     skills = db.relationship('Skill', backref='child', lazy=True)
@@ -80,7 +95,9 @@ class Habit(db.Model):
     habit = db.Column(db.String(255))
     is_daily = db.Column(db.String(10))
     is_done = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Date when the habit was recorded
+    completion_date = db.Column(db.DateTime, nullable=True)
+    habit_xp = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Habit {self.habit}>'
@@ -93,7 +110,9 @@ class Badge(db.Model):
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
     badge = db.Column(db.String(255))
     level = db.Column(db.String(255))
-    awarded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_earned = db.Column(db.Boolean, default=False)
+    badge_xp = db.Column(db.Integer, default=0)
+    earned_at = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return f'<Badge {self.badge}>'
@@ -107,8 +126,9 @@ class Skill(db.Model):
     skill_name = db.Column(db.String(255))
     video_url = db.Column(db.String(255))
     is_learned = db.Column(db.Boolean, default=False)
-    # Date when the skill was completed
+    skill_xp = db.Column(db.Integer, default=0)
     completion_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Skill {self.skill_name}>'
@@ -124,10 +144,11 @@ class ToDoList(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_done = db.Column(db.Boolean, default=False)
     is_daily = db.Column(db.Boolean, default=False)
-    completion_date = db.Column(db.DateTime, nullable=True)  # Date when the task was completed
+    completion_date = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return f'<ToDo {self.to_do}>'
+
 
 class GratitudeEntries(db.Model):
     __tablename__ = 'gratitude_entries'
@@ -185,11 +206,28 @@ class Users(db.Model):
     password = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
-    role_type = db.Column(db.String(50), nullable=False)
+    role_type = db.Column(db.Enum(UserRole), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    # One-to-one relationships for roles
+
     teacher = db.relationship('Teacher', backref='user', uselist=False)
     child = db.relationship('Child', backref='user', uselist=False)
     parent = db.relationship('Parent', backref='user', uselist=False)
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+    
+
+class School(db.Model):
+    __tablename__ = 'school'
+
+    school_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    address = db.Column(db.Text, nullable=False)
+    phone_number = db.Column(db.String(20), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    creator = db.relationship('Users', foreign_keys=[created_by], backref='schools_created')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<School {self.name}>'

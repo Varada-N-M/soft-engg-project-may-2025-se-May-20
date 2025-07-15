@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import config
 from models import db
-from api import jwt
+from api.auth import jwt
 from urls import api
 
 app = Flask(__name__)

@@ -1,5 +1,7 @@
-from api import *
 from flask_restful import Api
+from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization
+from api.student.routes import GratitudeEntry
+
 
 api = Api()
 

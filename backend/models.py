@@ -92,7 +92,9 @@ class Habit(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
-    habit = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    category = db.Column(db.String(50))
     is_daily = db.Column(db.String(10))
     is_done = db.Column(db.Boolean, default=False)
     completion_date = db.Column(db.DateTime, nullable=True)

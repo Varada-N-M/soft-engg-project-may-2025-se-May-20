@@ -233,6 +233,7 @@ class Habits(Resource):
             habit_name = data.get('habit_name', '').strip()
             habit_description = data.get('habit_description', '').strip()
             habit_category = data.get('habit_category', '').strip()
+            habit_xp = data.get('habit_xp', 20)  # Default XP points for habit
 
             if not (habit_name and habit_description and habit_category):
                 return {'error': 'Habit name is required'}, 400
@@ -242,6 +243,7 @@ class Habits(Resource):
                 name=habit_name,
                 description=habit_description,
                 category=habit_category,
+                habit_xp=habit_xp,
                 created_at=datetime.now(timezone.utc)
             )
             db.session.add(habit)
@@ -276,21 +278,28 @@ class Habits(Resource):
 
             habits = Habit.query.filter_by(child_id=child.child_id).all()
 
+            completed_habits = HabitCompletion.query.filter_by(child_id=child.child_id).all()
+
             if not habits:
                 return {'message': 'No habits found for this child'}, 200
 
             return {
-                'habits': [
+                'habits_created': [
                     {
                         'habit_id': habit.id,
                         'name': habit.name,
                         'description': habit.description,
                         'category': habit.category,
                         'created_at': habit.created_at.isoformat(),
-                        'is_daily': habit.is_daily,
-                        'is_done': habit.is_done,
-                        'completion_date': habit.completion_date.isoformat() if habit.completion_date else None
+                        # 'completion_date': habit.completion_date.isoformat() if habit.completion_date else None
                     } for habit in habits
+                ],
+                'completed_habits': [
+                    {
+                        'habit_id': completion.habit_id,
+                        'is_done': completion.is_done,
+                        'completion_date': completion.completion_date.isoformat() if completion.completion_date else None
+                    } for completion in completed_habits
                 ]
             }, 200
 
@@ -324,6 +333,7 @@ class Habits(Resource):
             habit_name = data.get('habit_name', '').strip()
             habit_description = data.get('habit_description', '').strip()
             habit_category = data.get('habit_category', '').strip()
+            habit_xp = data.get('habit_xp')
 
             if not (habit_name and habit_description and habit_category):
                 return {'error': 'Habit name is required'}, 400
@@ -332,6 +342,7 @@ class Habits(Resource):
             habit.name = habit_name
             habit.description = habit_description
             habit.category = habit_category
+            habit.habit_xp = habit_xp if habit_xp is not None else habit.habit_xp
             habit.updated_at = datetime.now(timezone.utc)
             
             db.session.commit()
@@ -368,6 +379,11 @@ class Habits(Resource):
             # Find the habit and verify ownership
             habit = Habit.query.filter_by(id=habit_id, child_id=child.child_id).first()
 
+            habit_completion = HabitCompletion.query.filter_by(
+                child_id=child.child_id,
+                habit_id=habit_id
+            ).all()
+
             if not habit:
                 return {'error': 'Habit not found or access denied'}, 404
 
@@ -382,6 +398,7 @@ class Habits(Resource):
 
             # Delete the habit
             db.session.delete(habit)
+            db.session.delete(habit_completion) if habit_completion else None
             db.session.commit()
 
             return {
@@ -392,15 +409,56 @@ class Habits(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CompleteHabit(Resource):
+    @jwt_required()
+    def post(self, habit_id):
+        """
+        Mark a habit as done for the logged-in child user.
+        URL: /habits/<int:habit_id>/complete
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can mark habits as done'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the habit and verify ownership
+            habit = Habit.query.filter_by(id=habit_id, child_id=child.child_id).first()
+
+            if not habit:
+                return {'error': 'Habit not found or access denied'}, 404
+            
+            # check if habit is already completed today
+            habit_completion = HabitCompletion.query.filter_by(
+                child_id=child.child_id,
+                habit_id=habit.id,
+                completion_date=date.today()
+            ).first()
+            
+            if habit_completion:
+                if habit_completion.completion_date and habit_completion.completion_date == date.today():
+                    return {'error': 'Habit already completed today'}, 400
+
+            habit_completion = HabitCompletion(
+                child_id=child.child_id,
+                habit_id=habit.id,
+                is_done=True,
+                completion_date=date.today()
+            )
+            db.session.add(habit_completion)
+            db.session.commit()
+            return {'message': 'Habit done successfully'}, 200
         
-        
-        
-        
-
-
-
-
-
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
 
 
 
@@ -602,6 +660,7 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+        
     @jwt_required()
     def delete(self, todo_id):
         """Delete a to-do item."""

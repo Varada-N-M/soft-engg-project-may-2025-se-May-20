@@ -1,11 +1,12 @@
+from datetime import date, datetime, timedelta, timezone
+
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from datetime import datetime, timedelta, timezone, date
-from sqlalchemy import func
 from flask_restful import Resource
+from sqlalchemy import func
+
 from models import *
 from utils import *
-
 
 
 class GratitudeEntry(Resource):
@@ -388,6 +389,242 @@ class Habits(Resource):
                 'deleted_habit': habit_details
             }, 200
 
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+class ToDoListResource(Resource):
+    """Manage to-do list items."""
+    @jwt_required()
+    def post(self):
+        """Create a new to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can create to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            required_fields = ['to_do', 'description']
+            for field in required_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+            
+            to_do = data['to_do'].strip()
+            description = data['description'].strip()
+            is_daily = data.get('is_daily', False)
+            created_at = datetime.now(timezone.utc)
+
+            # Optional fields
+            start_date_str = data.get('start_date')  # ISO 8601 string
+            due_date_str = data.get('due_date')      # ISO 8601 string
+            
+            start_date = None
+            due_date = None
+
+            # Parse and validate start_date
+            if start_date_str:
+                try:
+                    start_date = datetime.fromisoformat(start_date_str)
+                    if start_date < created_at:
+                        return {'error': 'Start date cannot be before creation time'}, 400
+                except ValueError:
+                    return {'error': 'Invalid start_date format. Use ISO 8601 format.'}, 400
+
+            # Parse and validate due_date
+            if due_date_str:
+                try:
+                    due_date = datetime.fromisoformat(due_date_str)
+                    if start_date and due_date <= start_date:
+                        return {'error': 'Due date must be after start date'}, 400
+                except ValueError:
+                    return {'error': 'Invalid due_date format. Use ISO 8601 format.'}, 400
+
+            # Create to-do item
+            todo_item = ToDoList(
+                child_id=child.child_id,
+                to_do=to_do,
+                description=description,
+                is_daily=is_daily,
+                created_at=created_at,
+                start_date=start_date,
+                due_date=due_date
+            )
+            
+            db.session.add(todo_item)
+            db.session.commit()
+            
+            response_data = {
+                'message': 'To-do item created successfully',
+                'list_id': todo_item.list_id,
+                'to_do': todo_item.to_do,
+                'description': todo_item.description,
+                'is_daily': todo_item.is_daily,
+                'is_done': todo_item.is_done,
+                'created_at': todo_item.created_at.isoformat(),
+                'start_date': todo_item.start_date.isoformat() if todo_item.start_date else None,
+                'due_date': todo_item.due_date.isoformat() if todo_item.due_date else None
+            }
+            
+            return response_data, 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    
+    @jwt_required()
+    def get(self):
+        """Get to-do items for the logged-in child."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can view to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            # Query parameters
+            is_done = request.args.get('is_done')
+            is_daily = request.args.get('is_daily')
+            date_str = request.args.get('date')
+            
+            query = ToDoList.query.filter_by(child_id=child.child_id)
+            
+            # Filter by completion status
+            if is_done is not None:
+                is_done_bool = is_done.lower() == 'true'
+                query = query.filter_by(is_done=is_done_bool)
+            
+            # Filter by daily tasks
+            if is_daily is not None:
+                is_daily_bool = is_daily.lower() == 'true'
+                query = query.filter_by(is_daily=is_daily_bool)
+            
+            # Filter by date
+            if date_str:
+                try:
+                    target_date = datetime.strptime(date_str, "%d-%m-%y").date()
+                    query = query.filter(func.date(ToDoList.created_at) == target_date)
+                except ValueError:
+                    return {'error': 'Invalid date format. Use DD-MM-YY'}, 400
+            
+            todos = query.order_by(ToDoList.created_at.desc()).all()
+            
+            return {
+                'todos': [
+                    {
+                        'list_id': todo.list_id,
+                        'to_do': todo.to_do,
+                        'description': todo.description,
+                        'is_done': todo.is_done,
+                        'is_daily': todo.is_daily,
+                        'created_at': todo.created_at.isoformat(),
+                        'completion_date': todo.completion_date.isoformat() if todo.completion_date else None
+                    } for todo in todos
+                ]
+            }, 200
+            
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+    
+    @jwt_required()
+    def put(self, todo_id):
+        """Update a to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can update to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            data = request.get_json()
+            list_id = data.get('list_id')
+            
+            if not list_id:
+                return {'error': 'list_id is required'}, 400
+            
+            todo_item = ToDoList.query.filter_by(list_id=list_id, child_id=child.child_id).first()
+            if not todo_item:
+                return {'error': 'To-do item not found'}, 404
+            
+            # Update fields
+            if 'to_do' in data:
+                todo_item.to_do = data['to_do'].strip()
+            if 'description' in data:
+                todo_item.description = data['description'].strip()
+            if 'is_daily' in data:
+                todo_item.is_daily = data['is_daily']
+            if 'is_done' in data:
+                todo_item.is_done = data['is_done']
+                if data['is_done'] and not todo_item.completion_date:
+                    todo_item.completion_date = datetime.now(timezone.utc)
+                elif not data['is_done']:
+                    todo_item.completion_date = None
+            
+            db.session.commit()
+            
+            return {
+                'message': 'To-do item updated successfully',
+                'list_id': todo_item.list_id,
+                'to_do': todo_item.to_do,
+                'description': todo_item.description,
+                'is_done': todo_item.is_done,
+                'is_daily': todo_item.is_daily,
+                'completion_date': todo_item.completion_date.isoformat() if todo_item.completion_date else None
+            }, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+    @jwt_required()
+    def delete(self, todo_id):
+        """Delete a to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can delete to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            todo_item = ToDoList.query.filter_by(list_id=todo_id, child_id=child.child_id).first()
+            if not todo_item:
+                return {'error': 'To-do item not found'}, 404
+            
+            db.session.delete(todo_item)
+            db.session.commit()
+            
+            return {'message': 'To-do item deleted successfully'}, 200
+            
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500

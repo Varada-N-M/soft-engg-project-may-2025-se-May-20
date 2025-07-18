@@ -32,6 +32,15 @@ Default server URL: ```http://127.0.0.1:5000```
 
 
 ## Database Migration
+
+To update the database schema and migrate, run:
+
+```bash
+flask --app main db init
+flask --app main db migrate -m "Your migration message"
+flask --app main db upgrade
+```
+
 To freshly migrate (delete and recreate) the database tables, run:
 
 ```bash

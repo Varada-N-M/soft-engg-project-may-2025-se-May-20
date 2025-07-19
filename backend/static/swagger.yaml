@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: CoolKids API
+  version: "1.0"
+paths:
+  /api/login:
+    post:
+      summary: Returns a access token and refresh token for the user
+      description: Login endpoint for user authentication
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

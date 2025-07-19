@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect
 from flask_cors import CORS
 from config import config
 from models import db
@@ -21,6 +21,12 @@ migrate = Migrate(app, db)
 with app.app_context():
     # db.drop_all()
     db.create_all()
+
+
+# Serve Swagger YAML file
+@app.route('/')
+def index():
+    return redirect('/static/swagger.html')
 
 if __name__ == "__main__":
   app.run(host="", port=5000, debug=True)

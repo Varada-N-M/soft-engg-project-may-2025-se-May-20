@@ -10,6 +10,7 @@ class UserRole(Enum):
     ADMIN = "admin"
     CHILD = "child"
     PARENT = "parent"
+    PRINCIPAL = "principal"
     TEACHER = "teacher"
     ORGANIZATION = "organization"
 

@@ -687,3 +687,460 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+
+
+
+def check_and_update_badges(child_id):
+    """
+    Check skill achievements and update badges automatically.
+    This function should be called whenever a skill is completed.
+    """
+    try:
+        # Get child's skill stats
+        total_skills = Skill.query.filter_by(child_id=child_id).count()
+        completed_skills = Skill.query.filter_by(child_id=child_id, is_learned=True).count()
+        total_skill_xp = db.session.query(func.sum(Skill.skill_xp)).filter_by(
+            child_id=child_id, is_learned=True
+        ).scalar() or 0
+
+        # Badge criteria and their corresponding achievements
+        badge_criteria = [
+            # Completion-based badges
+            {"name": "First Steps", "level": "bronze", "xp": 10, "condition": completed_skills >= 1},
+            {"name": "Skill Builder", "level": "bronze", "xp": 25, "condition": completed_skills >= 5},
+            {"name": "Learning Machine", "level": "silver", "xp": 50, "condition": completed_skills >= 10},
+            {"name": "Skill Master", "level": "silver", "xp": 100, "condition": completed_skills >= 20},
+            {"name": "Expert Learner", "level": "gold", "xp": 200, "condition": completed_skills >= 50},
+            
+            # XP-based badges
+            {"name": "XP Collector", "level": "bronze", "xp": 15, "condition": total_skill_xp >= 100},
+            {"name": "XP Hunter", "level": "silver", "xp": 75, "condition": total_skill_xp >= 500},
+            {"name": "XP Legend", "level": "gold", "xp": 150, "condition": total_skill_xp >= 1000},
+            
+            # Completion rate badges
+            {"name": "Perfectionist", "level": "gold", "xp": 300, "condition": completed_skills >= 10 and (completed_skills / max(total_skills, 1)) >= 0.9},
+        ]
+
+        newly_earned_badges = []
+        
+        for criteria in badge_criteria:
+            if criteria["condition"]:
+                # Check if badge already exists
+                existing_badge = Badge.query.filter_by(
+                    child_id=child_id,
+                    badge=criteria["name"],
+                    level=criteria["level"]
+                ).first()
+                
+                if not existing_badge:
+                    # Create new badge as earned
+                    new_badge = Badge(
+                        child_id=child_id,
+                        badge=criteria["name"],
+                        level=criteria["level"],
+                        badge_xp=criteria["xp"],
+                        is_earned=True,
+                        earned_at=datetime.now(timezone.utc)
+                    )
+                    db.session.add(new_badge)
+                    newly_earned_badges.append({
+                        'badge': criteria["name"],
+                        'level': criteria["level"],
+                        'xp': criteria["xp"]
+                    })
+                elif not existing_badge.is_earned:
+                    # Mark existing badge as earned
+                    existing_badge.is_earned = True
+                    existing_badge.earned_at = datetime.now(timezone.utc)
+                    newly_earned_badges.append({
+                        'badge': existing_badge.badge,
+                        'level': existing_badge.level,
+                        'xp': existing_badge.badge_xp
+                    })
+        
+        return newly_earned_badges
+    except Exception as e:
+        print(f"Error updating badges: {str(e)}")
+        return []
+
+
+class SkillResource(Resource):
+    @jwt_required()
+    def post(self):
+        """Create a new skill for the logged-in child user."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can create skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            data = request.get_json()
+            
+            if not data:
+                return {'error': 'No data provided'}, 400
+            
+            # Validate required fields
+            is_valid, error_msg = validate_skill_data(data)
+            if not is_valid:
+                return {'error': error_msg}, 400
+            
+            skill = Skill(
+                child_id=child.child_id,
+                skill_name=data['skill_name'].strip(),
+                video_url=data.get('video_url', '').strip() if data.get('video_url') else None,
+                skill_xp=data.get('skill_xp', 0)
+            )
+            
+            db.session.add(skill)
+            db.session.commit()
+            
+            return {
+                'message': 'Skill created successfully',
+                'skill': skill.to_dict()
+            }, 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def get(self):
+        """Get all skills for the logged-in child user with badge information."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Query parameters
+            is_learned = request.args.get('is_learned')
+            
+            query = Skill.query.filter_by(child_id=child.child_id)
+            
+            # Filter by completion status
+            if is_learned is not None:
+                is_learned_bool = is_learned.lower() == 'true'
+                query = query.filter_by(is_learned=is_learned_bool)
+            
+            skills = query.order_by(Skill.created_at.desc()).all()
+            
+            # Get badge information
+            total_badges = Badge.query.filter_by(child_id=child.child_id).count()
+            earned_badges = Badge.query.filter_by(child_id=child.child_id, is_earned=True).count()
+            recent_badges = Badge.query.filter_by(
+                child_id=child.child_id, 
+                is_earned=True
+            ).order_by(Badge.earned_at.desc()).limit(3).all()
+            
+            return {
+                'skills': [skill.to_dict() for skill in skills],
+                'total': len(skills),
+                'badge_summary': {
+                    'total_badges': total_badges,
+                    'earned_badges': earned_badges,
+                    'recent_badges': [
+                        {
+                            'badge': badge.badge,
+                            'level': badge.level,
+                            'earned_at': badge.earned_at.isoformat()
+                        } for badge in recent_badges
+                    ]
+                }
+            }, 200
+            
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def put(self, skill_id):
+        """Update a specific skill for the logged-in child user."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can update skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the skill and verify ownership
+            skill = Skill.query.filter_by(id=skill_id, child_id=child.child_id).first()
+
+            if not skill:
+                return {'error': 'Skill not found or access denied'}, 404
+
+            data = request.get_json()
+            
+            if not data:
+                return {'error': 'No data provided'}, 400
+
+            was_learned_before = skill.is_learned
+            newly_earned_badges = []
+
+            # Update fields if provided
+            if 'skill_name' in data and data['skill_name'].strip():
+                skill.skill_name = data['skill_name'].strip()
+            if 'video_url' in data:
+                skill.video_url = data['video_url'].strip() if data['video_url'] else None
+            if 'skill_xp' in data:
+                skill.skill_xp = data['skill_xp']
+            if 'is_learned' in data:
+                skill.is_learned = data['is_learned']
+                # Set completion date if skill is marked as learned
+                if data['is_learned'] and not skill.completion_date:
+                    skill.completion_date = datetime.now(timezone.utc)
+                    # Check for new badges if skill was just completed
+                    if not was_learned_before:
+                        newly_earned_badges = check_and_update_badges(child.child_id)
+                elif not data['is_learned']:
+                    skill.completion_date = None
+            
+            db.session.commit()
+            
+            response_data = {
+                'message': 'Skill updated successfully',
+                'skill': skill.to_dict()
+            }
+            
+            # Include newly earned badges in response
+            if newly_earned_badges:
+                response_data['newly_earned_badges'] = newly_earned_badges
+                response_data['message'] += f' and earned {len(newly_earned_badges)} new badge(s)!'
+            
+            return response_data, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def delete(self, skill_id):
+        """Delete a specific skill for the logged-in child user."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can delete skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the skill and verify ownership
+            skill = Skill.query.filter_by(id=skill_id, child_id=child.child_id).first()
+
+            if not skill:
+                return {'error': 'Skill not found or access denied'}, 404
+
+            # Store skill details for response before deletion
+            skill_details = skill.to_dict()
+
+            # Delete the skill
+            db.session.delete(skill)
+            db.session.commit()
+            
+            return {
+                'message': 'Skill deleted successfully',
+                'deleted_skill': skill_details
+            }, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CompleteSkillResource(Resource):
+    @jwt_required()
+    def patch(self, skill_id):
+        """Mark a skill as completed, add XP, and check for badge updates."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can complete skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the skill and verify ownership
+            skill = Skill.query.filter_by(id=skill_id, child_id=child.child_id).first()
+
+            if not skill:
+                return {'error': 'Skill not found or access denied'}, 404
+
+            if skill.is_learned:
+                return {'error': 'Skill already completed'}, 400
+
+            data = request.get_json() or {}
+            xp_to_add = data.get('xp', 10)  # Default 10 XP for completion
+            
+            # Mark skill as completed
+            skill.is_learned = True
+            skill.skill_xp += xp_to_add
+            skill.completion_date = datetime.now(timezone.utc)
+            
+            # Check for newly earned badges
+            newly_earned_badges = check_and_update_badges(child.child_id)
+            
+            db.session.commit()
+            
+            response_data = {
+                'message': 'Skill completed successfully!',
+                'skill': skill.to_dict(),
+                'xp_earned': xp_to_add
+            }
+            
+            # Include newly earned badges in response
+            if newly_earned_badges:
+                response_data['newly_earned_badges'] = newly_earned_badges
+                response_data['message'] += f' You earned {len(newly_earned_badges)} new badge(s)!'
+            
+            return response_data, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class SkillStatsResource(Resource):
+    @jwt_required()
+    def get(self):
+        """Get skill statistics with badge information for the logged-in child user."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view skill stats'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            skills_query = Skill.query.filter_by(child_id=child.child_id)
+            
+            total_skills = skills_query.count()
+            completed_skills = skills_query.filter_by(is_learned=True).count()
+            total_xp = db.session.query(func.sum(Skill.skill_xp)).filter_by(child_id=child.child_id).scalar() or 0
+            
+            # Recent completions (last 7 days)
+            week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+            recent_completions = skills_query.filter(
+                Skill.is_learned == True,
+                Skill.completion_date >= week_ago
+            ).count()
+
+            # Get recent completed skills (last 5)
+            recent_skills = skills_query.filter_by(is_learned=True).order_by(
+                Skill.completion_date.desc()
+            ).limit(5).all()
+            
+            # Get badge statistics
+            badge_query = Badge.query.filter_by(child_id=child.child_id)
+            total_badges = badge_query.count()
+            earned_badges = badge_query.filter_by(is_earned=True).count()
+            badge_xp = db.session.query(func.sum(Badge.badge_xp)).filter_by(
+                child_id=child.child_id, is_earned=True
+            ).scalar() or 0
+            
+            # Recent earned badges (last 3)
+            recent_badges = badge_query.filter_by(is_earned=True).order_by(
+                Badge.earned_at.desc()
+            ).limit(3).all()
+            
+            return {
+                'child_name': child.name,
+                'skills': {
+                    'total_skills': total_skills,
+                    'completed_skills': completed_skills,
+                    'completion_rate': round((completed_skills / total_skills * 100), 1) if total_skills > 0 else 0,
+                    'total_xp': total_xp,
+                    'recent_completions': recent_completions,
+                    'recent_skills': [
+                        {
+                            'skill_id': skill.id,
+                            'skill_name': skill.skill_name,
+                            'skill_xp': skill.skill_xp,
+                            'completion_date': skill.completion_date.isoformat()
+                        } for skill in recent_skills
+                    ]
+                },
+                'badges': {
+                    'total_badges': total_badges,
+                    'earned_badges': earned_badges,
+                    'badge_completion_rate': round((earned_badges / total_badges * 100), 1) if total_badges > 0 else 0,
+                    'badge_xp': badge_xp,
+                    'recent_badges': [
+                        {
+                            'badge': badge.badge,
+                            'level': badge.level,
+                            'badge_xp': badge.badge_xp,
+                            'earned_at': badge.earned_at.isoformat()
+                        } for badge in recent_badges
+                    ]
+                },
+                'combined_xp': total_xp + badge_xp
+            }, 200
+            
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class SkillSearchResource(Resource):
+    @jwt_required()
+    def get(self):
+        """Search skills by name for the logged-in child user."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can search skills'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            query_param = request.args.get('q', '')
+            
+            if not query_param:
+                return {'error': 'Search query is required'}, 400
+            
+            skills = Skill.query.filter(
+                Skill.child_id == child.child_id,
+                Skill.skill_name.ilike(f'%{query_param}%')
+            ).order_by(Skill.created_at.desc()).all()
+            
+            return {
+                'skills': [skill.to_dict() for skill in skills],
+                'total': len(skills),
+                'query': query_param
+            }, 200
+            
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+# Helper function for validation (you'll need to implement this based on your requirements)
+def validate_skill_data(data):
+    """Validate skill data for creation or update."""
+    if not data.get('skill_name', '').strip():
+        return False, 'Skill name is required'
+    return True, None

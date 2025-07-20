@@ -57,3 +57,37 @@ class AddStudent(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error": str(e)}, 500
+
+
+class RemoveStudent(Resource):
+    @jwt_required()
+    def delete(self, student_id):
+        """ 
+        Remove a student from a teacher's class.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            teacher_user = Users.query.filter_by(user_id=current_user_id).first()
+            
+            if not teacher_user or teacher_user.role_type != UserRole.TEACHER:
+                return {"message": "Unauthorized access"}, 401
+
+            teacher = Teacher.query.filter_by(user_id=teacher_user.user_id).first()
+            if not teacher:
+                return {"message": "Teacher not found"}, 404
+
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {"message": "Student is not linked to this teacher"}, 404
+
+            db.session.delete(link)
+            db.session.commit()
+
+            return {"message": "Student removed successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error": str(e)}, 500
+

@@ -1,0 +1,601 @@
+openapi: 3.0.0
+info:
+  title: CoolKids API
+  description: API documentation for the CoolKids application, which includes user authentication, child-parent linking, student habits, gratitude entries, and organization statistics.
+  version: "1.0"
+tags:
+  - name: Auth
+    description: Authentication and user management
+  - name: Parent
+    description: Parent-specific operations
+  - name: Student
+    description: Student-specific operations
+  - name: Teacher
+    description: Teacher-specific operations
+  - name: Organization
+    description: Organization-specific operations
+paths:
+  /api/auth/signup/child:
+    post:
+      tags:
+        - Auth
+      summary: Register a new child user
+      description: Creates a new user with the 'child' role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                class:
+                  type: integer
+                school_name:
+                  type: string
+                gender:
+                  type: string
+      responses:
+        '201':
+          description: Child registered successfully
+  /api/auth/signup/parent:
+    post:
+      tags:
+        - Auth
+      summary: Register a new parent user
+      description: Creates a new user with the 'parent' role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                phone_number:
+                  type: string
+      responses:
+        '201':
+          description: Parent registered successfully
+  /api/auth/signup/organization:
+    post:
+      tags:
+        - Auth
+      summary: Register a new organization
+      description: Creates a new user with the 'organization' role and an associated organization.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                organization_name:
+                  type: string
+                phone_number:
+                  type: string
+                address:
+                  type: string
+      responses:
+        '201':
+          description: Organization registered successfully
+  /api/auth/signup/teacher:
+    post:
+      tags:
+        - Auth
+      summary: Register a new teacher user
+      description: Creates a new user with the 'teacher' or 'principal' role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                subject:
+                  type: string
+                school_id:
+                  type: integer
+      responses:
+        '201':
+          description: Teacher registered successfully
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      description: Authenticates a user and returns an access and refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+  /api/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      description: Returns a new access token for the user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+  /api/parent/link-child:
+    post:
+      tags:
+        - Parent
+      summary: Link a child to a parent
+      description: Links a child to the logged-in parent using the child's unique key.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                child_key:
+                  type: string
+      responses:
+        '201':
+          description: Child linked successfully
+  /api/parent/unlink-child/{child_id}:
+    put:
+      tags:
+        - Parent
+      summary: Unlink a child from a parent
+      description: Unlinks a child from the logged-in parent.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: child_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Child unlinked successfully
+  /api/student/gratitude:
+    post:
+      tags:
+        - Student
+      summary: Create a gratitude entry
+      description: Creates a new gratitude entry for the logged-in child.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gratitude_text:
+                  type: string
+      responses:
+        '201':
+          description: Gratitude entry created successfully
+    get:
+      tags:
+        - Student
+      summary: Get gratitude entries
+      description: Retrieves gratitude entries for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: "Filter by date (DD-MM-YY)"
+        - in: query
+          name: days
+          schema:
+            type: integer
+          description: "Filter by last N days"
+      responses:
+        '200':
+          description: A list of gratitude entries
+  /api/student/gratitude/{entry_id}:
+    put:
+      tags:
+        - Student
+      summary: Update a gratitude entry
+      description: Updates a specific gratitude entry for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: entry_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gratitude_text:
+                  type: string
+      responses:
+        '200':
+          description: Gratitude entry updated successfully
+    delete:
+      tags:
+        - Student
+      summary: Delete a gratitude entry
+      description: Deletes a specific gratitude entry for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: entry_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gratitude entry deleted successfully
+  /api/student/habits:
+    post:
+      tags:
+        - Student
+      summary: Create a new habit
+      description: Creates a new habit for the logged-in child.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                habit_name:
+                  type: string
+                habit_description:
+                  type: string
+                habit_category:
+                  type: string
+                habit_xp:
+                  type: integer
+      responses:
+        '201':
+          description: Habit created successfully
+    get:
+      tags:
+        - Student
+      summary: Get all habits
+      description: Retrieves all habits for the logged-in child.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of habits
+  /api/student/habits/{habit_id}:
+    put:
+      tags:
+        - Student
+      summary: Update a habit
+      description: Updates a specific habit for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: habit_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                habit_name:
+                  type: string
+                habit_description:
+                  type: string
+                habit_category:
+                  type: string
+                habit_xp:
+                  type: integer
+      responses:
+        '200':
+          description: Habit updated successfully
+    delete:
+      tags:
+        - Student
+      summary: Delete a habit
+      description: Deletes a specific habit for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: habit_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Habit deleted successfully
+  /api/student/habits/{habit_id}/complete:
+    post:
+      tags:
+        - Student
+      summary: Complete a habit
+      description: Marks a habit as complete for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: habit_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Habit marked as complete
+  /api/student/todos:
+    post:
+      tags:
+        - Student
+      summary: Create a to-do item
+      description: Creates a new to-do item for the logged-in child.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to_do:
+                  type: string
+                description:
+                  type: string
+                is_daily:
+                  type: boolean
+                start_date:
+                  type: string
+                  format: date-time
+                due_date:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: To-do item created successfully
+    get:
+      tags:
+        - Student
+      summary: Get to-do items
+      description: Retrieves to-do items for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: is_done
+          schema:
+            type: boolean
+        - in: query
+          name: is_daily
+          schema:
+            type: boolean
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: "Filter by date (DD-MM-YY)"
+      responses:
+        '200':
+          description: A list of to-do items
+  /api/student/todos/{todo_id}:
+    put:
+      tags:
+        - Student
+      summary: Update a to-do item
+      description: Updates a specific to-do item for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todo_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to_do:
+                  type: string
+                description:
+                  type: string
+                is_daily:
+                  type: boolean
+                is_done:
+                  type: boolean
+      responses:
+        '200':
+          description: To-do item updated successfully
+    delete:
+      tags:
+        - Student
+      summary: Delete a to-do item
+      description: Deletes a specific to-do item for the logged-in child.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: todo_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: To-do item deleted successfully
+  /api/teacher/add-student:
+    post:
+      tags:
+        - Teacher
+      summary: Add a student to a teacher's class
+      description: Adds a student to the logged-in teacher's class using the student's email.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                student_email:
+                  type: string
+      responses:
+        '201':
+          description: Student added successfully
+  /api/teacher/remove-student/{student_id}:
+    delete:
+      tags:
+        - Teacher
+      summary: Remove a student from a teacher's class
+      description: Removes a student from the logged-in teacher's class.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: student_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Student removed successfully
+  /api/teacher/lesson-update:
+    post:
+      tags:
+        - Teacher
+      summary: Create a lesson update
+      description: Creates a new lesson update for the logged-in teacher's class.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lesson:
+                  type: string
+                summary:
+                  type: string
+      responses:
+        '201':
+          description: Lesson update created successfully
+  /api/organization/stats:
+    get:
+      tags:
+        - Organization
+      summary: Get organization statistics
+      description: Retrieves anonymized student data and school performance metrics for the logged-in organization.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A JSON object with organization statistics.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  anonymized_student_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        student_id:
+                          type: integer
+                        xp_points:
+                          type: integer
+                        streak:
+                          type: integer
+                        habits_completed:
+                          type: integer
+                        badges_earned:
+                          type: integer
+                        skills_learned:
+                          type: integer
+                  school_performance:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        school_id:
+                          type: integer
+                        school_name:
+                          type: string
+                        number_of_students:
+                          type: integer
+                        average_xp_per_student:
+                          type: number
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

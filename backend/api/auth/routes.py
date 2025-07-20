@@ -289,3 +289,77 @@ class RefreshToken(Resource):
         
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class SignupTeacher(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+
+            # Required fields for teacher
+            required_fields = ['email', 'password', 'first_name', 'last_name', 'subject', 'school_id']
+            for field in required_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+
+            email = data['email'].lower().strip()
+            password = data['password']
+            first_name = data['first_name'].strip()
+            last_name = data['last_name'].strip()
+            subject = data['subject']
+            school_id = data['school_id']
+
+            # Validate email and password
+            if not validate_email(email):
+                return {'error': 'Invalid email format'}, 400
+            is_valid_password, msg = validate_password(password)
+            if not is_valid_password:
+                return {'error': msg}, 400
+
+            if Users.query.filter_by(email=email).first():
+                return {'error': 'User with this email already exists'}, 409
+
+            # Check if school exists
+            if not School.query.get(school_id):
+                return {'error': 'School not found'}, 404
+
+            # Determine role based on whether any teachers already exist
+            role = UserRole.TEACHER
+            if not Teacher.query.first():
+                role = UserRole.PRINCIPAL
+
+            hashed_password = generate_password_hash(password)
+            new_user = Users(
+                email=email,
+                password=hashed_password,
+                first_name=first_name,
+                last_name=last_name,
+                role_type=role
+            )
+            db.session.add(new_user)
+            db.session.flush()  # Get user_id
+
+            # Create Teacher
+            new_teacher = Teacher(
+                user_id=new_user.user_id,
+                subject=subject,
+                school_id=school_id
+            )
+            db.session.add(new_teacher)
+            db.session.commit()
+
+            # Tokens
+            access_token = create_access_token(identity=str(new_user.user_id))
+            refresh_token = create_refresh_token(identity=str(new_user.user_id))
+
+            return {
+                'message': 'Teacher registered successfully',
+                'user_email': new_user.email,
+                'role': new_user.role_type.value,
+                'access_token': access_token,
+                'refresh_token': refresh_token
+            }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500

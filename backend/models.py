@@ -10,6 +10,7 @@ class UserRole(Enum):
     ADMIN = "admin"
     CHILD = "child"
     PARENT = "parent"
+    PRINCIPAL = "principal"
     TEACHER = "teacher"
     ORGANIZATION = "organization"
 
@@ -70,7 +71,7 @@ class Child(db.Model):
     school_name = db.Column(db.String(255))
     gender = db.Column(db.String(10))
     unique_key = db.Column(db.String(255))
-    is_linked = db.Column(db.Boolean, default=False)
+    is_linked = db.Column(db.Boolean, default=False)  # Indicates if the child is linked to a parent
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     streak = db.Column(db.Integer, default=0)
     xp_points = db.Column(db.Integer, default=0)
@@ -95,14 +96,24 @@ class Habit(db.Model):
     name = db.Column(db.String(255))
     description = db.Column(db.Text)
     category = db.Column(db.String(50))
-    is_daily = db.Column(db.String(10))
-    is_done = db.Column(db.Boolean, default=False)
-    completion_date = db.Column(db.DateTime, nullable=True)
     habit_xp = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Habit {self.habit}>'
+
+
+class HabitCompletion(db.Model):
+    __tablename__ = 'habit_completion'
+
+    id = db.Column(db.Integer, primary_key=True)
+    child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
+    habit_id = db.Column(db.Integer, db.ForeignKey('habit.id'), nullable=False)
+    is_done = db.Column(db.Boolean, default=False)
+    completion_date = db.Column(db.Date, default=datetime.utcnow().date)
+
+    def __repr__(self):
+        return f'<HabitCompletion habit_id={self.habit_id} date={self.completion_date}>'
 
 
 class Badge(db.Model):

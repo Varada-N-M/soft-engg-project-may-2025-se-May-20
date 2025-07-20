@@ -12,7 +12,7 @@
             >
               <ArrowLeftIcon class="w-6 h-6" />
             </button>
-            <h1 class="text-xl font-bold text-gray-800 font-fancy">📚 Lesson Updates</h1>
+            <h1 class="text-xl font-bold text-gray-800 font-fancy">📚 Lesson Updates (Teacher)</h1>
           </div>
           <div class="flex items-center space-x-6">
             <div class="text-center">
@@ -108,15 +108,15 @@ import { ArrowLeftIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const goHome = () => {
-  router.push('/student/home')
+  router.push('/teacher/home')
 }
 const lessons = [
-  { day: 'Monday', subject: 'Math', lesson: 'Introduction to Fractions', activity: 'Used paper cut-outs to compare 1/2, 1/4, 3/4' },
-  { day: 'Monday', subject: 'English', lesson: 'Types of Nouns (Common & Proper)', activity: 'Worksheet activity and group examples' },
-  { day: 'Tuesday', subject: 'Science', lesson: 'States of Matter: Solid, Liquid, Gas', activity: 'Melting ice and steam experiment demonstration' },
-  { day: 'Wednesday', subject: 'Social Studies', lesson: 'Community Helpers', activity: 'Class discussion and drawing different helpers' },
-  { day: 'Thursday', subject: 'Computers', lesson: 'Parts of a Computer', activity: 'Hands-on identification of hardware components' },
-  { day: 'Friday', subject: 'Math', lesson: 'Paragraph Writing: Fractions on Number Line', activity: 'Wrote a short paragraph on "My Favourite Game"' },
+  { day: 'Monday', subject: 'Math', lesson: 'Algebra: Solving for x', activity: 'Explained variables and solved equations on board' },
+  { day: 'Monday', subject: 'English', lesson: 'Essay Writing', activity: 'Guided students through brainstorming and outlining' },
+  { day: 'Tuesday', subject: 'Science', lesson: 'Photosynthesis', activity: 'Lab experiment with leaves and sunlight' },
+  { day: 'Wednesday', subject: 'Social Studies', lesson: 'World War II Overview', activity: 'Timeline activity and group discussion' },
+  { day: 'Thursday', subject: 'Computers', lesson: 'Introduction to Coding', activity: 'Scratch programming basics' },
+  { day: 'Friday', subject: 'Math', lesson: 'Geometry: Area & Perimeter', activity: 'Hands-on measurement activity' },
 ]
 
 const uniqueSubjects = computed(() => {
@@ -129,4 +129,4 @@ const uniqueSubjects = computed(() => {
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
 }
-</style>
+</style> 

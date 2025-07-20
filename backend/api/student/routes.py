@@ -687,3 +687,48 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class StudentLessonUpdates(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get all lesson updates for the logged-in child user.
+        Returns lesson updates from all teachers linked to the child.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            if not user:
+                return {'error': 'Only active child users can view lesson updates'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Get all teachers linked to this child
+            teacher_links = TeacherChild.query.filter_by(child_id=child.child_id).all()
+            teacher_ids = [link.teacher_id for link in teacher_links]
+
+            if not teacher_ids:
+                return {'message': 'No teachers linked to this child.'}, 200
+
+            # Get all lesson updates from these teachers
+            lesson_updates = LessonUpdates.query.filter(LessonUpdates.teacher_id.in_(teacher_ids)).order_by(LessonUpdates.created_at.desc()).all()
+
+            result = []
+            for lesson in lesson_updates:
+                teacher = Teacher.query.filter_by(teacher_id=lesson.teacher_id).first()
+                teacher_user = Users.query.filter_by(user_id=teacher.user_id).first() if teacher else None
+                result.append({
+                    'lesson_id': lesson.id,
+                    'lesson': lesson.lesson,
+                    'summary': lesson.summary,
+                    'created_at': lesson.created_at.isoformat(),
+                    'teacher_name': f"{teacher_user.first_name} {teacher_user.last_name}" if teacher_user else None
+                })
+
+            return {'lesson_updates': result}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

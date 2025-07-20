@@ -16,7 +16,7 @@ import LessonUpdates from "../pages/student/LessonUpdates.vue";
 import SurveyPage from "../pages/student/SurveyPage.vue";
 import WeeklyReport from "../pages/student/WeeklyReport.vue";
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
-import path from 'path';
+import TeacherLessonUpdates from "../pages/teacher/LessonUpdates.vue";
 import StudentJournal from "../pages/student/StudentJournal.vue";
 import LinkChild from '../pages/parent/LinkChild.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
@@ -58,6 +58,7 @@ const routes = [
 
     // BEGIN TEACHER SECTION
     {path: '/teacher/survey-report', component: SurveyReport},
+    {path: '/teacher/lesson-updates', component: TeacherLessonUpdates},
     // END TEACHER SECTION
 
 ]

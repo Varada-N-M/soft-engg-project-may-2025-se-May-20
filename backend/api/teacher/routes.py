@@ -57,3 +57,38 @@ class AddStudent(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error": str(e)}, 500
+
+
+class TeacherLessonUpdates(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get all lesson updates for the logged-in teacher user.
+        Returns lesson updates created by this teacher.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can view lesson updates'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            lesson_updates = LessonUpdates.query.filter_by(teacher_id=teacher.teacher_id).order_by(LessonUpdates.created_at.desc()).all()
+
+            result = []
+            for lesson in lesson_updates:
+                result.append({
+                    'lesson_id': lesson.id,
+                    'lesson': lesson.lesson,
+                    'summary': lesson.summary,
+                    'created_at': lesson.created_at.isoformat(),
+                })
+
+            return {'lesson_updates': result}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

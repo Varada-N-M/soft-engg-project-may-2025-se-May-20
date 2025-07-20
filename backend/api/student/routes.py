@@ -1140,7 +1140,7 @@ class SkillSearchResource(Resource):
 
 # Helper function for validation (you'll need to implement this based on your requirements)
 def validate_skill_data(data):
-    """Validate skill data - implement based on your requirements"""
+    """Validate skill data for creation or update."""
     if not data.get('skill_name', '').strip():
         return False, 'Skill name is required'
     return True, None

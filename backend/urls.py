@@ -2,7 +2,7 @@ from flask_restful import Api
 from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization
 from api.student.routes import GratitudeEntry, Habits
 from api.parent.routes import LinkChildToParent
-
+from api.student.routes import SkillResource, CompleteSkillResource, SkillStatsResource, SkillSearchResource
 
 api = Api()
 
@@ -22,6 +22,8 @@ api.add_resource(Habits, '/api/child/habit', '/api/child/habit/<int:habit_id>', 
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')
 
 
-api.add_resource(BadgeResource, '/badges', '/badges/<int:badge_id>')
-api.add_resource(EarnBadgeResource, '/badges/<int:badge_id>/earn')
-api.add_resource(BadgeStatsResource, '/badges/stats')
+# Register the resources with their URL patterns
+api.add_resource(SkillResource, '/skills', '/skills/<int:skill_id>')
+api.add_resource(CompleteSkillResource, '/skills/<int:skill_id>/complete')
+api.add_resource(SkillStatsResource, '/skills/stats')
+api.add_resource(SkillSearchResource, '/skills/search')

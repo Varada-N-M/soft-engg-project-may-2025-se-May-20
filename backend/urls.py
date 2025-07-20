@@ -20,3 +20,8 @@ api.add_resource(Habits, '/api/child/habit', '/api/child/habit/<int:habit_id>', 
 
 # Parent
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')
+
+
+api.add_resource(BadgeResource, '/badges', '/badges/<int:badge_id>')
+api.add_resource(EarnBadgeResource, '/badges/<int:badge_id>/earn')
+api.add_resource(BadgeStatsResource, '/badges/stats')

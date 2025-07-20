@@ -1,11 +1,12 @@
+from datetime import date, datetime, timedelta, timezone
+
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from datetime import datetime, timedelta, timezone, date
-from sqlalchemy import func
 from flask_restful import Resource
+from sqlalchemy import func
+
 from models import *
 from utils import *
-
 
 
 class GratitudeEntry(Resource):
@@ -232,6 +233,7 @@ class Habits(Resource):
             habit_name = data.get('habit_name', '').strip()
             habit_description = data.get('habit_description', '').strip()
             habit_category = data.get('habit_category', '').strip()
+            habit_xp = data.get('habit_xp', 20)  # Default XP points for habit
 
             if not (habit_name and habit_description and habit_category):
                 return {'error': 'Habit name is required'}, 400
@@ -241,6 +243,7 @@ class Habits(Resource):
                 name=habit_name,
                 description=habit_description,
                 category=habit_category,
+                habit_xp=habit_xp,
                 created_at=datetime.now(timezone.utc)
             )
             db.session.add(habit)
@@ -275,21 +278,28 @@ class Habits(Resource):
 
             habits = Habit.query.filter_by(child_id=child.child_id).all()
 
+            completed_habits = HabitCompletion.query.filter_by(child_id=child.child_id).all()
+
             if not habits:
                 return {'message': 'No habits found for this child'}, 200
 
             return {
-                'habits': [
+                'habits_created': [
                     {
                         'habit_id': habit.id,
                         'name': habit.name,
                         'description': habit.description,
                         'category': habit.category,
                         'created_at': habit.created_at.isoformat(),
-                        'is_daily': habit.is_daily,
-                        'is_done': habit.is_done,
-                        'completion_date': habit.completion_date.isoformat() if habit.completion_date else None
+                        # 'completion_date': habit.completion_date.isoformat() if habit.completion_date else None
                     } for habit in habits
+                ],
+                'completed_habits': [
+                    {
+                        'habit_id': completion.habit_id,
+                        'is_done': completion.is_done,
+                        'completion_date': completion.completion_date.isoformat() if completion.completion_date else None
+                    } for completion in completed_habits
                 ]
             }, 200
 
@@ -323,6 +333,7 @@ class Habits(Resource):
             habit_name = data.get('habit_name', '').strip()
             habit_description = data.get('habit_description', '').strip()
             habit_category = data.get('habit_category', '').strip()
+            habit_xp = data.get('habit_xp')
 
             if not (habit_name and habit_description and habit_category):
                 return {'error': 'Habit name is required'}, 400
@@ -331,6 +342,7 @@ class Habits(Resource):
             habit.name = habit_name
             habit.description = habit_description
             habit.category = habit_category
+            habit.habit_xp = habit_xp if habit_xp is not None else habit.habit_xp
             habit.updated_at = datetime.now(timezone.utc)
             
             db.session.commit()
@@ -367,6 +379,11 @@ class Habits(Resource):
             # Find the habit and verify ownership
             habit = Habit.query.filter_by(id=habit_id, child_id=child.child_id).first()
 
+            habit_completion = HabitCompletion.query.filter_by(
+                child_id=child.child_id,
+                habit_id=habit_id
+            ).all()
+
             if not habit:
                 return {'error': 'Habit not found or access denied'}, 404
 
@@ -381,6 +398,7 @@ class Habits(Resource):
 
             # Delete the habit
             db.session.delete(habit)
+            db.session.delete(habit_completion) if habit_completion else None
             db.session.commit()
 
             return {
@@ -390,4 +408,641 @@ class Habits(Resource):
 
         except Exception as e:
             db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CompleteHabit(Resource):
+    @jwt_required()
+    def post(self, habit_id):
+        """
+        Mark a habit as done for the logged-in child user.
+        URL: /habits/<int:habit_id>/complete
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can mark habits as done'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the habit and verify ownership
+            habit = Habit.query.filter_by(id=habit_id, child_id=child.child_id).first()
+
+            if not habit:
+                return {'error': 'Habit not found or access denied'}, 404
+            
+            # check if habit is already completed today
+            habit_completion = HabitCompletion.query.filter_by(
+                child_id=child.child_id,
+                habit_id=habit.id,
+                completion_date=date.today()
+            ).first()
+            
+            if habit_completion:
+                if habit_completion.completion_date and habit_completion.completion_date == date.today():
+                    return {'error': 'Habit already completed today'}, 400
+
+            habit_completion = HabitCompletion(
+                child_id=child.child_id,
+                habit_id=habit.id,
+                is_done=True,
+                completion_date=date.today()
+            )
+            db.session.add(habit_completion)
+            db.session.commit()
+            return {'message': 'Habit done successfully'}, 200
+        
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+
+class ToDoListResource(Resource):
+    """Manage to-do list items."""
+    @jwt_required()
+    def post(self):
+        """Create a new to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can create to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            data = request.get_json()
+            
+            # Validate required fields
+            required_fields = ['to_do', 'description']
+            for field in required_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+            
+            to_do = data['to_do'].strip()
+            description = data['description'].strip()
+            is_daily = data.get('is_daily', False)
+            created_at = datetime.now(timezone.utc)
+
+            # Optional fields
+            start_date_str = data.get('start_date')  # ISO 8601 string
+            due_date_str = data.get('due_date')      # ISO 8601 string
+            
+            start_date = None
+            due_date = None
+
+            # Parse and validate start_date
+            if start_date_str:
+                try:
+                    start_date = datetime.fromisoformat(start_date_str)
+                    if start_date < created_at:
+                        return {'error': 'Start date cannot be before creation time'}, 400
+                except ValueError:
+                    return {'error': 'Invalid start_date format. Use ISO 8601 format.'}, 400
+
+            # Parse and validate due_date
+            if due_date_str:
+                try:
+                    due_date = datetime.fromisoformat(due_date_str)
+                    if start_date and due_date <= start_date:
+                        return {'error': 'Due date must be after start date'}, 400
+                except ValueError:
+                    return {'error': 'Invalid due_date format. Use ISO 8601 format.'}, 400
+
+            # Create to-do item
+            todo_item = ToDoList(
+                child_id=child.child_id,
+                to_do=to_do,
+                description=description,
+                is_daily=is_daily,
+                created_at=created_at,
+                start_date=start_date,
+                due_date=due_date
+            )
+            
+            db.session.add(todo_item)
+            db.session.commit()
+            
+            response_data = {
+                'message': 'To-do item created successfully',
+                'list_id': todo_item.list_id,
+                'to_do': todo_item.to_do,
+                'description': todo_item.description,
+                'is_daily': todo_item.is_daily,
+                'is_done': todo_item.is_done,
+                'created_at': todo_item.created_at.isoformat(),
+                'start_date': todo_item.start_date.isoformat() if todo_item.start_date else None,
+                'due_date': todo_item.due_date.isoformat() if todo_item.due_date else None
+            }
+            
+            return response_data, 201
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    
+    @jwt_required()
+    def get(self):
+        """Get to-do items for the logged-in child."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can view to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            # Query parameters
+            is_done = request.args.get('is_done')
+            is_daily = request.args.get('is_daily')
+            date_str = request.args.get('date')
+            
+            query = ToDoList.query.filter_by(child_id=child.child_id)
+            
+            # Filter by completion status
+            if is_done is not None:
+                is_done_bool = is_done.lower() == 'true'
+                query = query.filter_by(is_done=is_done_bool)
+            
+            # Filter by daily tasks
+            if is_daily is not None:
+                is_daily_bool = is_daily.lower() == 'true'
+                query = query.filter_by(is_daily=is_daily_bool)
+            
+            # Filter by date
+            if date_str:
+                try:
+                    target_date = datetime.strptime(date_str, "%d-%m-%y").date()
+                    query = query.filter(func.date(ToDoList.created_at) == target_date)
+                except ValueError:
+                    return {'error': 'Invalid date format. Use DD-MM-YY'}, 400
+            
+            todos = query.order_by(ToDoList.created_at.desc()).all()
+            
+            return {
+                'todos': [
+                    {
+                        'list_id': todo.list_id,
+                        'to_do': todo.to_do,
+                        'description': todo.description,
+                        'is_done': todo.is_done,
+                        'is_daily': todo.is_daily,
+                        'created_at': todo.created_at.isoformat(),
+                        'completion_date': todo.completion_date.isoformat() if todo.completion_date else None
+                    } for todo in todos
+                ]
+            }, 200
+            
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+    
+    @jwt_required()
+    def put(self, todo_id):
+        """Update a to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can update to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            data = request.get_json()
+            list_id = data.get('list_id')
+            
+            if not list_id:
+                return {'error': 'list_id is required'}, 400
+            
+            todo_item = ToDoList.query.filter_by(list_id=list_id, child_id=child.child_id).first()
+            if not todo_item:
+                return {'error': 'To-do item not found'}, 404
+            
+            # Update fields
+            if 'to_do' in data:
+                todo_item.to_do = data['to_do'].strip()
+            if 'description' in data:
+                todo_item.description = data['description'].strip()
+            if 'is_daily' in data:
+                todo_item.is_daily = data['is_daily']
+            if 'is_done' in data:
+                todo_item.is_done = data['is_done']
+                if data['is_done'] and not todo_item.completion_date:
+                    todo_item.completion_date = datetime.now(timezone.utc)
+                elif not data['is_done']:
+                    todo_item.completion_date = None
+            
+            db.session.commit()
+            
+            return {
+                'message': 'To-do item updated successfully',
+                'list_id': todo_item.list_id,
+                'to_do': todo_item.to_do,
+                'description': todo_item.description,
+                'is_done': todo_item.is_done,
+                'is_daily': todo_item.is_daily,
+                'completion_date': todo_item.completion_date.isoformat() if todo_item.completion_date else None
+            }, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+        
+    @jwt_required()
+    def delete(self, todo_id):
+        """Delete a to-do item."""
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            
+            if not user:
+                return {'error': 'Only active child users can delete to-do items'}, 403
+            
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+            
+            todo_item = ToDoList.query.filter_by(list_id=todo_id, child_id=child.child_id).first()
+            if not todo_item:
+                return {'error': 'To-do item not found'}, 404
+            
+            db.session.delete(todo_item)
+            db.session.commit()
+            
+            return {'message': 'To-do item deleted successfully'}, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+
+
+class BadgeResource(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Create a new badge for the logged-in child user.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can create badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            data = request.get_json()
+            badge_name = data.get('badge', '').strip()
+            level = data.get('level', '').strip()
+            badge_xp = data.get('badge_xp', 0)
+
+            if not badge_name:
+                return {'error': 'Badge name is required'}, 400
+            
+            if not level:
+                return {'error': 'Badge level is required'}, 400
+
+            # Check if badge already exists for this child
+            existing_badge = Badge.query.filter_by(
+                child_id=child.child_id,
+                badge=badge_name,
+                level=level
+            ).first()
+
+            if existing_badge:
+                return {'error': 'Badge with this name and level already exists'}, 400
+
+            badge = Badge(
+                child_id=child.child_id,
+                badge=badge_name,
+                level=level,
+                badge_xp=badge_xp,
+                is_earned=False
+            )
+            db.session.add(badge)
+            db.session.commit()
+
+            return {
+                'message': 'Badge created successfully',
+                'badge_id': badge.id,
+                'badge': badge.badge,
+                'level': badge.level,
+                'badge_xp': badge.badge_xp,
+                'is_earned': badge.is_earned
+            }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def get(self):
+        """
+        Get badges for the logged-in child user.
+        Supports:
+        - ?earned=true/false → filter by earned status
+        - ?level=bronze/silver/gold → filter by level
+        - No params → all badges
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            query = Badge.query.filter_by(child_id=child.child_id)
+
+            # Filter by earned status
+            earned = request.args.get('earned')
+            if earned is not None:
+                is_earned = earned.lower() == 'true'
+                query = query.filter_by(is_earned=is_earned)
+
+            # Filter by level
+            level = request.args.get('level')
+            if level:
+                query = query.filter_by(level=level)
+
+            badges = query.order_by(Badge.earned_at.desc().nullslast()).all()
+
+            if not badges:
+                return {'message': 'No badges found for this child'}, 200
+
+            return {
+                'badges': [
+                    {
+                        'badge_id': badge.id,
+                        'badge': badge.badge,
+                        'level': badge.level,
+                        'is_earned': badge.is_earned,
+                        'badge_xp': badge.badge_xp,
+                        'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+                    } for badge in badges
+                ]
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def put(self, badge_id):
+        """
+        Update a specific badge for the logged-in child user.
+        URL: /badges/<int:badge_id>
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can update badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the badge and verify ownership
+            badge = Badge.query.filter_by(
+                id=badge_id,
+                child_id=child.child_id
+            ).first()
+
+            if not badge:
+                return {'error': 'Badge not found or access denied'}, 404
+
+            data = request.get_json()
+
+            # Update allowed fields
+            if 'badge' in data:
+                badge_name = data['badge'].strip()
+                if badge_name:
+                    badge.badge = badge_name
+
+            if 'level' in data:
+                level = data['level'].strip()
+                if level:
+                    badge.level = level
+
+            if 'badge_xp' in data:
+                badge.badge_xp = data['badge_xp']
+
+            if 'is_earned' in data:
+                badge.is_earned = data['is_earned']
+                if data['is_earned'] and not badge.earned_at:
+                    badge.earned_at = datetime.now(timezone.utc)
+                elif not data['is_earned']:
+                    badge.earned_at = None
+
+            db.session.commit()
+
+            return {
+                'message': 'Badge updated successfully',
+                'badge_id': badge.id,
+                'badge': badge.badge,
+                'level': badge.level,
+                'is_earned': badge.is_earned,
+                'badge_xp': badge.badge_xp,
+                'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def delete(self, badge_id):
+        """
+        Delete a specific badge for the logged-in child user.
+        URL: /badges/<int:badge_id>
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can delete badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the badge and verify ownership
+            badge = Badge.query.filter_by(
+                id=badge_id,
+                child_id=child.child_id
+            ).first()
+
+            if not badge:
+                return {'error': 'Badge not found or access denied'}, 404
+
+            # Store badge details for response before deletion
+            badge_details = {
+                'badge_id': badge.id,
+                'badge': badge.badge,
+                'level': badge.level,
+                'is_earned': badge.is_earned,
+                'badge_xp': badge.badge_xp,
+                'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+            }
+
+            # Delete the badge
+            db.session.delete(badge)
+            db.session.commit()
+
+            return {
+                'message': 'Badge deleted successfully',
+                'deleted_badge': badge_details
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class EarnBadgeResource(Resource):
+    @jwt_required()
+    def post(self, badge_id):
+        """
+        Mark a badge as earned for the logged-in child user.
+        URL: /badges/<int:badge_id>/earn
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can earn badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the badge and verify ownership
+            badge = Badge.query.filter_by(
+                id=badge_id,
+                child_id=child.child_id
+            ).first()
+
+            if not badge:
+                return {'error': 'Badge not found or access denied'}, 404
+
+            if badge.is_earned:
+                return {'error': 'Badge already earned'}, 400
+
+            # Mark badge as earned
+            badge.is_earned = True
+            badge.earned_at = datetime.now(timezone.utc)
+
+            db.session.commit()
+
+            return {
+                'message': 'Badge earned successfully!',
+                'badge_id': badge.id,
+                'badge': badge.badge,
+                'level': badge.level,
+                'badge_xp': badge.badge_xp,
+                'earned_at': badge.earned_at.isoformat()
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class BadgeStatsResource(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get badge statistics for the logged-in child user.
+        Returns counts by level and total earned/available badges.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view badge stats'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Get all badges for the child
+            badges = Badge.query.filter_by(child_id=child.child_id).all()
+
+            if not badges:
+                return {
+                    'total_badges': 0,
+                    'earned_badges': 0,
+                    'total_xp': 0,
+                    'stats_by_level': {},
+                    'recent_badges': []
+                }, 200
+
+            # Calculate statistics
+            total_badges = len(badges)
+            earned_badges = sum(1 for badge in badges if badge.is_earned)
+            total_xp = sum(badge.badge_xp for badge in badges if badge.is_earned)
+
+            # Group by level
+            stats_by_level = {}
+            for badge in badges:
+                level = badge.level
+                if level not in stats_by_level:
+                    stats_by_level[level] = {
+                        'total': 0,
+                        'earned': 0,
+                        'xp': 0
+                    }
+                stats_by_level[level]['total'] += 1
+                if badge.is_earned:
+                    stats_by_level[level]['earned'] += 1
+                    stats_by_level[level]['xp'] += badge.badge_xp
+
+            # Get recent earned badges (last 5)
+            recent_badges = Badge.query.filter_by(
+                child_id=child.child_id,
+                is_earned=True
+            ).order_by(Badge.earned_at.desc()).limit(5).all()
+
+            return {
+                'total_badges': total_badges,
+                'earned_badges': earned_badges,
+                'total_xp': total_xp,
+                'completion_rate': round((earned_badges / total_badges) * 100, 1) if total_badges > 0 else 0,
+                'stats_by_level': stats_by_level,
+                'recent_badges': [
+                    {
+                        'badge_id': badge.id,
+                        'badge': badge.badge,
+                        'level': badge.level,
+                        'badge_xp': badge.badge_xp,
+                        'earned_at': badge.earned_at.isoformat()
+                    } for badge in recent_badges
+                ]
+            }, 200
+
+        except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500

@@ -6,8 +6,10 @@ from datetime import date
 import pytest
 
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
-from ..models import Child, Users, UserRole  # Adjust imports as needed
-from ..main import db, create_app 
+from models import Child, Users, UserRole  # Adjust imports as needed
+from main import db, create_app 
+
+
 # Removed unused or unknown import 'login' from api.auth
 def test_signup_child_success(client, child_payload):
     """Test successful child registration"""

@@ -6,9 +6,9 @@ import pytest
 from flask_jwt_extended import create_refresh_token
 from werkzeug.security import generate_password_hash
 
-from ..api.auth.routes import Login
-from ..main import create_app, db
-from ..models import Child, UserRole, Users
+from api.auth.routes import Login
+from main import create_app, db
+from models import Child, UserRole, Users
 
 from datetime import datetime, timezone
 

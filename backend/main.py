@@ -1,14 +1,10 @@
-# app/__init__.py
-
 from flask import Flask, redirect
 from flask_cors import CORS
 from flask_migrate import Migrate
-
 from api.auth import jwt
-from static.config import config
+from config import config
 from models import db
 from urls import api
-
 
 
 def create_app(config_name='default', testing=False):

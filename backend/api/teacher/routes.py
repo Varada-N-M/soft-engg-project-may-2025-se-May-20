@@ -59,7 +59,6 @@ class AddStudent(Resource):
             return {"error": str(e)}, 500
 
 
-<<<<<<< HEAD
 class RemoveStudent(Resource):
     @jwt_required()
     def delete(self, student_id):
@@ -92,7 +91,6 @@ class RemoveStudent(Resource):
             db.session.rollback()
             return {"error": str(e)}, 500
 
-=======
 class TeacherLessonUpdates(Resource):
     @jwt_required()
     def get(self):
@@ -126,4 +124,3 @@ class TeacherLessonUpdates(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
->>>>>>> lessonupdates_backend_frontend

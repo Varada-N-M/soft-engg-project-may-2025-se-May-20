@@ -168,6 +168,7 @@ class GratitudeEntries(db.Model):
 
     entry_id = db.Column(db.Integer, primary_key=True)
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     gratitude_text = db.Column(db.Text)
 

@@ -33,6 +33,9 @@ def app():
         'WTF_CSRF_ENABLED': False,
         'SECRET_KEY': 'test-secret-key'
     })
+
+    # Initialize JWT
+    jwt = JWTManager(app)
     
     with app.app_context():
         try:
@@ -149,7 +152,7 @@ def child_user(create_test_child):
 def auth_header(child_user):
     """Create authentication header for child user"""
     user, _ = child_user
-    access_token = create_access_token(identity=user.user_id)
+    access_token = create_access_token(identity=str(user.user_id))
     return {'Authorization': f'Bearer {access_token}'}
 
 

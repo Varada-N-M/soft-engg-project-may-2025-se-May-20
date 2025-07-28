@@ -1,4 +1,4 @@
-# test_signup.py - Updated to match actual model structure
+# test_signup.py 
 import json
 import uuid
 from datetime import date
@@ -6,17 +6,17 @@ from datetime import date
 import pytest
 
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
-from models import Child, Users, UserRole  # Adjust imports as needed
+from models import Child, Users, UserRole  
 from main import db, create_app 
 
 
-# Removed unused or unknown import 'login' from api.auth
 def test_signup_child_success(client, child_payload):
     """Test successful child registration"""
     response = client.post('/api/child/register', 
                           json=child_payload,
                           content_type='application/json')
     
+    print(f"Input Payload: {child_payload}")
     print(f"Response Status: {response.status_code}")
     print(f"Response Data: {response.get_data(as_text=True)}")
     if response.get_json():
@@ -36,6 +36,7 @@ def test_signup_parent_success(client, parent_payload):
                           json=parent_payload,
                           content_type='application/json')
     
+    print(f"Input Payload: {parent_payload}")
     print(f"Response Status: {response.status_code}")
     print(f"Response Data: {response.get_data(as_text=True)}")
     
@@ -48,6 +49,7 @@ def test_signup_organization_success(client, organization_payload):
                           json=organization_payload,
                           content_type='application/json')
     
+    print(f"Input Payload: {organization_payload}")
     print(f"Response Status: {response.status_code}")
     print(f"Response Data: {response.get_data(as_text=True)}")
     

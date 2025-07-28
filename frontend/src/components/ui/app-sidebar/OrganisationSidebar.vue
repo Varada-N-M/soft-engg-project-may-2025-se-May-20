@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {Calendar, Home, Inbox, PersonStanding, Search, Settings} from "lucide-vue-next"
+import {Calendar, Home, Inbox, PersonStanding, Search, Settings, UserPlus, Users, ClipboardMinus} from "lucide-vue-next"
 import {
   Sidebar,
   SidebarContent, SidebarFooter,
@@ -22,7 +22,17 @@ const items = [
   {
     title: "Teachers",
     url: "/org/teachers",
-    icon: PersonStanding,
+    icon: Users,s
+  },
+  {
+    title: "Add Teacher",
+    url: "/org/add-teacher",
+    icon: UserPlus,
+  },
+  {
+    title: "Survey Report",
+    url: "/org/survey-report",
+    icon: ClipboardMinus,
   },
 ];
 </script>

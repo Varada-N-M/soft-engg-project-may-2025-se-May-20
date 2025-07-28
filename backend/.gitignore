@@ -2,6 +2,7 @@ env
 /env
 /__pycache__
 __pycache__
+.pytest_cache*
 *.db
 *.sqlite3
 *.log

@@ -1,24 +1,39 @@
-from flask import Flask
+from flask import Flask, redirect
 from flask_cors import CORS
+from flask_migrate import Migrate
+from api.auth import jwt
 from config import config
 from models import db
-from api import jwt
 from urls import api
 
-app = Flask(__name__)
-# Add frontend URLs here
-CORS(app, origins=['http://localhost:5173'])
 
-app.config.from_object(config['default'])
+def create_app(config_name='default', testing=False):
+    app = Flask(__name__)
 
-api.init_app(app)
-jwt.init_app(app)
+    # Load config
+    app.config.from_object(config[config_name])
 
-db.init_app(app)
+    if testing:
+        app.config['TESTING'] = True
 
-with app.app_context():
-    # db.drop_all()
-    db.create_all()
+    # Setup CORS
+    CORS(app, origins=['http://localhost:5173'])
 
-if __name__ == "__main__":
-  app.run(host="", port=5000, debug=True)
+    # Initialize extensions
+    db.init_app(app)
+    jwt.init_app(app)
+    api.init_app(app)
+    Migrate(app, db)
+
+    # Create tables on startup (optional)
+    with app.app_context():
+        db.create_all()
+
+    # Swagger redirection
+    @app.route('/')
+    def index():
+        return redirect('/static/swagger.html')
+    return app
+
+  
+

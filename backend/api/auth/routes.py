@@ -225,7 +225,9 @@ class Login(Resource):
     """
     User login endpoint
     This endpoint allows users to log in by providing their email and password.
-    It validates the credentials and returns a JWT access token and refresh token upon successful login.
+    It validates that the user is logging in from the correct page (parent/child) by cross-checking
+    the frontend-provided user type with the actual user type stored in the database.
+    Returns a JWT access token and refresh token upon successful login.
     """
     def post(self):
         try:
@@ -234,9 +236,12 @@ class Login(Resource):
             # Validate required fields
             if not data.get('email') or not data.get('password'):
                 return {'error': 'Email and password are required'}, 400
+            if not data.get('role_type'):
+                return {'error': 'Role type is required'}, 400
             
             email = data['email'].lower().strip()
             password = data['password']
+            user_type = data['role_type'].lower().strip()
             
             # Find user by email
             user = Users.query.filter_by(email=email).first()
@@ -251,6 +256,10 @@ class Login(Resource):
             # Verify password
             if not check_password_hash(user.password, password):
                 return {'error': 'Invalid email or password'}, 401
+
+            # Check user role type ['admin', 'teacher', 'parent', 'child', 'organization', 'principal']
+            if user.role_type.value.lower() != user_type:
+                return {'error': 'User role does not match  '}, 403
             
             # Create access and refresh tokens
             access_token = create_access_token(identity=str(user.user_id))

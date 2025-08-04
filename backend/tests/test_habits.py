@@ -39,6 +39,9 @@ class TestHabits:
         assert habit.description == payload['habit_description']
         assert habit.category == payload['habit_category']
         assert habit.habit_xp == payload['habit_xp']
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_post_habit_default_xp(self, client, child_user, auth_header, db):
         """Test creating habit with default XP when not provided"""
@@ -62,6 +65,9 @@ class TestHabits:
         # Verify default XP was set
         habit = Habit.query.filter_by(child_id=child.child_id).first()
         assert habit.habit_xp == 20  # Default XP
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_post_habit_missing_fields(self, client, auth_header):
         """Test creating habit with missing required fields fails"""
@@ -80,6 +86,9 @@ class TestHabits:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert data['error'] == 'Habit name is required'
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_get_habits_empty(self, client, auth_header):
         """Test getting habits when none exist"""
@@ -88,6 +97,9 @@ class TestHabits:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data['message'] == 'No habits found for this child'
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_get_habits_with_data(self, client, child_user, auth_header, db):
         """Test getting habits with created habits and completions"""
@@ -141,6 +153,9 @@ class TestHabits:
         # Verify completion data
         assert data['completed_habits'][0]['habit_id'] == habit1.id
         assert data['completed_habits'][0]['is_done'] is True
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_put_habit_success(self, client, child_user, auth_header, db):
         """Test updating a habit successfully"""
@@ -184,6 +199,9 @@ class TestHabits:
         assert updated_habit.description == update_payload['habit_description']
         assert updated_habit.category == update_payload['habit_category']
         assert updated_habit.habit_xp == update_payload['habit_xp']
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_put_habit_not_found(self, client, auth_header):
         """Test updating non-existent habit fails"""
@@ -203,6 +221,9 @@ class TestHabits:
         assert response.status_code == 404
         data = json.loads(response.data)
         assert data['error'] == 'Habit not found or access denied'
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_delete_habit_success(self, client, child_user, auth_header, db):
         """Test deleting a habit successfully"""
@@ -231,6 +252,9 @@ class TestHabits:
         # Verify deletion in database
         deleted_habit = Habit.query.get(habit_id)
         assert deleted_habit is None
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_delete_habit_not_found(self, client, auth_header):
         """Test deleting non-existent habit fails"""
@@ -240,7 +264,10 @@ class TestHabits:
         data = json.loads(response.data)
         assert data['error'] == 'Habit not found or access denied'
 
-
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
+    
 class TestCompleteHabit:
     """Test cases for CompleteHabit resource"""
     
@@ -277,6 +304,9 @@ class TestCompleteHabit:
         assert completion is not None
         assert completion.is_done is True
         assert completion.completion_date == date.today()
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_complete_habit_already_completed_today(self, client, child_user, auth_header, db):
         """Test marking habit as complete when already completed today fails"""
@@ -312,6 +342,9 @@ class TestCompleteHabit:
         assert response.status_code == 400
         data = json.loads(response.data)
         assert data['error'] == 'Habit already completed today'
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_complete_habit_not_found(self, client, auth_header):
         """Test completing non-existent habit fails"""
@@ -320,9 +353,16 @@ class TestCompleteHabit:
         assert response.status_code == 404
         data = json.loads(response.data)
         assert data['error'] == 'Habit not found or access denied'
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
     
     def test_complete_habit_no_auth(self, client):
         """Test completing habit without authentication fails"""
         response = client.post('api/child/habit/1/complete')
         
         assert response.status_code == 401
+        print(f"Response Data: {response.get_data(as_text=True)}")
+        if response.get_json():
+            print(f"Response JSON: {response.get_json()}")
+    

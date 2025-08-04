@@ -1,7 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
 from datetime import datetime
 from enum import Enum
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
@@ -130,7 +131,6 @@ class Badge(db.Model):
     def __repr__(self):
         return f'<Badge {self.badge}>'
 
-
 class Skill(db.Model):
     __tablename__ = 'skill'
 
@@ -142,11 +142,22 @@ class Skill(db.Model):
     skill_xp = db.Column(db.Integer, default=0)
     completion_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "child_id": self.child_id,
+            "skill_name": self.skill_name,
+            "video_url": self.video_url,
+            "skill_xp": self.skill_xp,
+            "is_learned": self.is_learned,
+            "completion_date": self.completion_date.isoformat() if self.completion_date else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            # "updated_at": self.updated_at.isoformat() if self.updated_at else None,  ← Remove this line
+        }
 
     def __repr__(self):
         return f'<Skill {self.skill_name}>'
-
-
 class ToDoList(db.Model):
     __tablename__ = 'to_do_list'
 

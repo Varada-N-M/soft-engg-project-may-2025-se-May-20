@@ -808,8 +808,8 @@ def check_and_update_badges(child_id):
         print(f"Error updating badges: {str(e)}")
         return []
 
-
 class SkillResource(Resource):
+    @jwt_required()
     @jwt_required()
     def post(self):
         """Create a new skill for the logged-in child user."""
@@ -824,31 +824,34 @@ class SkillResource(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
 
-            # Get all teachers linked to this child
-            teacher_links = TeacherChild.query.filter_by(child_id=child.child_id).all()
-            teacher_ids = [link.teacher_id for link in teacher_links]
+            data = request.get_json()
+            is_valid, error_msg = validate_skill_data(data)
+            if not is_valid:
+                return {'error': error_msg}, 400
 
-            if not teacher_ids:
-                return {'message': 'No teachers linked to this child.'}, 200
+            # Extract fields
+            skill_name = data['skill_name'].strip()
+            video_url = data.get('video_url', '').strip() if data.get('video_url') else None
+            skill_xp = data.get('skill_xp', 0)
 
-            # Get all lesson updates from these teachers
-            lesson_updates = LessonUpdates.query.filter(LessonUpdates.teacher_id.in_(teacher_ids)).order_by(LessonUpdates.created_at.desc()).all()
+            new_skill = Skill(
+                child_id=child.child_id,
+                skill_name=skill_name,
+                video_url=video_url,
+                skill_xp=skill_xp,
+                is_learned=False
+            )
 
-            result = []
-            for lesson in lesson_updates:
-                teacher = Teacher.query.filter_by(teacher_id=lesson.teacher_id).first()
-                teacher_user = Users.query.filter_by(user_id=teacher.user_id).first() if teacher else None
-                result.append({
-                    'lesson_id': lesson.id,
-                    'lesson': lesson.lesson,
-                    'summary': lesson.summary,
-                    'created_at': lesson.created_at.isoformat(),
-                    'teacher_name': f"{teacher_user.first_name} {teacher_user.last_name}" if teacher_user else None
-                })
+            db.session.add(new_skill)
+            db.session.commit()
 
-            return {'lesson_updates': result}, 200
+            return {
+                'message': 'Skill created successfully',
+                'skill': new_skill.to_dict()
+            }, 201
 
         except Exception as e:
+            db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
     @jwt_required()
@@ -1107,7 +1110,7 @@ class SkillStatsResource(Resource):
             ).limit(3).all()
             
             return {
-                'child_name': child.name,
+                'child_name': user.first_name + ' ' + user.last_name,
                 'skills': {
                     'total_skills': total_skills,
                     'completed_skills': completed_skills,

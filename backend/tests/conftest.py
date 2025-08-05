@@ -79,8 +79,8 @@ def create_test_user(db):
                 'email': email,
                 'first_name': 'Test',
                 'last_name': 'User',
-                'role_type': role,  # Correct field name from model
-                'password': generate_password_hash('TestPass123!'),  # Correct field name
+                'role_type': role,  
+                'password': generate_password_hash('TestPass123!'),  
                 'is_active': True,
                 'created_at': datetime.utcnow()
             }
@@ -166,7 +166,7 @@ def child_payload():
         "first_name": "John",
         "last_name": "Doe",
         "dob": str(date(2010, 5, 17)),
-        "class": "5",  # This will need to be mapped to class_ field in your registration endpoint
+        "class": "5",  
         "school_name": "ABC School",
         "gender": "Male"
     }

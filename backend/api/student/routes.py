@@ -810,7 +810,6 @@ def check_and_update_badges(child_id):
 
 class SkillResource(Resource):
     @jwt_required()
-    @jwt_required()
     def post(self):
         """Create a new skill for the logged-in child user."""
         try:
@@ -825,9 +824,8 @@ class SkillResource(Resource):
                 return {'error': 'Child profile not found'}, 404
 
             data = request.get_json()
-            is_valid, error_msg = validate_skill_data(data)
-            if not is_valid:
-                return {'error': error_msg}, 400
+            if not data.get('skill_name', '').strip():
+                return {'error': 'Skill name is required'}, 400
 
             # Extract fields
             skill_name = data['skill_name'].strip()
@@ -1180,11 +1178,3 @@ class SkillSearchResource(Resource):
             
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
-
-
-# Helper function for validation (you'll need to implement this based on your requirements)
-def validate_skill_data(data):
-    """Validate skill data for creation or update."""
-    if not data.get('skill_name', '').strip():
-        return False, 'Skill name is required'
-    return True, None

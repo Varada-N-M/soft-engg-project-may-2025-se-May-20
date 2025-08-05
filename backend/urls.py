@@ -31,10 +31,10 @@ api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlin
 
 
 # Register the resources with their URL patterns
-api.add_resource(SkillResource, '/api/skills', '/api/skills/<int:skill_id>')
-api.add_resource(CompleteSkillResource, '/api/skills/<int:skill_id>/complete')
-api.add_resource(SkillStatsResource, '/api/skills/stats')
-api.add_resource(SkillSearchResource, '/api/skills/search')
+api.add_resource(SkillResource, '/api/child/skills', '/api/child/skills/<int:skill_id>')
+api.add_resource(CompleteSkillResource, '/api/child/skills/<int:skill_id>/complete')
+api.add_resource(SkillStatsResource, '/api/child/skills/stats')
+api.add_resource(SkillSearchResource, '/api/child/skills/search')
 
 # Teacher
 api.add_resource(AddStudent, '/api/teacher/add-student')

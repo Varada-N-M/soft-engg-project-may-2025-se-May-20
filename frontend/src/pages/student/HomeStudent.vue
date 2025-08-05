@@ -30,11 +30,32 @@
     </aside>
 
     <div class="flex-1 ml-64 p-4 overflow-y-auto">
-      <div v-if="!showWeeklyReport" class="max-w-6xl mx-auto mt-10">
+      <!-- Loading State -->
+      <div v-if="loading" class="max-w-6xl mx-auto mt-10 text-center">
+        <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl p-12 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
+          <div class="text-6xl mb-4">🎯</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Loading your dashboard...</h2>
+          <p class="text-gray-600">Getting your latest progress and achievements!</p>
+        </div>
+      </div>
+      
+      <!-- Error State -->
+      <div v-else-if="error" class="max-w-6xl mx-auto mt-10 text-center">
+        <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl p-12 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
+          <div class="text-6xl mb-4">😔</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Oops! Something went wrong</h2>
+          <p class="text-gray-600 mb-4">{{ error }}</p>
+          <button @click="fetchDashboardData" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+            Try Again
+          </button>
+        </div>
+      </div>
+      
+      <div v-else-if="!showWeeklyReport" class="max-w-6xl mx-auto mt-10">
         <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl p-6 mb-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-800 mb-2">Good evening, Alex! 🌈</h1>
+              <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ dashboardData.greeting || 'Welcome! 🌈' }}</h1>
               <p class="text-gray-600">Ready for another amazing day of learning?</p>
             </div>
           </div>
@@ -45,32 +66,32 @@
             <div class="flex items-center justify-between mb-3">
               <div>
                 <p class="text-gray-600 text-sm font-medium">XP Points</p>
-                <h3 class="text-3xl font-bold text-orange-500">2450</h3>
+                <h3 class="text-3xl font-bold text-orange-500">{{ dashboardData.stats?.total_xp || 0 }}</h3>
               </div>
               <div class="text-4xl">⭐</div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-              <div class="bg-orange-400 h-2 rounded-full" style="width: 82%"></div>
+              <div class="bg-orange-400 h-2 rounded-full" :style="{ width: `${dashboardData.progress?.xp_progress_percent || 0}%` }"></div>
             </div>
-            <p class="text-xs text-gray-500">550 XP to next level</p>
+            <p class="text-xs text-gray-500">{{ dashboardData.stats?.xp_for_next_level || 0 }} XP to next level</p>
           </div>
 
           <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
             <div class="flex items-center justify-between mb-3">
               <div>
                 <p class="text-gray-600 text-sm font-medium">Badges</p>
-                <h3 class="text-3xl font-bold text-purple-500">12</h3>
+                <h3 class="text-3xl font-bold text-purple-500">{{ dashboardData.stats?.total_badges || 0 }}</h3>
               </div>
               <div class="text-4xl">🏅</div>
             </div>
-            <p class="text-green-600 text-sm font-medium">+2 this week!</p>
+            <p class="text-green-600 text-sm font-medium">+{{ dashboardData.stats?.badges_this_week || 0 }} this week!</p>
           </div>
 
           <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
             <div class="flex items-center justify-between mb-3">
               <div>
                 <p class="text-gray-600 text-sm font-medium">Streak</p>
-                <h3 class="text-3xl font-bold text-red-500">7</h3>
+                <h3 class="text-3xl font-bold text-red-500">{{ dashboardData.stats?.learning_streak || 0 }}</h3>
               </div>
               <div class="text-4xl">🔥</div>
             </div>
@@ -81,7 +102,7 @@
             <div class="flex items-center justify-between mb-3">
               <div>
                 <p class="text-gray-600 text-sm font-medium">Lessons</p>
-                <h3 class="text-3xl font-bold text-green-500">34</h3>
+                <h3 class="text-3xl font-bold text-green-500">{{ dashboardData.stats?.lessons_completed || 0 }}</h3>
               </div>
               <div class="text-4xl">📚</div>
             </div>
@@ -218,9 +239,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from '@/plugins/axios.js'
 
 const showWeeklyReport = ref(false)
+const dashboardData = ref({})
+const loading = ref(false)
+const error = ref(null)
+
+// Fetch dashboard data
+const fetchDashboardData = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    
+    const response = await axios.get('/api/student/dashboard')
+    dashboardData.value = response.data
+  } catch (err) {
+    console.error('Error fetching dashboard data:', err)
+    error.value = err.response?.data?.error || 'Failed to load dashboard data'
+    
+    // Fallback to static data if API fails
+    dashboardData.value = {
+      greeting: 'Welcome! 🌈',
+      stats: {
+        total_xp: 0,
+        xp_for_next_level: 500,
+        learning_streak: 0,
+        total_badges: 0,
+        badges_this_week: 0,
+        lessons_completed: 0
+      },
+      progress: {
+        xp_progress_percent: 0
+      }
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load data on component mount
+onMounted(() => {
+  fetchDashboardData()
+})
 
 
 

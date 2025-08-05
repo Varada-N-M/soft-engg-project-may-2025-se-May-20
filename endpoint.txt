@@ -1,0 +1,285 @@
+API ENDPOINTS DOCUMENTATION
+============================
+
+AUTH ENDPOINTS (/auth/)
+========================
+
+POST /signup/child
+- Description: Register a new child user
+- Required fields: email, password, first_name, last_name, dob, class, school_name, gender
+- Returns: JWT access token and refresh token
+
+POST /signup/parent  
+- Description: Register a new parent user
+- Required fields: email, password, first_name, last_name, phone_number
+- Returns: JWT access token and refresh token
+
+POST /signup/organization
+- Description: Register a new organization user
+- Required fields: email, password, first_name, last_name, organization_name, phone_number, address
+- Returns: JWT access token and refresh token
+
+POST /signup/teacher
+- Description: Register a new teacher user
+- Required fields: email, password, first_name, last_name, subject, school_id
+- Returns: JWT access token and refresh token
+
+POST /login
+- Description: User login endpoint
+- Required fields: email, password, role_type
+- Returns: JWT access token and refresh token
+
+POST /refresh
+- Description: Refresh access token using refresh token
+- Requires: Valid refresh token in Authorization header
+- Returns: New access token
+
+POST /forgot-password
+- Description: Send password reset email
+- Required fields: email
+- Returns: Success message
+
+POST /reset-password?token=<reset_token>
+- Description: Reset password using token from email
+- Required fields: new_password
+- Returns: Success message
+
+POST /change-password
+- Description: Change password for authenticated user
+- Required fields: old_password, new_password
+- Requires: JWT authentication
+- Returns: Success message
+
+
+ORGANIZATION ENDPOINTS (/organization/)
+=======================================
+
+GET /stats
+- Description: Get organization statistics including student data and school performance
+- Requires: JWT authentication (Organization role)
+- Returns: Anonymized student data and school performance metrics
+
+
+PARENT ENDPOINTS (/parent/)
+===========================
+
+POST /link-child
+- Description: Link a child to parent using child's unique key
+- Required fields: child_key
+- Requires: JWT authentication (Parent role)
+- Returns: Success message
+
+PUT /link-child/<child_id>
+- Description: Unlink a child from parent
+- Requires: JWT authentication (Parent role)
+- Returns: Success message
+
+
+STUDENT ENDPOINTS (/student/)
+=============================
+
+POST /gratitude
+- Description: Create a new gratitude entry
+- Required fields: gratitude_text
+- Requires: JWT authentication (Child role)
+- Returns: Entry details
+
+GET /gratitude
+- Description: Get gratitude entries for child
+- Query parameters: date (DD-MM-YY), days (number)
+- Requires: JWT authentication (Child role)
+- Returns: List of gratitude entries
+
+PUT /gratitude/<entry_id>
+- Description: Update a specific gratitude entry
+- Required fields: gratitude_text
+- Requires: JWT authentication (Child role)
+- Returns: Updated entry details
+
+DELETE /gratitude/<entry_id>
+- Description: Delete a specific gratitude entry
+- Requires: JWT authentication (Child role)
+- Returns: Success message with deleted entry details
+
+POST /habits
+- Description: Create a new habit
+- Required fields: habit_name, habit_description, habit_category
+- Optional fields: habit_xp (default: 20)
+- Requires: JWT authentication (Child role)
+- Returns: Habit details
+
+GET /habits
+- Description: Get all habits for child
+- Requires: JWT authentication (Child role)
+- Returns: List of created habits and completed habits
+
+PUT /habits/<habit_id>
+- Description: Update a specific habit
+- Required fields: habit_name, habit_description, habit_category
+- Optional fields: habit_xp
+- Requires: JWT authentication (Child role)
+- Returns: Updated habit details
+
+DELETE /habits/<habit_id>
+- Description: Delete a specific habit
+- Requires: JWT authentication (Child role)
+- Returns: Success message with deleted habit details
+
+POST /habits/<habit_id>/complete
+- Description: Mark a habit as completed for today
+- Requires: JWT authentication (Child role)
+- Returns: Success message
+
+POST /todos
+- Description: Create a new to-do item
+- Required fields: to_do, description
+- Optional fields: is_daily, start_date, due_date
+- Requires: JWT authentication (Child role)
+- Returns: To-do item details
+
+GET /todos
+- Description: Get to-do items for child
+- Query parameters: is_done (true/false), is_daily (true/false), date (DD-MM-YY)
+- Requires: JWT authentication (Child role)
+- Returns: List of to-do items
+
+PUT /todos/<todo_id>
+- Description: Update a to-do item
+- Fields: to_do, description, is_daily, is_done, list_id
+- Requires: JWT authentication (Child role)
+- Returns: Updated to-do item details
+
+DELETE /todos/<todo_id>
+- Description: Delete a to-do item
+- Requires: JWT authentication (Child role)
+- Returns: Success message
+
+GET /lesson-updates
+- Description: Get lesson updates from linked teachers
+- Requires: JWT authentication (Child role)
+- Returns: List of lesson updates with teacher information
+
+POST /skills
+- Description: Create a new skill (returns lesson updates instead - appears to be incorrect implementation)
+- Requires: JWT authentication (Child role)
+- Returns: List of lesson updates
+
+GET /skills
+- Description: Get all skills for child with badge information
+- Query parameters: is_learned (true/false)
+- Requires: JWT authentication (Child role)
+- Returns: List of skills and badge summary
+
+PUT /skills/<skill_id>
+- Description: Update a specific skill
+- Fields: skill_name, video_url, skill_xp, is_learned
+- Requires: JWT authentication (Child role)
+- Returns: Updated skill details and newly earned badges
+
+DELETE /skills/<skill_id>
+- Description: Delete a specific skill
+- Requires: JWT authentication (Child role)
+- Returns: Success message with deleted skill details
+
+PATCH /skills/<skill_id>/complete
+- Description: Mark a skill as completed and earn XP
+- Optional fields: xp (default: 10)
+- Requires: JWT authentication (Child role)
+- Returns: Skill details, XP earned, and newly earned badges
+
+GET /skills/stats
+- Description: Get skill statistics and badge information
+- Requires: JWT authentication (Child role)
+- Returns: Comprehensive skill and badge statistics
+
+GET /skills/search
+- Description: Search skills by name
+- Query parameters: q (search query)
+- Requires: JWT authentication (Child role)
+- Returns: List of matching skills
+
+
+TEACHER ENDPOINTS (/teacher/)
+=============================
+
+POST /add-student
+- Description: Add a student to teacher's class
+- Required fields: student_email
+- Requires: JWT authentication (Teacher role)
+- Returns: Success message
+
+DELETE /remove-student/<student_id>
+- Description: Remove a student from teacher's class
+- Requires: JWT authentication (Teacher role)
+- Returns: Success message
+
+GET /lesson-updates
+- Description: Get lesson updates created by this teacher
+- Requires: JWT authentication (Teacher role)
+- Returns: List of lesson updates created by teacher
+
+
+STUDENT DASHBOARD ENDPOINTS (NEW)
+==================================
+
+GET /api/student/dashboard
+- Description: Get comprehensive dashboard data for student
+- Requires: JWT authentication (Child role)
+- Returns: Personalized greeting, XP stats, badges, streaks, lessons completed, recent activities
+- Response format:
+  {
+    "greeting": "Good morning, Alex! 🌅",
+    "student_info": {
+      "name": "Alex",
+      "full_name": "Alex Johnson",
+      "class": 5,
+      "school": "Sunshine Elementary"
+    },
+    "stats": {
+      "total_xp": 2450,
+      "current_level": 4,
+      "xp_for_next_level": 550,
+      "learning_streak": 7,
+      "total_badges": 12,
+      "badges_this_week": 2,
+      "lessons_completed": 34,
+      "total_lessons": 50
+    },
+    "progress": {
+      "xp_progress_percent": 82.0,
+      "skill_completion_rate": 68.0,
+      "badge_completion_rate": 75.0
+    },
+    "recent_activities": {
+      "skills": [...],
+      "habits": [...]
+    }
+  }
+
+GET /api/student/weekly-progress
+- Description: Get detailed weekly progress data for charts and reports
+- Requires: JWT authentication (Child role)
+- Returns: Daily progress breakdown, weekly totals, activity minutes
+- Response format:
+  {
+    "week_period": "December 18 - December 24, 2023",
+    "daily_progress": [
+      {
+        "date": "2023-12-18",
+        "day_name": "Monday",
+        "skills_completed": 5,
+        "habits_completed": 3,
+        "total_activities": 8,
+        "xp_earned": 120,
+        "activity_minutes": 120
+      },
+      ...
+    ],
+    "week_totals": {
+      "total_skills": 25,
+      "total_habits": 18,
+      "total_xp": 680,
+      "total_minutes": 645,
+      "average_daily_activities": 6.2
+    }
+  }

@@ -1185,3 +1185,229 @@ def validate_skill_data(data):
     if not data.get('skill_name', '').strip():
         return False, 'Skill name is required'
     return True, None
+
+
+class StudentDashboard(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get comprehensive dashboard data for the logged-in student.
+        Returns XP, badges, streaks, lessons completed, and personalized greeting.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can access dashboard'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Calculate total XP from skills and badges
+            skills_xp = db.session.query(func.sum(Skill.skill_xp)).filter_by(child_id=child.child_id).scalar() or 0
+            badges_xp = db.session.query(func.sum(Badge.badge_xp)).filter_by(
+                child_id=child.child_id, is_earned=True
+            ).scalar() or 0
+            total_xp = skills_xp + badges_xp
+
+            # Calculate level based on XP (every 500 XP = 1 level)
+            current_level = total_xp // 500
+            xp_for_next_level = 500 - (total_xp % 500)
+
+            # Get badge statistics
+            total_badges = Badge.query.filter_by(child_id=child.child_id).count()
+            earned_badges = Badge.query.filter_by(child_id=child.child_id, is_earned=True).count()
+            
+            # Get badges earned this week
+            week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+            badges_this_week = Badge.query.filter(
+                Badge.child_id == child.child_id,
+                Badge.is_earned == True,
+                Badge.earned_at >= week_ago
+            ).count()
+
+            # Calculate learning streak (consecutive days with activity)
+            current_streak = self._calculate_learning_streak(child.child_id)
+
+            # Get skills/lessons completed
+            total_skills = Skill.query.filter_by(child_id=child.child_id).count()
+            completed_skills = Skill.query.filter_by(child_id=child.child_id, is_learned=True).count()
+
+            # Get recent activities (last 5)
+            recent_skills = Skill.query.filter_by(
+                child_id=child.child_id, is_learned=True
+            ).order_by(Skill.completion_date.desc()).limit(5).all()
+
+            recent_habits = HabitCompletion.query.join(Habit).filter(
+                Habit.child_id == child.child_id
+            ).order_by(HabitCompletion.completion_date.desc()).limit(5).all()
+
+            # Personalized greeting based on time
+            current_hour = datetime.now().hour
+            if current_hour < 12:
+                greeting = f"Good morning, {user.first_name}! 🌅"
+            elif current_hour < 17:
+                greeting = f"Good afternoon, {user.first_name}! ☀️"
+            else:
+                greeting = f"Good evening, {user.first_name}! 🌙"
+
+            return {
+                'greeting': greeting,
+                'student_info': {
+                    'name': user.first_name,
+                    'full_name': f"{user.first_name} {user.last_name}",
+                    'class': child.class_grade,
+                    'school': child.school_name
+                },
+                'stats': {
+                    'total_xp': total_xp,
+                    'current_level': current_level,
+                    'xp_for_next_level': xp_for_next_level,
+                    'learning_streak': current_streak,
+                    'total_badges': earned_badges,
+                    'badges_this_week': badges_this_week,
+                    'lessons_completed': completed_skills,
+                    'total_lessons': total_skills
+                },
+                'progress': {
+                    'xp_progress_percent': round((total_xp % 500) / 500 * 100, 1),
+                    'skill_completion_rate': round((completed_skills / total_skills * 100), 1) if total_skills > 0 else 0,
+                    'badge_completion_rate': round((earned_badges / total_badges * 100), 1) if total_badges > 0 else 0
+                },
+                'recent_activities': {
+                    'skills': [
+                        {
+                            'skill_name': skill.skill_name,
+                            'xp_earned': skill.skill_xp,
+                            'completed_at': skill.completion_date.isoformat()
+                        } for skill in recent_skills
+                    ],
+                    'habits': [
+                        {
+                            'habit_name': habit.habit.habit_name,
+                            'completed_at': habit.completion_date.isoformat()
+                        } for habit in recent_habits
+                    ]
+                }
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    def _calculate_learning_streak(self, child_id):
+        """Calculate consecutive days of learning activity."""
+        try:
+            # Get dates when skills were completed or habits were done
+            skill_dates = db.session.query(func.date(Skill.completion_date)).filter(
+                Skill.child_id == child_id,
+                Skill.is_learned == True,
+                Skill.completion_date.isnot(None)
+            ).distinct().all()
+
+            habit_dates = db.session.query(func.date(HabitCompletion.completion_date)).join(Habit).filter(
+                Habit.child_id == child_id
+            ).distinct().all()
+
+            # Combine and sort dates
+            all_dates = set([date[0] for date in skill_dates] + [date[0] for date in habit_dates])
+            sorted_dates = sorted(all_dates, reverse=True)
+
+            if not sorted_dates:
+                return 0
+
+            # Calculate streak from most recent date backwards
+            today = date.today()
+            streak = 0
+            expected_date = today
+
+            for activity_date in sorted_dates:
+                if activity_date == expected_date:
+                    streak += 1
+                    expected_date = expected_date - timedelta(days=1)
+                elif activity_date == expected_date - timedelta(days=1):
+                    # Allow for today if no activity yet
+                    streak += 1
+                    expected_date = activity_date - timedelta(days=1)
+                else:
+                    break
+
+            return streak
+
+        except Exception as e:
+            print(f"Error calculating streak: {str(e)}")
+            return 0
+
+
+class WeeklyProgress(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get detailed weekly progress data for charts and reports.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view weekly progress'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Get data for the last 7 days
+            week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+            daily_progress = []
+
+            for i in range(7):
+                day_date = (datetime.now(timezone.utc) - timedelta(days=6-i)).date()
+                
+                # Skills completed on this day
+                skills_completed = Skill.query.filter(
+                    Skill.child_id == child.child_id,
+                    Skill.is_learned == True,
+                    func.date(Skill.completion_date) == day_date
+                ).count()
+
+                # Habits completed on this day
+                habits_completed = HabitCompletion.query.join(Habit).filter(
+                    Habit.child_id == child.child_id,
+                    func.date(HabitCompletion.completion_date) == day_date
+                ).count()
+
+                # XP earned on this day
+                skills_xp = db.session.query(func.sum(Skill.skill_xp)).filter(
+                    Skill.child_id == child.child_id,
+                    Skill.is_learned == True,
+                    func.date(Skill.completion_date) == day_date
+                ).scalar() or 0
+
+                daily_progress.append({
+                    'date': day_date.isoformat(),
+                    'day_name': day_date.strftime('%A'),
+                    'skills_completed': skills_completed,
+                    'habits_completed': habits_completed,
+                    'total_activities': skills_completed + habits_completed,
+                    'xp_earned': skills_xp,
+                    'activity_minutes': (skills_completed + habits_completed) * 15  # Estimate 15min per activity
+                })
+
+            # Weekly totals
+            week_totals = {
+                'total_skills': sum(day['skills_completed'] for day in daily_progress),
+                'total_habits': sum(day['habits_completed'] for day in daily_progress),
+                'total_xp': sum(day['xp_earned'] for day in daily_progress),
+                'total_minutes': sum(day['activity_minutes'] for day in daily_progress),
+                'average_daily_activities': round(sum(day['total_activities'] for day in daily_progress) / 7, 1)
+            }
+
+            return {
+                'week_period': f"{(datetime.now() - timedelta(days=6)).strftime('%B %d')} - {datetime.now().strftime('%B %d, %Y')}",
+                'daily_progress': daily_progress,
+                'week_totals': week_totals
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

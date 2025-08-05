@@ -5,7 +5,7 @@ from api.parent.routes import LinkChildToParent
 from api.student.routes import SkillResource, CompleteSkillResource, SkillStatsResource, SkillSearchResource
 from api.teacher.routes import AddStudent, RemoveStudent
 from api.organization.routes import OrganizationStats
-
+from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
 
 api = Api()
 
@@ -16,6 +16,10 @@ api.add_resource(SignupChild, '/api/child/register')
 api.add_resource(SignupParent, '/api/parent/register')
 api.add_resource(SignupOrganization, '/api/organization/register')
 api.add_resource(SignupTeacher, '/api/teacher/register')
+
+api.add_resource(ForgotPassword, '/api/auth/forgot-password')
+api.add_resource(ResetPassword, '/api/auth/reset-password')
+api.add_resource(ChangePassword, '/api/auth/change-password')
 
 # Student
 api.add_resource(GratitudeEntry, '/api/child/gratitude', '/api/child/gratitude/<int:entry_id>')

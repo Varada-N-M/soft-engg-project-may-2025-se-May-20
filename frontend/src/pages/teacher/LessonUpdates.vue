@@ -15,9 +15,6 @@
             <h1 class="text-xl font-bold text-gray-800 font-fancy">📚 Lesson Updates (Teacher)</h1>
           </div>
           <div class="flex items-center space-x-6">
-            <router-link to="/teacher/add-student" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Add Student
-            </router-link>
             <div class="text-center">
               <p class="text-2xl font-bold text-blue-600">{{ lessons.length }}</p>
               <p class="text-xs text-gray-600">Lessons</p>

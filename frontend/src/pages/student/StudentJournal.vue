@@ -13,8 +13,8 @@
               <ArrowLeftIcon class="w-6 h-6" />
             </button>
             <div>
-              <h1 class="text-xl font-bold text-gray-800 font-fancy">✨ My Gratitude Journal</h1>
-              <p class="text-sm text-gray-600 hidden sm:block">Record what you're thankful for!</p>
+              <h1 class="text-xl font-bold text-gray-800 font-fancy">📖 My Journal</h1>
+              <p class="text-sm text-gray-600 hidden sm:block">Write about your day!</p>
             </div>
           </div>
 
@@ -25,7 +25,7 @@
                 class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all duration-200 flex items-center space-x-2 shadow-lg"
             >
               <PlusIcon class="w-4 h-4" />
-              <span class="hidden sm:inline">New Gratitude</span>
+              <span class="hidden sm:inline">New Entry</span>
             </button>
           </div>
         </div>
@@ -40,9 +40,9 @@
           <div class="flex flex-col md:flex-row items-center justify-between">
             <div class="text-center md:text-left mb-4 md:mb-0">
               <h2 class="text-2xl font-bold text-gray-800 mb-2">
-                {{ getGreeting() }}, {{ studentName }}! ✨
+                {{ getGreeting() }}, {{ studentName }}! 📝
               </h2>
-              <p class="text-gray-600">What are you grateful for today?</p>
+              <p class="text-gray-600">What amazing things happened today?</p>
             </div>
             <div class="flex space-x-4">
               <div class="text-4xl animate-bounce" style="animation-delay: 0s">✨</div>
@@ -56,9 +56,9 @@
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 text-center">
-          <div class="text-3xl mb-2">✨</div>
+          <div class="text-3xl mb-2">📖</div>
           <p class="text-2xl font-bold text-blue-600">{{ journalEntries.length }}</p>
-          <p class="text-sm text-gray-600">Gratitude Entries</p>
+          <p class="text-sm text-gray-600">Total Entries</p>
         </div>
 
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 text-center">
@@ -68,9 +68,9 @@
         </div>
 
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 text-center">
-          <div class="text-3xl mb-2">💖</div>
+          <div class="text-3xl mb-2">📝</div>
           <p class="text-2xl font-bold text-green-600">{{ totalWords }}</p>
-          <p class="text-sm text-gray-600">Words of Gratitude</p>
+          <p class="text-sm text-gray-600">Words Written</p>
         </div>
       </div>
 
@@ -104,28 +104,8 @@
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-16">
-        <div class="text-6xl mb-4 animate-spin">🔄</div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Loading your gratitude entries...</h3>
-        <p class="text-gray-600">Please wait a moment</p>
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="errorMessage" class="text-center py-16">
-        <div class="text-6xl mb-4">❌</div>
-        <h3 class="text-xl font-bold text-red-600 mb-2">Oops! Something went wrong</h3>
-        <p class="text-gray-600 mb-6">{{ errorMessage }}</p>
-        <button
-            @click="fetchGratitudeEntries()"
-            class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
-        >
-          🔄 Try Again
-        </button>
-      </div>
-
       <!-- Journal Entries Grid -->
-      <div v-else-if="filteredEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-if="filteredEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
             v-for="entry in filteredEntries"
             :key="entry.id"
@@ -161,13 +141,13 @@
       <!-- Empty State -->
       <div v-else class="text-center py-16">
         <div class="text-6xl mb-4">📝</div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">No gratitude entries yet</h3>
-        <p class="text-gray-600 mb-6">Start writing about what you're grateful for to create your first entry!</p>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">No journal entries yet</h3>
+        <p class="text-gray-600 mb-6">Start writing about your day to create your first entry!</p>
         <button
             @click="showCreateModal = true"
             class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg"
         >
-          ✨ Write My First Gratitude Entry
+          ✨ Write My First Entry
         </button>
       </div>
     </main>
@@ -177,7 +157,7 @@
       <div class="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-800">
-            {{ editingEntry ? '✏️ Edit Gratitude Entry' : '📝 New Gratitude Entry' }}
+            {{ editingEntry ? '✏️ Edit Entry' : '📝 New Journal Entry' }}
           </h2>
           <button
               @click="closeModal"
@@ -188,12 +168,71 @@
         </div>
 
         <form @submit.prevent="saveEntry" class="space-y-6">
+          <!-- Date -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Date</label>
+            <input
+                v-model="entryForm.date"
+                type="date"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 transition-colors"
+                required
+            />
+          </div>
+
+          <!-- Title -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">📖 Title</label>
+            <input
+                v-model="entryForm.title"
+                type="text"
+                placeholder="What's today's story about?"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 transition-colors"
+                required
+            />
+          </div>
+
+          <!-- Mood -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">😊 How are you feeling?</label>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              <button
+                  v-for="mood in moods"
+                  :key="mood.emoji"
+                  type="button"
+                  @click="entryForm.mood = mood.emoji"
+                  class="p-3 rounded-xl border-2 transition-all duration-200 text-center"
+                  :class="entryForm.mood === mood.emoji
+                  ? 'border-blue-500 bg-blue-50 scale-110'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
+              >
+                <div class="text-2xl mb-1">{{ mood.emoji }}</div>
+                <div class="text-xs text-gray-600">{{ mood.label }}</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Weather (Optional) -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">🌤️ Weather (Optional)</label>
+            <select
+                v-model="entryForm.weather"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 transition-colors"
+            >
+              <option value="">Select weather</option>
+              <option value="Sunny">☀️ Sunny</option>
+              <option value="Cloudy">☁️ Cloudy</option>
+              <option value="Rainy">🌧️ Rainy</option>
+              <option value="Snowy">❄️ Snowy</option>
+              <option value="Windy">💨 Windy</option>
+            </select>
+          </div>
+
           <!-- Content -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">✨ What are you grateful for today?</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">✍️ What happened today?</label>
             <textarea
                 v-model="entryForm.content"
-                placeholder="Write about something you're thankful for today..."
+                placeholder="Tell me about your day... What did you learn? What made you happy? What was challenging?"
                 rows="8"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 transition-colors resize-none"
                 required
@@ -205,42 +244,16 @@
 
           <!-- Prompts for inspiration -->
           <div class="bg-blue-50 rounded-2xl p-4">
-            <h4 class="font-semibold text-blue-800 mb-2">💡 Need inspiration? Try these gratitude prompts:</h4>
+            <h4 class="font-semibold text-blue-800 mb-2">💡 Need inspiration? Try these prompts:</h4>
             <div class="space-y-1 text-sm text-blue-700">
               <button
+                  v-for="prompt in writingPrompts"
+                  :key="prompt"
                   type="button"
-                  @click="addPromptToContent('I am grateful for...')"
+                  @click="addPromptToContent(prompt)"
                   class="block text-left hover:text-blue-900 transition-colors"
               >
-                • I am grateful for...
-              </button>
-              <button
-                  type="button"
-                  @click="addPromptToContent('Today, I appreciate...')"
-                  class="block text-left hover:text-blue-900 transition-colors"
-              >
-                • Today, I appreciate...
-              </button>
-              <button
-                  type="button"
-                  @click="addPromptToContent('Something that made me smile today was...')"
-                  class="block text-left hover:text-blue-900 transition-colors"
-              >
-                • Something that made me smile today was...
-              </button>
-              <button
-                  type="button"
-                  @click="addPromptToContent('I\'m thankful for this person in my life...')"
-                  class="block text-left hover:text-blue-900 transition-colors"
-              >
-                • I'm thankful for this person in my life...
-              </button>
-              <button
-                  type="button"
-                  @click="addPromptToContent('A small joy I experienced today was...')"
-                  class="block text-left hover:text-blue-900 transition-colors"
-              >
-                • A small joy I experienced today was...
+                • {{ prompt }}
               </button>
             </div>
           </div>
@@ -256,10 +269,10 @@
             </button>
             <button
                 type="submit"
-                :disabled="!entryForm.content"
+                :disabled="!entryForm.title || !entryForm.content || !entryForm.mood"
                 class="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ editingEntry ? '💾 Update Gratitude' : '✨ Save Gratitude' }}
+              {{ editingEntry ? '💾 Update Entry' : '✨ Save Entry' }}
             </button>
           </div>
         </form>
@@ -271,9 +284,9 @@
       <div class="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center space-x-3">
-            <div class="text-3xl">✨</div>
+            <div class="text-3xl">{{ readingEntry.mood }}</div>
             <div>
-              <h2 class="text-2xl font-bold text-gray-800">Gratitude Entry</h2>
+              <h2 class="text-2xl font-bold text-gray-800">{{ readingEntry.title }}</h2>
               <p class="text-sm text-gray-600">{{ formatFullDate(readingEntry.date) }}</p>
             </div>
           </div>
@@ -301,6 +314,11 @@
 
         <!-- Entry Content -->
         <div class="space-y-4">
+          <div v-if="readingEntry.weather" class="flex items-center text-gray-600">
+            <span class="mr-2">🌤️</span>
+            <span>Weather: {{ readingEntry.weather }}</span>
+          </div>
+
           <div class="prose prose-lg max-w-none">
             <p class="text-gray-800 leading-relaxed whitespace-pre-wrap">{{ readingEntry.content }}</p>
           </div>
@@ -333,7 +351,6 @@ import {
   EditIcon,
   TrashIcon
 } from 'lucide-vue-next'
-import api from '../../plugins/axios'
 
 // Router
 const router = useRouter()
@@ -348,57 +365,61 @@ const studentName = ref('Alex')
 
 // Form data
 const entryForm = ref({
-  content: '' // This will be used as gratitude_text
+  date: new Date().toISOString().split('T')[0],
+  title: '',
+  content: '',
+  mood: '',
+  weather: ''
 })
 
-// Gratitude entries from API
-const journalEntries = ref([])
-const isLoading = ref(false)
-const errorMessage = ref('')
-
-// Function to fetch gratitude entries
-const fetchGratitudeEntries = async (dateFilter = null, daysFilter = null) => {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    let url = '/gratitude'
-    const params = {}
-
-    if (dateFilter) {
-      // Format date as DD-MM-YY
-      const date = new Date(dateFilter)
-      const day = String(date.getDate()).padStart(2, '0')
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const year = String(date.getFullYear()).slice(2)
-      params.date = `${day}-${month}-${year}`
-    } else if (daysFilter) {
-      params.days = daysFilter
-    }
-
-    const response = await api.get(url, { params })
-
-    if (response.data.entries) {
-      journalEntries.value = response.data.entries.map(entry => ({
-        id: entry.entry_id,
-        date: entry.created_at,
-        title: 'Gratitude Entry',  // API doesn't have title, so we use a default
-        content: entry.gratitude_text,
-        mood: '😊',  // API doesn't have mood, so we use a default
-        weather: '',  // API doesn't have weather, so we leave it empty
-        wordCount: entry.gratitude_text.split(' ').filter(word => word.length > 0).length
-      }))
-    } else {
-      journalEntries.value = []
-    }
-  } catch (error) {
-    console.error('Error fetching gratitude entries:', error)
-    errorMessage.value = 'Failed to load your gratitude entries. Please try again.'
-    journalEntries.value = []
-  } finally {
-    isLoading.value = false
+// Mock journal entries
+const journalEntries = ref([
+  {
+    id: 1,
+    date: '2024-01-15T10:30:00Z',
+    title: 'Amazing Science Experiment!',
+    content: 'Today we did a volcano experiment in science class! It was so cool when it erupted with baking soda and vinegar. I learned that chemical reactions can create gas that makes things bubble up. I want to try this at home with mom and dad. The best part was when everyone cheered when my volcano erupted the highest! I felt like a real scientist.',
+    mood: '😆',
+    weather: 'Sunny',
+    wordCount: 65
+  },
+  {
+    id: 2,
+    date: '2024-01-14T15:45:00Z',
+    title: 'Math Was Tricky Today',
+    content: 'We learned about fractions today and it was really hard at first. I didn\'t understand how 1/2 could be the same as 2/4. But then Mrs. Johnson showed us with pizza slices and it made so much sense! Now I think fractions are actually pretty cool. I helped my friend Jake understand it too, which made me feel proud.',
+    mood: '🤔',
+    weather: 'Cloudy',
+    wordCount: 58
+  },
+  {
+    id: 3,
+    date: '2024-01-13T09:15:00Z',
+    title: 'Reading Adventure',
+    content: 'I finished reading "Charlotte\'s Web" today and I cried at the end! Charlotte was such a good friend to Wilbur. It made me think about how important friendship is. I want to be a good friend like Charlotte. Tomorrow I\'m going to start a new book about dragons. Reading makes me feel like I can go anywhere and be anyone!',
+    mood: '😢',
+    weather: 'Rainy',
+    wordCount: 62
+  },
+  {
+    id: 4,
+    date: '2024-01-12T14:20:00Z',
+    title: 'Art Class Masterpiece',
+    content: 'In art class today, I painted a picture of my family at the beach. I used lots of blue for the ocean and yellow for the sun. My little sister looks funny in the painting because I made her head too big, but mom said it shows how much I love her. I can\'t wait to give it to my parents as a surprise!',
+    mood: '😊',
+    weather: 'Sunny',
+    wordCount: 59
+  },
+  {
+    id: 5,
+    date: '2024-01-11T16:30:00Z',
+    title: 'Playground Fun',
+    content: 'Recess was the best part of today! We played tag and I was "it" for most of the time, but I didn\'t mind because everyone was laughing and having fun. Then we played on the swings and tried to see who could swing the highest. I made a new friend named Emma who just moved here from another state. She\'s really nice and likes the same games I do.',
+    mood: '😎',
+    weather: 'Windy',
+    wordCount: 71
   }
-}
+])
 
 // Available moods
 const moods = [
@@ -410,7 +431,17 @@ const moods = [
   { emoji: '😆', label: 'Excited' }
 ]
 
-// We're now using hardcoded gratitude prompts in the template
+// Writing prompts
+const writingPrompts = [
+  'What was the best part of your day?',
+  'What did you learn today?',
+  'Who made you smile today?',
+  'What was challenging for you?',
+  'What are you grateful for?',
+  'What do you want to remember about today?',
+  'How did you help someone today?',
+  'What made you laugh?'
+]
 
 // Computed properties
 const filteredEntries = computed(() => {
@@ -512,31 +543,22 @@ const openEntry = (entry) => {
 const editEntry = (entry) => {
   editingEntry.value = entry
   entryForm.value = {
-    content: entry.content
+    date: entry.date.split('T')[0],
+    title: entry.title,
+    content: entry.content,
+    mood: entry.mood,
+    weather: entry.weather || ''
   }
   readingEntry.value = null
 }
 
-const deleteEntry = async (entryId) => {
-  if (confirm('Are you sure you want to delete this gratitude entry?')) {
-    try {
-      isLoading.value = true
-      errorMessage.value = ''
-
-      const response = await api.delete(`/gratitude/${entryId}`)
-
-      if (response.status === 200) {
-        // Refresh the entries to reflect the deletion
-        await fetchGratitudeEntries()
-      }
-
-      readingEntry.value = null
-    } catch (error) {
-      console.error('Error deleting gratitude entry:', error)
-      errorMessage.value = 'Failed to delete your gratitude entry. Please try again.'
-    } finally {
-      isLoading.value = false
+const deleteEntry = (entryId) => {
+  if (confirm('Are you sure you want to delete this journal entry?')) {
+    const index = journalEntries.value.findIndex(entry => entry.id === entryId)
+    if (index > -1) {
+      journalEntries.value.splice(index, 1)
     }
+    readingEntry.value = null
   }
 }
 
@@ -544,7 +566,11 @@ const closeModal = () => {
   showCreateModal.value = false
   editingEntry.value = null
   entryForm.value = {
-    content: ''
+    date: new Date().toISOString().split('T')[0],
+    title: '',
+    content: '',
+    mood: '',
+    weather: ''
   }
 }
 
@@ -556,55 +582,41 @@ const addPromptToContent = (prompt) => {
   }
 }
 
-const saveEntry = async () => {
-  try {
-    isLoading.value = true
-    errorMessage.value = ''
+const saveEntry = () => {
+  const wordCount = entryForm.value.content.split(' ').filter(word => word.length > 0).length
 
-    // Extract the gratitude text from the form
-    const gratitudeText = entryForm.value.content
-
-    if (editingEntry.value) {
-      // Update existing entry
-      const response = await api.put(`/gratitude/${editingEntry.value.id}`, {
-        gratitude_text: gratitudeText
-      })
-
-      if (response.status === 200) {
-        // Refresh the entries to get the updated data
-        await fetchGratitudeEntries()
-      }
-    } else {
-      // Create new entry
-      const response = await api.post('/gratitude', {
-        gratitude_text: gratitudeText
-      })
-
-      if (response.status === 201) {
-        // Refresh the entries to get the new data
-        await fetchGratitudeEntries()
+  if (editingEntry.value) {
+    // Update existing entry
+    const index = journalEntries.value.findIndex(entry => entry.id === editingEntry.value.id)
+    if (index > -1) {
+      journalEntries.value[index] = {
+        ...editingEntry.value,
+        ...entryForm.value,
+        date: entryForm.value.date + 'T' + new Date().toTimeString().split(' ')[0] + 'Z',
+        wordCount
       }
     }
-
-    closeModal()
-  } catch (error) {
-    console.error('Error saving gratitude entry:', error)
-    errorMessage.value = 'Failed to save your gratitude entry. Please try again.'
-  } finally {
-    isLoading.value = false
+  } else {
+    // Create new entry
+    const newEntry = {
+      id: Date.now(),
+      ...entryForm.value,
+      date: entryForm.value.date + 'T' + new Date().toTimeString().split(' ')[0] + 'Z',
+      wordCount
+    }
+    journalEntries.value.unshift(newEntry)
   }
+
+  closeModal()
 }
 
-onMounted(async () => {
+onMounted(() => {
   // Get student info from localStorage
   const userEmail = localStorage.getItem('user_email')
   if (userEmail) {
     const name = userEmail.split('@')[0]
     studentName.value = name.charAt(0).toUpperCase() + name.slice(1)
   }
-
-  // Fetch gratitude entries when component is mounted
-  await fetchGratitudeEntries()
 })
 </script>
 

@@ -77,16 +77,18 @@ api.interceptors.response.use(
 
             try {
                 // 💡 Call refresh endpoint with your refresh token
-                const response = await axios.post(`${BACKEND_BASE_URL}/api/refresh-token`, {
-                    refresh_token: getRefreshToken(),
+                const response = await axios.post(`${BACKEND_BASE_URL}/api/auth/refresh`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${getRefreshToken()}`
+                    }
                 })
 
-                const {accessToken, refreshToken} = response.data
-                saveTokens({accessToken, refreshToken})
-                processQueue(null, accessToken)
+                const {access_token, refresh_token} = response.data
+                saveTokens({accessToken: access_token, refreshToken: refresh_token})
+                processQueue(null, access_token)
 
                 // Set auth header and repeat the original request
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`
+                originalRequest.headers.Authorization = `Bearer ${access_token}`
                 return api(originalRequest)
             } catch (refreshError) {
                 processQueue(refreshError, null)

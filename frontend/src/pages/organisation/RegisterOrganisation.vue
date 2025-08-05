@@ -198,12 +198,16 @@
 
 <script setup>
 import {ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {BuildingIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
 import api from '@/plugins/axios'
 import {Input} from "@/components/ui/input/index.js";
 import {Textarea} from "@/components/ui/textarea/index.js";
 import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
 import {Card} from "@/components/ui/card/index.js";
+
+// Router
+const router = useRouter()
 
 // Reactive data
 const formData = ref({
@@ -236,7 +240,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const {data: result} = await api.post('/api/organization/register', apiData)
+    const {data: result} = await api.post('/api/auth/signup/organization', apiData)
     response.value = {
       success: true,
       message: result.message || 'Organization registered successfully! Welcome to CoolKids! 🎉',
@@ -247,7 +251,7 @@ const handleSubmit = async () => {
     localStorage.setItem('access_token', result.access_token)
     localStorage.setItem('role', result.role)
 
-    this.$router.push('/org/home')
+    router.push('/org/home')
 
   } catch (error) {
     response.value = {

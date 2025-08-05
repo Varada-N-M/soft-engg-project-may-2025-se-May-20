@@ -405,7 +405,7 @@ const handleSubmit = async () => {
       gender: formData.value.gender
     }
 
-    const apiResponse = await axios.post('/api/child/register', apiData)
+    const apiResponse = await axios.post('/api/auth/signup/child', apiData)
 
     if (apiResponse.data) {
       response.value = {

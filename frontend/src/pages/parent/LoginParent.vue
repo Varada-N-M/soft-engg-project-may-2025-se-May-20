@@ -207,10 +207,10 @@ const handleLogin = async () => {
     const loginData = {
       email: formData.value.email,
       password: formData.value.password,
-      role: 'parent'
+      role_type: 'parent'
     }
 
-    const apiResponse = await axios.post('/api/login', loginData)
+    const apiResponse = await axios.post('/api/auth/login', loginData)
 
     if (apiResponse.data) {
       // Store tokens in localStorage

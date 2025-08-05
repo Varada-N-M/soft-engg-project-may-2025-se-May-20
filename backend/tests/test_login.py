@@ -18,7 +18,8 @@ def test_login_success(client, create_test_user):
     user = create_test_user()
     login_payload = {
         "email": user.email,
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     response = client.post('api/login', 
@@ -107,7 +108,8 @@ def test_login_invalid_email(client):
     unique_email = f"nonexistent_{uuid.uuid4().hex[:8]}@example.com"
     payload = {
         "email": unique_email,
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     response = client.post('api/login', 
@@ -130,7 +132,8 @@ def test_login_invalid_password(client, create_test_user):
     user = create_test_user()
     payload = {
         "email": user.email,
-        "password": "WrongPassword123!"
+        "password": "WrongPassword123!",
+        "role_type": UserRole.CHILD.value
     }
     
     response = client.post('api/login', 
@@ -154,7 +157,8 @@ def test_login_case_insensitive_email(client, create_test_user):
     user = create_test_user()
     payload = {
         "email": user.email.upper(),  # Convert to uppercase
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     response = client.post('api/login', 
@@ -176,7 +180,8 @@ def test_login_email_with_whitespace(client, create_test_user):
     user = create_test_user()
     payload = {
         "email": f"  {user.email}  ",  # Add whitespace
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     response = client.post('api/login', 
@@ -210,7 +215,8 @@ def test_login_no_content_type(client, create_test_user):
     user = create_test_user()
     login_payload = {
         "email": user.email,
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     # Send without content_type='application/json'
@@ -229,7 +235,8 @@ def test_refresh_token_success(client, create_test_user, app):
     user = create_test_user()
     login_payload = {
         "email": user.email,
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     login_response = client.post('api/login', 
@@ -288,7 +295,8 @@ def test_refresh_token_with_access_token(client, create_test_user):
     user = create_test_user()
     login_payload = {
         "email": user.email,
-        "password": "TestPass123!"
+        "password": "TestPass123!",
+        "role_type": UserRole.CHILD.value
     }
     
     login_response = client.post('api/login', 

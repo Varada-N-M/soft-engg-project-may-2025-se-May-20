@@ -86,8 +86,25 @@
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-16">
+        <div class="text-6xl mb-4 animate-spin">🎯</div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Loading your badges...</h3>
+        <p class="text-gray-600">Getting your latest achievements!</p>
+      </div>
+      
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center py-16">
+        <div class="text-6xl mb-4">😔</div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Oops! Something went wrong</h3>
+        <p class="text-gray-600 mb-4">{{ error }}</p>
+        <button @click="fetchBadges" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+          Try Again
+        </button>
+      </div>
+
       <!-- Badges Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div
             v-for="badge in filteredBadges"
             :key="badge.id"
@@ -144,14 +161,14 @@
               </div>
 
               <!-- Earned Date -->
-              <div v-if="badge.earned && badge.earnedDate" class="mt-2">
-                <p class="text-xs text-gray-500">Earned on {{ formatDate(badge.earnedDate) }}</p>
+              <div v-if="badge.earned && (badge.earned_date || badge.earnedDate)" class="mt-2">
+                <p class="text-xs text-gray-500">Earned on {{ formatDate(badge.earned_date || badge.earnedDate) }}</p>
               </div>
 
               <!-- XP Reward -->
               <div class="mt-3 inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
                 <span class="mr-1">⭐</span>
-                +{{ badge.xpReward }} XP
+                +{{ badge.xp_reward || badge.xpReward }} XP
               </div>
             </div>
           </div>
@@ -194,7 +211,7 @@
           <div class="bg-gray-50 rounded-2xl p-4 mb-4 text-left">
             <h4 class="font-semibold text-gray-800 mb-2">How to earn this badge:</h4>
             <ul class="space-y-1 text-sm text-gray-600">
-              <li v-for="req in selectedBadge.detailedRequirements" :key="req" class="flex items-start">
+              <li v-for="req in (selectedBadge.detailed_requirements || selectedBadge.detailedRequirements)" :key="req" class="flex items-start">
                 <span class="text-blue-500 mr-2">•</span>
                 {{ req }}
               </li>
@@ -217,7 +234,7 @@
             </div>
             <div class="text-center">
               <p class="text-sm text-gray-500">XP Reward</p>
-              <p class="font-medium text-yellow-600">+{{ selectedBadge.xpReward }} XP</p>
+              <p class="font-medium text-yellow-600">+{{ selectedBadge.xp_reward || selectedBadge.xpReward }} XP</p>
             </div>
           </div>
 
@@ -252,6 +269,7 @@ import {
   ClockIcon,
   XIcon
 } from 'lucide-vue-next'
+import axios from '@/plugins/axios.js'
 
 // Router
 const router = useRouter()
@@ -259,9 +277,25 @@ const router = useRouter()
 // Reactive data
 const activeFilter = ref('all')
 const selectedBadge = ref(null)
+const loading = ref(false)
+const error = ref(null)
+const badgesData = ref(null)
 
-// Mock data for badges
-const badges = ref([
+// Fetch badges data from API
+const fetchBadges = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    
+    const response = await axios.get('/api/student/badges')
+    badgesData.value = response.data
+  } catch (err) {
+    console.error('Error fetching badges:', err)
+    error.value = err.response?.data?.error || 'Failed to load badges'
+    
+    // Fallback to static data if API fails
+    badgesData.value = {
+      badges: [
   // Math Badges
   {
     id: 1,
@@ -480,8 +514,23 @@ const badges = ref([
       'Support team members'
     ],
     tips: 'Listen to others and share your ideas respectfully!'
+        }
+      ],
+      summary: {
+        earned_count: 3,
+        total_count: 12,
+        completion_percentage: 25.0
+      }
+    }
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// Computed property to get badges from API data or fallback
+const badges = computed(() => {
+  return badgesData.value?.badges || []
+})
 
 // Computed properties
 const earnedBadges = computed(() => badges.value.filter(badge => badge.earned))
@@ -555,7 +604,10 @@ const transformElements = () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch badges data
+  await fetchBadges()
+  
   // Add entrance animation
   transformElements()
 })

@@ -1185,3 +1185,393 @@ def validate_skill_data(data):
     if not data.get('skill_name', '').strip():
         return False, 'Skill name is required'
     return True, None
+
+
+class BadgeSystem(Resource):
+    @jwt_required()
+    def get(self):
+        """Get all badges for the authenticated student"""
+        try:
+            current_user_id = get_jwt_identity()
+            child = Child.query.filter_by(user_id=current_user_id).first()
+            
+            if not child:
+                return {'error': 'Student not found'}, 404
+            
+            # Define all available badges with their requirements
+            available_badges = [
+                {
+                    'id': 1,
+                    'name': 'Math Wizard',
+                    'description': 'Master of numbers and calculations',
+                    'emoji': '🧮',
+                    'category': 'math',
+                    'xp_reward': 100,
+                    'requirement': 'Solve 100 math problems',
+                    'detailed_requirements': [
+                        'Complete 50 addition problems',
+                        'Complete 30 subtraction problems', 
+                        'Complete 20 multiplication problems'
+                    ],
+                    'tips': 'Practice a little bit every day to build your math skills!'
+                },
+                {
+                    'id': 2,
+                    'name': 'Speed Calculator',
+                    'description': 'Lightning fast with numbers',
+                    'emoji': '⚡',
+                    'category': 'math',
+                    'xp_reward': 75,
+                    'requirement': 'Solve 20 problems in under 2 minutes',
+                    'detailed_requirements': [
+                        'Complete math quiz in under 2 minutes',
+                        'Maintain 90% accuracy',
+                        'Use mental math techniques'
+                    ],
+                    'tips': 'Learn your multiplication tables to solve problems faster!'
+                },
+                {
+                    'id': 3,
+                    'name': 'Problem Solver',
+                    'description': 'Tackles the toughest math challenges',
+                    'emoji': '🎯',
+                    'category': 'math',
+                    'xp_reward': 150,
+                    'requirement': 'Complete 5 advanced word problems',
+                    'detailed_requirements': [
+                        'Solve 5 multi-step word problems',
+                        'Show your work clearly',
+                        'Explain your reasoning'
+                    ],
+                    'tips': 'Read the problem carefully and identify what you need to find!'
+                },
+                {
+                    'id': 4,
+                    'name': 'Bookworm',
+                    'description': 'Loves reading and stories',
+                    'emoji': '📚',
+                    'category': 'reading',
+                    'xp_reward': 80,
+                    'requirement': 'Read 10 books',
+                    'detailed_requirements': [
+                        'Read 10 complete books',
+                        'Take comprehension quizzes',
+                        'Write book summaries'
+                    ],
+                    'tips': 'Choose books that interest you to make reading more fun!'
+                },
+                {
+                    'id': 5,
+                    'name': 'Speed Reader',
+                    'description': 'Reads with incredible speed',
+                    'emoji': '🏃‍♂️',
+                    'category': 'reading',
+                    'xp_reward': 90,
+                    'requirement': 'Read 200 words per minute',
+                    'detailed_requirements': [
+                        'Practice reading daily',
+                        'Take speed reading tests',
+                        'Maintain comprehension above 80%'
+                    ],
+                    'tips': 'Use your finger to guide your eyes while reading!'
+                },
+                {
+                    'id': 6,
+                    'name': 'Story Master',
+                    'description': 'Expert at understanding stories',
+                    'emoji': '📖',
+                    'category': 'reading',
+                    'xp_reward': 120,
+                    'requirement': 'Score 100% on 5 reading comprehension tests',
+                    'detailed_requirements': [
+                        'Read 5 different story types',
+                        'Answer comprehension questions',
+                        'Achieve perfect scores'
+                    ],
+                    'tips': 'Pay attention to main characters and plot details!'
+                },
+                {
+                    'id': 7,
+                    'name': 'Science Explorer',
+                    'description': 'Curious about how the world works',
+                    'emoji': '🔬',
+                    'category': 'science',
+                    'xp_reward': 110,
+                    'requirement': 'Complete 10 science experiments',
+                    'detailed_requirements': [
+                        'Conduct 10 safe experiments',
+                        'Record observations',
+                        'Explain scientific concepts'
+                    ],
+                    'tips': 'Always ask "why" and "how" to learn more!'
+                },
+                {
+                    'id': 8,
+                    'name': 'Streak Master',
+                    'description': 'Consistent learner every day',
+                    'emoji': '🔥',
+                    'category': 'habits',
+                    'xp_reward': 200,
+                    'requirement': 'Learn for 30 days in a row',
+                    'detailed_requirements': [
+                        'Complete daily learning activities',
+                        'Maintain 30-day streak',
+                        'No missed days'
+                    ],
+                    'tips': 'Set a daily reminder to keep your streak alive!'
+                },
+                {
+                    'id': 9,
+                    'name': 'XP Champion',
+                    'description': 'Master of earning experience points',
+                    'emoji': '⭐',
+                    'category': 'progress',
+                    'xp_reward': 250,
+                    'requirement': 'Earn 5000 XP total',
+                    'detailed_requirements': [
+                        'Complete various learning activities',
+                        'Earn XP from multiple subjects',
+                        'Reach 5000 XP milestone'
+                    ],
+                    'tips': 'Try different activities to earn XP faster!'
+                },
+                {
+                    'id': 10,
+                    'name': 'Habit Hero',
+                    'description': 'Excellence in building good habits',
+                    'emoji': '🦸',
+                    'category': 'habits',
+                    'xp_reward': 150,
+                    'requirement': 'Complete 100 habit tasks',
+                    'detailed_requirements': [
+                        'Create helpful habits',
+                        'Complete habit tasks consistently',
+                        'Reach 100 completions'
+                    ],
+                    'tips': 'Start with small, easy habits and build up!'
+                }
+            ]
+            
+            # Get earned badges from database
+            earned_badges_db = Badge.query.filter_by(child_id=child.child_id, is_earned=True).all()
+            earned_badge_names = {badge.badge for badge in earned_badges_db}
+            
+            # Calculate progress for each badge based on current child data
+            child_skills = Skill.query.filter_by(child_id=child.child_id, is_learned=True).count()
+            child_habits = CompletedHabit.query.filter_by(child_id=child.child_id).count()
+            child_xp = child.xp if hasattr(child, 'xp') else 0
+            
+            # Calculate learning streak
+            streak = self._calculate_learning_streak(child.child_id)
+            
+            # Add earned status and progress to each badge
+            badges_with_status = []
+            for badge in available_badges:
+                # Calculate progress based on badge type
+                progress = 0
+                if badge['name'] == 'Math Wizard':
+                    math_skills = Skill.query.filter_by(child_id=child.child_id, is_learned=True).count()
+                    progress = min(100, (math_skills / 10) * 100)  # Assuming 10 skills = 100 problems
+                elif badge['name'] == 'Bookworm':
+                    progress = min(100, (child_skills / 10) * 100)
+                elif badge['name'] == 'Streak Master':
+                    progress = min(100, (streak / 30) * 100)
+                elif badge['name'] == 'XP Champion':
+                    progress = min(100, (child_xp / 5000) * 100)
+                elif badge['name'] == 'Habit Hero':
+                    progress = min(100, (child_habits / 100) * 100)
+                else:
+                    # Default progress calculation
+                    progress = min(100, max(0, (child_skills * 10) + (child_habits * 5)))
+                
+                badge_data = {
+                    **badge,
+                    'earned': badge['name'] in earned_badge_names,
+                    'progress': round(progress, 1),
+                    'earned_date': None
+                }
+                
+                # Add earned date if badge is earned
+                if badge['name'] in earned_badge_names:
+                    earned_badge = next((b for b in earned_badges_db if b.badge == badge['name']), None)
+                    if earned_badge and earned_badge.earned_at:
+                        badge_data['earned_date'] = earned_badge.earned_at.isoformat()
+                
+                badges_with_status.append(badge_data)
+            
+            # Calculate summary statistics
+            earned_count = len([b for b in badges_with_status if b['earned']])
+            total_count = len(badges_with_status)
+            completion_percentage = round((earned_count / total_count) * 100, 1)
+            
+            return {
+                'badges': badges_with_status,
+                'summary': {
+                    'earned_count': earned_count,
+                    'total_count': total_count,
+                    'completion_percentage': completion_percentage,
+                    'categories': {
+                        'math': len([b for b in badges_with_status if b['category'] == 'math']),
+                        'reading': len([b for b in badges_with_status if b['category'] == 'reading']),
+                        'science': len([b for b in badges_with_status if b['category'] == 'science']),
+                        'habits': len([b for b in badges_with_status if b['category'] == 'habits']),
+                        'progress': len([b for b in badges_with_status if b['category'] == 'progress'])
+                    }
+                }
+            }, 200
+            
+        except Exception as e:
+            return {'error': f'Failed to fetch badges: {str(e)}'}, 500
+    
+    def _calculate_learning_streak(self, child_id):
+        """Calculate current learning streak for a child"""
+        try:
+            # Get recent completed habits and skills to determine streak
+            from datetime import datetime, timedelta
+            
+            current_date = datetime.now().date()
+            streak_days = 0
+            
+            # Check each day going backwards from today
+            for i in range(365):  # Check up to 1 year back
+                check_date = current_date - timedelta(days=i)
+                
+                # Check if child had any activity on this date
+                habits_completed = CompletedHabit.query.filter(
+                    CompletedHabit.child_id == child_id,
+                    db.func.date(CompletedHabit.completed_date) == check_date
+                ).first()
+                
+                skills_completed = Skill.query.filter(
+                    Skill.child_id == child_id,
+                    Skill.is_learned == True,
+                    db.func.date(Skill.updated_at) == check_date
+                ).first() if hasattr(Skill, 'updated_at') else None
+                
+                if habits_completed or skills_completed:
+                    streak_days += 1
+                else:
+                    break
+            
+            return streak_days
+            
+        except Exception:
+            return 0
+
+
+class BadgeProgress(Resource):
+    @jwt_required()
+    def get(self, badge_id):
+        """Get detailed progress for a specific badge"""
+        try:
+            current_user_id = get_jwt_identity()
+            child = Child.query.filter_by(user_id=current_user_id).first()
+            
+            if not child:
+                return {'error': 'Student not found'}, 404
+            
+            # This would contain detailed progress tracking for specific badges
+            # For now, return basic progress info
+            badge_progress = {
+                'badge_id': badge_id,
+                'current_progress': 75,
+                'requirements_completed': 3,
+                'total_requirements': 4,
+                'next_milestone': 'Complete 1 more math problem set',
+                'estimated_completion': '2-3 days',
+                'recent_activities': [
+                    {
+                        'date': '2024-01-20',
+                        'activity': 'Completed multiplication worksheet',
+                        'progress_gained': 15
+                    }
+                ]
+            }
+            
+            return badge_progress, 200
+            
+        except Exception as e:
+            return {'error': f'Failed to fetch badge progress: {str(e)}'}, 500
+
+
+class ClaimBadge(Resource):
+    @jwt_required()
+    def post(self, badge_id):
+        """Claim an earned badge"""
+        try:
+            current_user_id = get_jwt_identity()
+            child = Child.query.filter_by(user_id=current_user_id).first()
+            
+            if not child:
+                return {'error': 'Student not found'}, 404
+            
+            # Badge definitions (you might want to move this to a separate configuration)
+            badge_definitions = {
+                1: {'name': 'Math Wizard', 'xp_reward': 100},
+                2: {'name': 'Speed Calculator', 'xp_reward': 75},
+                3: {'name': 'Problem Solver', 'xp_reward': 150},
+                4: {'name': 'Bookworm', 'xp_reward': 80},
+                5: {'name': 'Speed Reader', 'xp_reward': 90},
+                6: {'name': 'Story Master', 'xp_reward': 120},
+                7: {'name': 'Science Explorer', 'xp_reward': 110},
+                8: {'name': 'Streak Master', 'xp_reward': 200},
+                9: {'name': 'XP Champion', 'xp_reward': 250},
+                10: {'name': 'Habit Hero', 'xp_reward': 150}
+            }
+            
+            if badge_id not in badge_definitions:
+                return {'error': 'Badge not found'}, 404
+            
+            badge_info = badge_definitions[badge_id]
+            
+            # Check if badge already claimed
+            existing_badge = Badge.query.filter_by(
+                child_id=child.child_id,
+                badge=badge_info['name'],
+                is_earned=True
+            ).first()
+            
+            if existing_badge:
+                return {'error': 'Badge already claimed'}, 400
+            
+            # Create or update badge record
+            badge_record = Badge.query.filter_by(
+                child_id=child.child_id,
+                badge=badge_info['name']
+            ).first()
+            
+            if badge_record:
+                badge_record.is_earned = True
+                badge_record.earned_at = datetime.utcnow()
+                badge_record.badge_xp = badge_info['xp_reward']
+            else:
+                badge_record = Badge(
+                    child_id=child.child_id,
+                    badge=badge_info['name'],
+                    level='Basic',  # Default level
+                    is_earned=True,
+                    badge_xp=badge_info['xp_reward'],
+                    earned_at=datetime.utcnow()
+                )
+                db.session.add(badge_record)
+            
+            # Award XP to child (if child model has xp field)
+            if hasattr(child, 'xp'):
+                child.xp = (child.xp or 0) + badge_info['xp_reward']
+            
+            db.session.commit()
+            
+            return {
+                'message': f'Badge "{badge_info["name"]}" claimed successfully!',
+                'badge': {
+                    'id': badge_id,
+                    'name': badge_info['name'],
+                    'xp_reward': badge_info['xp_reward'],
+                    'earned_at': badge_record.earned_at.isoformat()
+                },
+                'total_xp': child.xp if hasattr(child, 'xp') else 0
+            }, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {'error': f'Failed to claim badge: {str(e)}'}, 500

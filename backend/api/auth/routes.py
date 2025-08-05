@@ -7,6 +7,8 @@ from werkzeug.security import generate_password_hash
 from models import *
 from utils import *
 from werkzeug.security import check_password_hash
+from .reset import send_reset_email, confirm_reset_token
+from models import Users
 
 
 
@@ -369,6 +371,74 @@ class SignupTeacher(Resource):
                 'refresh_token': refresh_token
             }, 201
 
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ForgotPassword(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            email = data.get('email', '').strip().lower()
+            if not email:
+                return {'error': 'Email is required'}, 400
+            user = Users.query.filter_by(email=email).first()
+            if user:
+                send_reset_email(user)
+                return {'message': 'If the email exists, a reset link has been sent.'}, 200
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ResetPassword(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            token = request.args.get('token')
+            new_password = data.get('new_password')
+
+            if not token or not new_password:
+                return {'error': 'Token and new password are required'}, 400
+
+            email = confirm_reset_token(token)
+            if not email:
+                return {'error': 'Invalid or expired token'}, 400
+
+            user = Users.query.filter_by(email=email).first()
+            if not user:
+                return {'error': 'User not found'}, 404
+
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+
+            return {'message': 'Password reset successfully'}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ChangePassword(Resource):
+    @jwt_required()
+    def post(self):
+        try:
+            current_user_id = get_jwt_identity()
+            data = request.get_json()
+            old_password = data.get('old_password')
+            new_password = data.get('new_password')
+
+            if not old_password or not new_password:
+                return {'error': 'Old and new passwords are required'}, 400
+            
+            user = Users.query.filter_by(user_id=current_user_id).first()
+            if not user or not check_password_hash(user.password, old_password):
+                return {"message": "Invalid current password"}, 400
+            
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+            return {"message": "Password changed successfully"}, 200
+        
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500

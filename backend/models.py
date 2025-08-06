@@ -136,12 +136,25 @@ class Skill(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
+    parent_id = db.Column(db.Integer, db.ForeignKey('parent.parent_id'))
     skill_name = db.Column(db.String(255))
     video_url = db.Column(db.String(255))
     is_learned = db.Column(db.Boolean, default=False)
     skill_xp = db.Column(db.Integer, default=0)
     completion_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'child_id': self.child_id,
+            'parent_id': self.parent_id,
+            'skill_name': self.skill_name,
+            'video_url': self.video_url,
+            'is_learned': self.is_learned,
+            'skill_xp': self.skill_xp,
+            'completion_date': self.completion_date.isoformat() if self.completion_date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
 
     def __repr__(self):
         return f'<Skill {self.skill_name}>'

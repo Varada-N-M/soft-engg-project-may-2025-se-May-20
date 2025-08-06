@@ -815,42 +815,51 @@ class SkillResource(Resource):
         """Create a new skill for the logged-in child user."""
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.PARENT).first()
 
             if not user:
-                return {'error': 'Only active child users can create skills'}, 403
+                return {'error': 'Only active parent users can create skills'}, 403
 
-            child = Child.query.filter_by(user_id=user.user_id).first()
-            if not child:
-                return {'error': 'Child profile not found'}, 404
+            parent = Parent.query.filter_by(user_id=user.user_id).first()
+            if not parent:
+                return {'error': 'Parent profile not found'}, 404
 
-            # Get all teachers linked to this child
-            teacher_links = TeacherChild.query.filter_by(child_id=child.child_id).all()
-            teacher_ids = [link.teacher_id for link in teacher_links]
+            data = request.get_json()
+            if not data:
+                return {'error': 'No data provided'}, 400
 
-            if not teacher_ids:
-                return {'message': 'No teachers linked to this child.'}, 200
+            # Validate required fields
+            is_valid, error_message = validate_skill_data(data)
+            if not is_valid:
+                return {'error': error_message}, 400
 
-            # Get all lesson updates from these teachers
-            lesson_updates = LessonUpdates.query.filter(LessonUpdates.teacher_id.in_(teacher_ids)).order_by(LessonUpdates.created_at.desc()).all()
+            # Create new skill
+            new_skill = Skill(
+                child_id=data['child_id'],
+                skill_name=data['skill_name'].strip(),
+                video_url=data.get('video_url', '').strip() or None,
+                skill_xp=data.get('skill_xp', 0),
+                is_learned=data.get('is_learned', False),
+                parent_id=parent.parent_id,
+                created_at=datetime.now(timezone.utc),
+            )
 
-            result = []
-            for lesson in lesson_updates:
-                teacher = Teacher.query.filter_by(teacher_id=lesson.teacher_id).first()
-                teacher_user = Users.query.filter_by(user_id=teacher.user_id).first() if teacher else None
-                result.append({
-                    'lesson_id': lesson.id,
-                    'lesson': lesson.lesson,
-                    'summary': lesson.summary,
-                    'created_at': lesson.created_at.isoformat(),
-                    'teacher_name': f"{teacher_user.first_name} {teacher_user.last_name}" if teacher_user else None
-                })
+            # Set completion_date if skill is already marked as learned
+            if new_skill.is_learned:
+                new_skill.completion_date = datetime.now(timezone.utc)
 
-            return {'lesson_updates': result}, 200
+            db.session.add(new_skill)
+            db.session.commit()
+
+            return {
+                'message': 'Skill created successfully',
+                'skill': new_skill.to_dict()
+            }, 201
 
         except Exception as e:
+            db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-
+            
     @jwt_required()
     def get(self):
         """Get all skills for the logged-in child user with badge information."""
@@ -909,17 +918,17 @@ class SkillResource(Resource):
         """Update a specific skill for the logged-in child user."""
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.PARENT).first()
 
             if not user:
                 return {'error': 'Only active child users can update skills'}, 403
 
-            child = Child.query.filter_by(user_id=user.user_id).first()
-            if not child:
-                return {'error': 'Child profile not found'}, 404
+            parent = Parent.query.filter_by(user_id=user.user_id).first()
+            if not parent:
+                return {'error': 'Parent profile not found'}, 404
 
             # Find the skill and verify ownership
-            skill = Skill.query.filter_by(id=skill_id, child_id=child.child_id).first()
+            skill = Skill.query.filter_by(id=skill_id, parent_id=parent.parent_id).first()
 
             if not skill:
                 return {'error': 'Skill not found or access denied'}, 404
@@ -930,7 +939,6 @@ class SkillResource(Resource):
                 return {'error': 'No data provided'}, 400
 
             was_learned_before = skill.is_learned
-            newly_earned_badges = []
 
             # Update fields if provided
             if 'skill_name' in data and data['skill_name'].strip():
@@ -944,25 +952,15 @@ class SkillResource(Resource):
                 # Set completion date if skill is marked as learned
                 if data['is_learned'] and not skill.completion_date:
                     skill.completion_date = datetime.now(timezone.utc)
-                    # Check for new badges if skill was just completed
-                    if not was_learned_before:
-                        newly_earned_badges = check_and_update_badges(child.child_id)
                 elif not data['is_learned']:
                     skill.completion_date = None
             
             db.session.commit()
             
-            response_data = {
+            return {
                 'message': 'Skill updated successfully',
                 'skill': skill.to_dict()
-            }
-            
-            # Include newly earned badges in response
-            if newly_earned_badges:
-                response_data['newly_earned_badges'] = newly_earned_badges
-                response_data['message'] += f' and earned {len(newly_earned_badges)} new badge(s)!'
-            
-            return response_data, 200
+            }, 200
             
         except Exception as e:
             db.session.rollback()
@@ -978,12 +976,12 @@ class SkillResource(Resource):
             if not user:
                 return {'error': 'Only active child users can delete skills'}, 403
 
-            child = Child.query.filter_by(user_id=user.user_id).first()
-            if not child:
+            parent = Parent.query.filter_by(user_id=user.user_id).first()
+            if not parent:
                 return {'error': 'Child profile not found'}, 404
 
             # Find the skill and verify ownership
-            skill = Skill.query.filter_by(id=skill_id, child_id=child.child_id).first()
+            skill = Skill.query.filter_by(id=skill_id, parent_id=parent.child_id).first()
 
             if not skill:
                 return {'error': 'Skill not found or access denied'}, 404
@@ -1037,23 +1035,13 @@ class CompleteSkillResource(Resource):
             skill.skill_xp += xp_to_add
             skill.completion_date = datetime.now(timezone.utc)
             
-            # Check for newly earned badges
-            newly_earned_badges = check_and_update_badges(child.child_id)
-            
             db.session.commit()
             
-            response_data = {
+            return {
                 'message': 'Skill completed successfully!',
                 'skill': skill.to_dict(),
                 'xp_earned': xp_to_add
-            }
-            
-            # Include newly earned badges in response
-            if newly_earned_badges:
-                response_data['newly_earned_badges'] = newly_earned_badges
-                response_data['message'] += f' You earned {len(newly_earned_badges)} new badge(s)!'
-            
-            return response_data, 200
+            }, 200
             
         except Exception as e:
             db.session.rollback()
@@ -1119,7 +1107,7 @@ class SkillStatsResource(Resource):
                             'skill_id': skill.id,
                             'skill_name': skill.skill_name,
                             'skill_xp': skill.skill_xp,
-                            'completion_date': skill.completion_date.isoformat()
+                            'completion_date': skill.completion_date.isoformat() if skill.completion_date else None
                         } for skill in recent_skills
                     ]
                 },
@@ -1133,7 +1121,7 @@ class SkillStatsResource(Resource):
                             'badge': badge.badge,
                             'level': badge.level,
                             'badge_xp': badge.badge_xp,
-                            'earned_at': badge.earned_at.isoformat()
+                            'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
                         } for badge in recent_badges
                     ]
                 },
@@ -1166,7 +1154,7 @@ class SkillSearchResource(Resource):
             
             skills = Skill.query.filter(
                 Skill.child_id == child.child_id,
-                Skill.skill_name.ilike(f'%{query_param}%')
+                func.lower(Skill.skill_name).like(f'%{query_param.lower()}%')
             ).order_by(Skill.created_at.desc()).all()
             
             return {
@@ -1179,9 +1167,29 @@ class SkillSearchResource(Resource):
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
 
-# Helper function for validation (you'll need to implement this based on your requirements)
+# Helper function for validation
 def validate_skill_data(data):
     """Validate skill data for creation or update."""
     if not data.get('skill_name', '').strip():
         return False, 'Skill name is required'
+    
+    # Validate skill_xp if provided
+    if 'skill_xp' in data:
+        try:
+            xp_value = int(data['skill_xp'])
+            if xp_value < 0:
+                return False, 'Skill XP cannot be negative'
+        except (ValueError, TypeError):
+            return False, 'Skill XP must be a valid integer'
+    
+    # Validate video_url if provided
+    if 'video_url' in data and data['video_url']:
+        if not isinstance(data['video_url'], str):
+            return False, 'Video URL must be a string'
+    
+    # Validate is_learned if provided
+    if 'is_learned' in data:
+        if not isinstance(data['is_learned'], bool):
+            return False, 'is_learned must be a boolean value'
+    
     return True, None

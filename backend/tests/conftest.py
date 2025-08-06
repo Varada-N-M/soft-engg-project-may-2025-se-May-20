@@ -156,6 +156,29 @@ def auth_header(child_user):
     return {'Authorization': f'Bearer {access_token}'}
 
 
+@pytest.fixture
+def teacher_user(create_test_user, db):
+    """Create a teacher user for lesson updates tests"""
+    unique_email = f"teacher_{uuid.uuid4().hex[:8]}@example.com"
+    user = create_test_user(role=UserRole.TEACHER, email=unique_email)
+    # Create a school for the teacher
+    from models import School, Teacher
+    school = School(name="Test School", address="123 Main St", phone_number="1234567890", created_by=user.user_id)
+    db.session.add(school)
+    db.session.flush()
+    teacher = Teacher(user_id=user.user_id, subject="Math", school_id=school.school_id)
+    db.session.add(teacher)
+    db.session.commit()
+    return user, teacher
+
+@pytest.fixture
+def teacher_auth_header(teacher_user):
+    """Create authentication header for teacher user"""
+    user, _ = teacher_user
+    access_token = create_access_token(identity=str(user.user_id))
+    return {'Authorization': f'Bearer {access_token}'}
+
+
 # Sample payloads for registration tests with unique emails and correct field names
 @pytest.fixture
 def child_payload():

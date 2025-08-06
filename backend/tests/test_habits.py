@@ -2,13 +2,11 @@ import json
 import uuid
 from datetime import date
 
-import pytest
 from flask_jwt_extended import create_refresh_token, create_access_token
 from werkzeug.security import generate_password_hash
 
-from api.auth.routes import Login
 from main import create_app, db
-from models import Child, UserRole, Users, Habit
+from models import Habit
 
 from datetime import datetime, timezone
 

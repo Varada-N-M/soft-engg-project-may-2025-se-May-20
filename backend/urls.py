@@ -1,8 +1,13 @@
 from flask_restful import Api
-from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization, SignupTeacher
-from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource
+
+from api.auth.routes import (Login, RefreshToken, SignupChild,
+                             SignupOrganization, SignupParent, SignupTeacher)
+from api.organization.routes import OrganizationStats
 from api.parent.routes import LinkChildToParent
-from api.student.routes import SkillResource, CompleteSkillResource, SkillStatsResource, SkillSearchResource
+from api.student.routes import (CompleteHabit, CompleteSkillResource,
+                                GratitudeEntry, Habits, SkillResource,
+                                SkillSearchResource, SkillStatsResource,
+                                ToDoListResource)
 from api.teacher.routes import AddStudent, RemoveStudent
 from api.organization.routes import OrganizationStats
 from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
@@ -32,10 +37,11 @@ api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlin
 
 
 # Register the resources with their URL patterns
-api.add_resource(SkillResource, '/skills', '/skills/<int:skill_id>')
-api.add_resource(CompleteSkillResource, '/skills/<int:skill_id>/complete')
-api.add_resource(SkillStatsResource, '/skills/stats')
-api.add_resource(SkillSearchResource, '/skills/search')
+api.add_resource(SkillResource, '/api/child/skills', '/api/child/skills/<int:skill_id>')
+api.add_resource(CompleteSkillResource, '/api/child/skills/<int:skill_id>/complete')
+api.add_resource(SkillStatsResource, '/api/child/skills/stats')
+api.add_resource(SkillSearchResource, '/api/child/skills/search')
+
 # Teacher
 api.add_resource(AddStudent, '/api/teacher/add-student')
 api.add_resource(RemoveStudent, '/api/teacher/remove-student/<int:student_id>')

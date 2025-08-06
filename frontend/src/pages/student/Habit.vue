@@ -300,6 +300,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import api from '../../plugins/axios'
 
 // Reactive data
 const showCreateModal = ref(false)
@@ -307,6 +308,8 @@ const editingHabit = ref(null)
 const currentFilter = ref('all')
 const selectedCategory = ref('all')
 const currentStreak = ref(7)
+const isLoading = ref(false)
+const errorMessage = ref('')
 
 // Form data
 const habitForm = ref({
@@ -341,87 +344,8 @@ const streakMilestones = ref([
   { days: 50, emoji: '👑', title: 'Habit King' }
 ])
 
-// Sample habits data
-const habits = ref([
-  {
-    id: 1,
-    name: 'Brush My Teeth',
-    description: 'Keep my teeth clean and healthy',
-    emoji: '🦷',
-    category: 'health',
-    xpReward: 10,
-    completedToday: true,
-    currentStreak: 7,
-    bestStreak: 12,
-    totalCompleted: 45,
-    weeklyProgress: [true, true, true, true, true, true, true]
-  },
-  {
-    id: 2,
-    name: 'Read for 20 Minutes',
-    description: 'Improve my reading skills daily',
-    emoji: '📚',
-    category: 'learning',
-    xpReward: 25,
-    completedToday: false,
-    currentStreak: 5,
-    bestStreak: 8,
-    totalCompleted: 32,
-    weeklyProgress: [true, true, false, true, true, true, false]
-  },
-  {
-    id: 3,
-    name: 'Exercise',
-    description: 'Stay active and strong',
-    emoji: '🏃',
-    category: 'health',
-    xpReward: 50,
-    completedToday: false,
-    currentStreak: 3,
-    bestStreak: 10,
-    totalCompleted: 28,
-    weeklyProgress: [false, true, true, true, false, true, false]
-  },
-  {
-    id: 4,
-    name: 'Make My Bed',
-    description: 'Start the day organized',
-    emoji: '🛏️',
-    category: 'chores',
-    xpReward: 10,
-    completedToday: true,
-    currentStreak: 4,
-    bestStreak: 15,
-    totalCompleted: 38,
-    weeklyProgress: [true, true, true, true, false, true, true]
-  },
-  {
-    id: 5,
-    name: 'Practice Piano',
-    description: 'Improve my musical skills',
-    emoji: '🎵',
-    category: 'creative',
-    xpReward: 25,
-    completedToday: false,
-    currentStreak: 2,
-    bestStreak: 6,
-    totalCompleted: 18,
-    weeklyProgress: [false, true, true, false, false, true, false]
-  },
-  {
-    id: 6,
-    name: 'Drink Water',
-    description: 'Stay hydrated throughout the day',
-    emoji: '💧',
-    category: 'health',
-    xpReward: 10,
-    completedToday: true,
-    currentStreak: 6,
-    bestStreak: 14,
-    totalCompleted: 42,
-    weeklyProgress: [true, true, true, true, true, true, false]
-  }
-])
+// Habits data from API
+const habits = ref([])
 
 // Computed properties
 const totalHabits = computed(() => habits.value.length)
@@ -441,23 +365,174 @@ const filteredHabits = computed(() => {
   return filtered
 })
 
+// API Methods
+const fetchHabits = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await api.get('/api/child/habit')
+    
+    if (response.data.habits_created) {
+      // Transform backend data to match frontend structure
+      habits.value = response.data.habits_created.map(habit => ({
+        id: habit.habit_id,
+        name: habit.name,
+        description: habit.description,
+        emoji: getEmojiForCategory(habit.category),
+        category: habit.category,
+        xpReward: 25, // Default since backend doesn't return habit_xp in GET response
+        completedToday: response.data.completed_habits ? response.data.completed_habits.some(completed => completed.habit_id === habit.habit_id && isToday(completed.completion_date)) : false,
+        currentStreak: calculateStreak(habit.habit_id, response.data.completed_habits),
+        bestStreak: 0, // Will be calculated
+        totalCompleted: response.data.completed_habits ? response.data.completed_habits.filter(completed => completed.habit_id === habit.habit_id).length : 0,
+        weeklyProgress: calculateWeeklyProgress(habit.habit_id, response.data.completed_habits || [])
+      }))
+    } else {
+      habits.value = []
+    }
+  } catch (error) {
+    console.error('Error fetching habits:', error)
+    errorMessage.value = 'Failed to load your habits. Please try again.'
+    habits.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Helper functions
+const getEmojiForCategory = (category) => {
+  const categoryEmojis = {
+    'health': '💪',
+    'learning': '📚',
+    'chores': '🏠',
+    'social': '👥',
+    'creative': '🎨'
+  }
+  return categoryEmojis[category] || '🎯'
+}
+
+const isToday = (dateString) => {
+  if (!dateString) return false
+  
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const date = new Date(dateString)
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return false
+    
+    const dateStr = date.toISOString().split('T')[0]
+    return today === dateStr
+  } catch (error) {
+    console.error('Error parsing date in isToday:', dateString, error)
+    return false
+  }
+}
+
+const calculateStreak = (habitId, completedHabits) => {
+  try {
+    if (!completedHabits || !Array.isArray(completedHabits)) return 0
+    
+    const habitCompletions = completedHabits
+      .filter(completed => completed.habit_id === habitId && completed.completion_date)
+      .map(completed => {
+        const date = new Date(completed.completion_date)
+        if (isNaN(date.getTime())) return null
+        return date.toISOString().split('T')[0]
+      })
+      .filter(date => date !== null)
+      .sort((a, b) => new Date(b) - new Date(a))
+
+    let streak = 0
+    const today = new Date()
+    
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(today)
+      checkDate.setDate(today.getDate() - i)
+      const dateString = checkDate.toISOString().split('T')[0]
+      
+      if (habitCompletions.includes(dateString)) {
+        streak++
+      } else if (i > 0) {
+        break
+      }
+    }
+    
+    return streak
+  } catch (error) {
+    console.error('Error calculating streak:', error)
+    return 0
+  }
+}
+
+const calculateWeeklyProgress = (habitId, completedHabits) => {
+  try {
+    if (!completedHabits || !Array.isArray(completedHabits)) return [false, false, false, false, false, false, false]
+    
+    const progress = []
+    const today = new Date()
+    
+    for (let i = 6; i >= 0; i--) {
+      const checkDate = new Date(today)
+      checkDate.setDate(today.getDate() - i)
+      const dateString = checkDate.toISOString().split('T')[0]
+      
+      const hasCompletion = completedHabits.some(completed => {
+        if (!completed.habit_id || completed.habit_id !== habitId || !completed.completion_date) return false
+        
+        try {
+          const completedDate = new Date(completed.completion_date)
+          if (isNaN(completedDate.getTime())) return false
+          return completedDate.toISOString().split('T')[0] === dateString
+        } catch (error) {
+          console.error('Error parsing completed date:', completed.completion_date, error)
+          return false
+        }
+      })
+      
+      progress.push(hasCompletion)
+    }
+    
+    return progress
+  } catch (error) {
+    console.error('Error calculating weekly progress:', error)
+    return [false, false, false, false, false, false, false]
+  }
+}
+
 // Methods
 const getCategoryCount = (categoryId) => {
   if (categoryId === 'all') return habits.value.length
   return habits.value.filter(h => h.category === categoryId).length
 }
 
-const toggleHabit = (habit) => {
+const toggleHabit = async (habit) => {
   if (!habit.completedToday) {
-    habit.completedToday = true
-    habit.currentStreak += 1
-    habit.totalCompleted += 1
-    if (habit.currentStreak > habit.bestStreak) {
-      habit.bestStreak = habit.currentStreak
+    try {
+      isLoading.value = true
+      errorMessage.value = ''
+      
+      const response = await api.post(`/api/child/habit/${habit.id}/complete`)
+      
+      if (response.status === 200) {
+        // Update local state
+        habit.completedToday = true
+        habit.currentStreak += 1
+        habit.totalCompleted += 1
+        if (habit.currentStreak > habit.bestStreak) {
+          habit.bestStreak = habit.currentStreak
+        }
+        
+        // Show XP gained animation
+        showXPGained(habit.xpReward)
+      }
+    } catch (error) {
+      console.error('Error completing habit:', error)
+      errorMessage.value = 'Failed to complete habit. Please try again.'
+    } finally {
+      isLoading.value = false
     }
-    
-    // Show XP gained animation (you can implement this)
-    showXPGained(habit.xpReward)
   }
 }
 
@@ -489,38 +564,48 @@ const closeModal = () => {
   }
 }
 
-const saveHabit = () => {
-  if (editingHabit.value) {
-    // Update existing habit
-    const habit = editingHabit.value
-    habit.name = habitForm.value.name
-    habit.description = habitForm.value.description
-    habit.emoji = habitForm.value.emoji
-    habit.category = habitForm.value.category
-    habit.xpReward = habitForm.value.xpReward
-  } else {
-    // Create new habit
-    const newHabit = {
-      id: Date.now(),
-      name: habitForm.value.name,
-      description: habitForm.value.description,
-      emoji: habitForm.value.emoji,
-      category: habitForm.value.category,
-      xpReward: habitForm.value.xpReward,
-      completedToday: false,
-      currentStreak: 0,
-      bestStreak: 0,
-      totalCompleted: 0,
-      weeklyProgress: [false, false, false, false, false, false, false]
+const saveHabit = async () => {
+  try {
+    isLoading.value = true
+    errorMessage.value = ''
+    
+    const habitData = {
+      habit_name: habitForm.value.name,
+      habit_description: habitForm.value.description,
+      habit_category: habitForm.value.category,
+      habit_xp: habitForm.value.xpReward
     }
-    habits.value.push(newHabit)
+    
+    if (editingHabit.value) {
+      // Update existing habit
+      const response = await api.put(`/api/child/habit/${editingHabit.value.id}`, habitData)
+      
+      if (response.status === 200) {
+        // Refresh habits to get updated data
+        await fetchHabits()
+      }
+    } else {
+      // Create new habit
+      const response = await api.post('/api/child/habit', habitData)
+      
+      if (response.status === 201) {
+        // Refresh habits to get the new habit
+        await fetchHabits()
+      }
+    }
+    
+    closeModal()
+  } catch (error) {
+    console.error('Error saving habit:', error)
+    errorMessage.value = 'Failed to save habit. Please try again.'
+  } finally {
+    isLoading.value = false
   }
-  
-  closeModal()
 }
 
-onMounted(() => {
-  // Initialize any data or API calls here
+onMounted(async () => {
+  // Fetch habits when component is mounted
+  await fetchHabits()
 })
 </script>
 

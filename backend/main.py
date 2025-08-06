@@ -16,8 +16,12 @@ def create_app(config_name='default', testing=False):
     if testing:
         app.config['TESTING'] = True
 
-    # Setup CORS
-    CORS(app, origins=['http://localhost:5173'])
+    # Setup CORS - Allow frontend origins to access backend
+    CORS(app, 
+         origins=['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
+         supports_credentials=True,
+         allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 
     # Initialize extensions
     db.init_app(app)

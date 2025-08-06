@@ -362,7 +362,7 @@ const fetchGratitudeEntries = async (dateFilter = null, daysFilter = null) => {
   errorMessage.value = ''
 
   try {
-    let url = '/gratitude'
+    let url = '/api/child/gratitude'
     const params = {}
 
     if (dateFilter) {
@@ -523,7 +523,7 @@ const deleteEntry = async (entryId) => {
       isLoading.value = true
       errorMessage.value = ''
 
-      const response = await api.delete(`/gratitude/${entryId}`)
+      const response = await api.delete(`/api/child/gratitude/${entryId}`)
 
       if (response.status === 200) {
         // Refresh the entries to reflect the deletion
@@ -566,7 +566,7 @@ const saveEntry = async () => {
 
     if (editingEntry.value) {
       // Update existing entry
-      const response = await api.put(`/gratitude/${editingEntry.value.id}`, {
+      const response = await api.put(`/api/child/gratitude/${editingEntry.value.id}`, {
         gratitude_text: gratitudeText
       })
 
@@ -576,7 +576,7 @@ const saveEntry = async () => {
       }
     } else {
       // Create new entry
-      const response = await api.post('/gratitude', {
+      const response = await api.post('/api/child/gratitude', {
         gratitude_text: gratitudeText
       })
 

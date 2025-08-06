@@ -6,6 +6,7 @@ import {BACKEND_BASE_URL} from '../constants'
 const api = axios.create({
     baseURL: BACKEND_BASE_URL,
     timeout: 10000,
+    withCredentials: true,
 })
 
 /**
@@ -80,7 +81,8 @@ api.interceptors.response.use(
                 const response = await axios.post(`${BACKEND_BASE_URL}/api/auth/refresh`, {}, {
                     headers: {
                         Authorization: `Bearer ${getRefreshToken()}`
-                    }
+                    },
+                    withCredentials: true
                 })
 
                 const {access_token, refresh_token} = response.data

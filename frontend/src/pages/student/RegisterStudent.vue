@@ -405,7 +405,7 @@ const handleSubmit = async () => {
       gender: formData.value.gender
     }
 
-    const apiResponse = await axios.post('/api/auth/signup/child', apiData)
+    const apiResponse = await axios.post('/api/child/register', apiData)
 
     if (apiResponse.data) {
       response.value = {
@@ -416,7 +416,7 @@ const handleSubmit = async () => {
 
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
-      localStorage.setItem('user_email', apiResponse.data.user)
+      localStorage.setItem('user_email', apiResponse.data.user_email)
       localStorage.setItem('user_type', 'student')
 
       // Redirect to login after success

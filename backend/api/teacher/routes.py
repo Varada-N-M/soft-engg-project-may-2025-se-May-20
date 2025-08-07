@@ -114,13 +114,202 @@ class TeacherLessonUpdates(Resource):
             result = []
             for lesson in lesson_updates:
                 result.append({
-                    'lesson_id': lesson.id,
+                    'id': lesson.id,
+                    'day': lesson.day,
+                    'subject': lesson.subject,
                     'lesson': lesson.lesson,
-                    'summary': lesson.summary,
+                    'activity': lesson.activity,
                     'created_at': lesson.created_at.isoformat(),
                 })
 
-            return {'lesson_updates': result}, 200
+            return {'lessons': result}, 200
 
         except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def post(self):
+        """
+        Create a new lesson update for the logged-in teacher.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can create lesson updates'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            data = request.get_json()
+            
+            # Validate required fields
+            required_fields = ['day', 'subject', 'lesson', 'activity']
+            for field in required_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+
+            # Validate day
+            valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+            if data['day'] not in valid_days:
+                return {'error': 'Invalid day. Must be one of: Monday, Tuesday, Wednesday, Thursday, Friday'}, 400
+
+            # Validate subject
+            valid_subjects = ['Math', 'English', 'Science', 'Social Studies', 'Computers']
+            if data['subject'] not in valid_subjects:
+                return {'error': 'Invalid subject. Must be one of: Math, English, Science, Social Studies, Computers'}, 400
+
+            # Create new lesson update
+            new_lesson = LessonUpdates(
+                teacher_id=teacher.teacher_id,
+                day=data['day'],
+                subject=data['subject'],
+                lesson=data['lesson'],
+                activity=data['activity']
+            )
+
+            db.session.add(new_lesson)
+            db.session.commit()
+
+            return {
+                'message': 'Lesson update created successfully',
+                'lesson': {
+                    'id': new_lesson.id,
+                    'day': new_lesson.day,
+                    'subject': new_lesson.subject,
+                    'lesson': new_lesson.lesson,
+                    'activity': new_lesson.activity,
+                    'created_at': new_lesson.created_at.isoformat(),
+                }
+            }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class TeacherLessonUpdateDetail(Resource):
+    @jwt_required()
+    def get(self, lesson_id):
+        """
+        Get a specific lesson update by ID.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can view lesson updates'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            lesson = LessonUpdates.query.filter_by(id=lesson_id, teacher_id=teacher.teacher_id).first()
+            if not lesson:
+                return {'error': 'Lesson update not found'}, 404
+
+            return {
+                'id': lesson.id,
+                'day': lesson.day,
+                'subject': lesson.subject,
+                'lesson': lesson.lesson,
+                'activity': lesson.activity,
+                'created_at': lesson.created_at.isoformat(),
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def put(self, lesson_id):
+        """
+        Update a specific lesson update by ID.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can update lesson updates'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            lesson = LessonUpdates.query.filter_by(id=lesson_id, teacher_id=teacher.teacher_id).first()
+            if not lesson:
+                return {'error': 'Lesson update not found'}, 404
+
+            data = request.get_json()
+            
+            # Validate required fields
+            required_fields = ['day', 'subject', 'lesson', 'activity']
+            for field in required_fields:
+                if not data.get(field):
+                    return {'error': f'{field} is required'}, 400
+
+            # Validate day
+            valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+            if data['day'] not in valid_days:
+                return {'error': 'Invalid day. Must be one of: Monday, Tuesday, Wednesday, Thursday, Friday'}, 400
+
+            # Validate subject
+            valid_subjects = ['Math', 'English', 'Science', 'Social Studies', 'Computers']
+            if data['subject'] not in valid_subjects:
+                return {'error': 'Invalid subject. Must be one of: Math, English, Science, Social Studies, Computers'}, 400
+
+            # Update lesson
+            lesson.day = data['day']
+            lesson.subject = data['subject']
+            lesson.lesson = data['lesson']
+            lesson.activity = data['activity']
+
+            db.session.commit()
+
+            return {
+                'message': 'Lesson update updated successfully',
+                'lesson': {
+                    'id': lesson.id,
+                    'day': lesson.day,
+                    'subject': lesson.subject,
+                    'lesson': lesson.lesson,
+                    'activity': lesson.activity,
+                    'created_at': lesson.created_at.isoformat(),
+                }
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+    @jwt_required()
+    def delete(self, lesson_id):
+        """
+        Delete a specific lesson update by ID.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can delete lesson updates'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            lesson = LessonUpdates.query.filter_by(id=lesson_id, teacher_id=teacher.teacher_id).first()
+            if not lesson:
+                return {'error': 'Lesson update not found'}, 404
+
+            db.session.delete(lesson)
+            db.session.commit()
+
+            return {'message': 'Lesson update deleted successfully'}, 200
+
+        except Exception as e:
+            db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500

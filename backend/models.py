@@ -54,8 +54,10 @@ class LessonUpdates(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    lesson = db.Column(db.String(255))
-    summary = db.Column(db.Text)
+    day = db.Column(db.String(20), nullable=False)  # Monday, Tuesday, etc.
+    subject = db.Column(db.String(100), nullable=False)  # Math, English, Science, etc.
+    lesson = db.Column(db.String(255), nullable=False)  # Lesson title
+    activity = db.Column(db.Text, nullable=False)  # Activity description
 
     def __repr__(self):
         return f'<LessonUpdate {self.lesson}>'

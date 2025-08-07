@@ -80,7 +80,7 @@ class Child(db.Model):
 
     habits = db.relationship('Habit', backref='child', lazy=True)
     badges = db.relationship('Badge', backref='child', lazy=True)
-    skills = db.relationship('Skill', backref='child', lazy=True)
+    skills = db.relationship('SkillCompleted', backref='child', lazy=True)
     todos = db.relationship('ToDoList', backref='child', lazy=True)
     gratitudes = db.relationship('GratitudeEntries', backref='child', lazy=True)
     teacher_links = db.relationship('TeacherChild', backref='child', lazy=True)
@@ -133,15 +133,26 @@ class Badge(db.Model):
         return f'<Badge {self.badge}>'
 
 
-class Skill(db.Model):
+class CommonSkill(db.Model):
+    __tablename__ = 'common_skill'
+
+    id = db.Column(db.Integer, primary_key=True)
+    skill_name = db.Column(db.String(255), unique=True, nullable=False)
+    video_url = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    skill_xp = db.Column(db.Integer, default=50)
+
+    def __repr__(self):
+        return f'<CommonSkill {self.skill_name}>'
+
+
+class SkillCompleted(db.Model):
     __tablename__ = 'skill'
 
     id = db.Column(db.Integer, primary_key=True)
     child_id = db.Column(db.Integer, db.ForeignKey('child.child_id'))
-    skill_name = db.Column(db.String(255))
-    video_url = db.Column(db.String(255))
+    skill_id = db.Column(db.Integer, db.ForeignKey('common_skill.id'), nullable=False)
     is_learned = db.Column(db.Boolean, default=False)
-    skill_xp = db.Column(db.Integer, default=0)
     completion_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

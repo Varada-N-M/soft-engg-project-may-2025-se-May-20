@@ -219,3 +219,28 @@ def organization_payload():
         "phone_number": "1234567890",
         "address": "123 Main Street"
     }
+    
+    
+
+@pytest.fixture
+def skill_completions(db, create_test_child, common_skills):
+    """Create skill completions for testing"""
+    user, child = create_test_child()
+    
+    completions = [
+        SkillCompleted(
+            child_id=child.child_id,
+            skill_id=common_skills[0].id,
+            is_learned=True,
+            completion_date=datetime.now(timezone.utc)
+        ),
+        SkillCompleted(
+            child_id=child.child_id,
+            skill_id=common_skills[1].id,
+            is_learned=False
+        )
+    ]
+    db.session.add_all(completions)
+    db.session.commit()
+    return user, child, completions
+

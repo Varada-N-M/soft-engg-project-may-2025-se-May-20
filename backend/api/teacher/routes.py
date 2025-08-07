@@ -313,3 +313,41 @@ class TeacherLessonUpdateDetail(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CreateSchool(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Create a new school for the organization.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.ADMIN).first()
+
+            if not user:
+                return {'error': 'Only admin user can create schools'}, 403
+
+            data = request.get_json()
+            name = data.get('name')
+            phone_number = data.get('phone_number')
+            address = data.get('address')
+
+            if not name or not phone_number or not address:
+                return {'error': 'Name, phone number, and address are required'}, 400
+
+            new_school = School(
+                name=name,
+                phone_number=phone_number,
+                address=address,
+                created_by=current_user_id
+            )
+
+            db.session.add(new_school)
+            db.session.commit()
+
+            return {'message': 'School created successfully', 'school_id': new_school.school_id}, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500

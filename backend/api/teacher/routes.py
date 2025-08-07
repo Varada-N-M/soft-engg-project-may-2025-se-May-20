@@ -351,3 +351,86 @@ class CreateSchool(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class LinkStudentToTeacher(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Link a student to a teacher using the student's email.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can link students'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            data = request.get_json()
+            student_email = data.get('student_email')
+
+            if not student_email:
+                return {'error': 'Student email is required'}, 400
+
+            student_user = Users.query.filter_by(email=student_email).first()
+            if not student_user:
+                return {'error': 'Student not found'}, 404
+
+            student = Child.query.filter_by(user_id=student_user.user_id).first()
+            if not student:
+                return {'error': 'Student profile not found'}, 404
+
+            existing_link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student.child_id
+            ).first()
+            if existing_link:
+                return {'error': 'Student already linked to this teacher'}, 400
+
+            new_link = TeacherChild(
+                teacher_id=teacher.teacher_id, child_id=student.child_id
+            )
+            db.session.add(new_link)
+            db.session.commit()
+
+            return {'message': 'Student linked successfully'}, 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class UnlinkStudentFromTeacher(Resource):
+    @jwt_required()
+    def delete(self, student_id):
+        """
+        Unlink a student from a teacher.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can unlink students'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {'error': 'Student is not linked to this teacher'}, 404
+
+            db.session.delete(link)
+            db.session.commit()
+
+            return {'message': 'Student unlinked successfully'}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500

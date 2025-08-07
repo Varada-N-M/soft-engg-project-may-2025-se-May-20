@@ -825,3 +825,134 @@ class Skills(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+    
+    @jwt_required()
+    def put(self, skill_id):
+        """
+        Update an existing skill.
+        Teacher and Principal can update common skills
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user:
+                return {'error': 'User not found or inactive'}, 404
+            
+            # Check if user is a teacher or principal
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only teachers and principals can update skills'}, 403
+            
+            # Validate request data
+            data = request.get_json()
+            skill_name = data.get('skill_name', '').strip()
+            video_url = data.get('video_url', '').strip()
+            skill_xp = data.get('skill_xp')
+
+            if not skill_name or not video_url:
+                return {'error': 'Skill name and video URL are required'}, 400
+            
+            if not isinstance(skill_xp, int) or skill_xp <= 0:
+                return {'error': 'Skill XP must be a positive integer'}, 400
+            
+            # Find the skill to update
+            skill = CommonSkill.query.filter_by(id=skill_id).first()
+            if not skill:
+                return {'error': 'Skill not found'}, 404
+            
+            # Update the skill
+            skill.skill_name = skill_name
+            skill.video_url = video_url
+            skill.skill_xp = skill_xp
+            db.session.commit()
+            
+            return {'message': 'Skill updated successfully'}, 200
+        
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+    
+    @jwt_required()
+    def delete(self, skill_id):
+        """
+        Delete a skill.
+        Teacher and Principal can delete common skills
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user:
+                return {'error': 'User not found or inactive'}, 404
+
+            # Check if user is a teacher or principal
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only teachers and principals can delete skills'}, 403
+
+            # Find the skill to delete
+            skill = CommonSkill.query.filter_by(id=skill_id).first()
+            if not skill:
+                return {'error': 'Skill not found'}, 404
+
+            db.session.delete(skill)
+            db.session.commit()
+
+            return {'message': 'Skill deleted successfully'}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CompleteSkill(Resource):
+    @jwt_required()
+    def post(self, skill_id):
+        """
+        Mark a skill as learned by the logged-in child user.
+        URL: /skills/<int:skill_id>/complete
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can mark skills as learned'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            # Find the skill and verify ownership
+            skill = CommonSkill.query.filter_by(id=skill_id).first()
+
+            if not skill:
+                return {'error': 'Skill not found or access denied'}, 404
+            
+            # Check if the skill is already marked as learned
+            existing_skill = SkillCompleted.query.filter_by(
+                child_id=child.child_id,
+                skill_id=skill.id
+            ).first()
+            
+            if existing_skill and existing_skill.is_learned:
+                return {'error': 'Skill already marked as learned'}, 400
+
+            # Create or update the skill completion record
+            if existing_skill:
+                existing_skill.is_learned = True
+                existing_skill.completion_date = datetime.now(timezone.utc)
+                db.session.add(existing_skill)
+            else:
+                new_skill_completion = SkillCompleted(
+                    child_id=child.child_id,
+                    skill_id=skill.id,
+                    is_learned=True,
+                    completion_date=datetime.now(timezone.utc)
+                )
+                db.session.add(new_skill_completion)
+
+            db.session.commit()
+            return {'message': 'Skill marked as learned successfully'}, 200
+        
+        except Exception as e:
+            db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+    

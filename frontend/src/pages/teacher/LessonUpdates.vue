@@ -19,11 +19,11 @@
               Add Student
             </router-link>
             <div class="text-center">
-              <p class="text-2xl font-bold text-blue-600">{{ lessons.length }}</p>
+              <p class="text-2xl font-bold text-blue-600">{{ lessons?.length || 0 }}</p>
               <p class="text-xs text-gray-600">Lessons</p>
             </div>
             <div class="text-center">
-              <p class="text-2xl font-bold text-green-600">{{ uniqueSubjects.length }}</p>
+              <p class="text-2xl font-bold text-green-600">{{ uniqueSubjects?.length || 0 }}</p>
               <p class="text-xs text-gray-600">Subjects</p>
             </div>
           </div>
@@ -33,23 +33,135 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Progress Overview -->
+      <!-- Error Alert -->
+      <div v-if="error" class="mb-6">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>{{ error }}</span>
+          </div>
+          <button @click="error = ''" class="text-red-700 hover:text-red-900">
+            <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Alert -->
+      <div v-if="successMessage" class="mb-6">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>{{ successMessage }}</span>
+          </div>
+          <button @click="successMessage = ''" class="text-green-700 hover:text-green-900">
+            <XIcon class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="loading && (!lessons || lessons.length === 0)" class="mb-8">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20 text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p class="text-gray-600">Loading your lessons...</p>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
       <div class="mb-8">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 Filter Lessons</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Date Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Date</label>
+              <input
+                v-model="filters.date"
+                type="date"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                @change="applyFilters"
+              />
+            </div>
+
+            <!-- Subject Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Subject</label>
+              <select 
+                v-model="filters.subject" 
+                @change="applyFilters"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Subjects</option>
+                <option value="Math">Math</option>
+                <option value="English">English</option>
+                <option value="Science">Science</option>
+                <option value="Social Studies">Social Studies</option>
+                <option value="Computers">Computers</option>
+              </select>
+            </div>
+
+            <!-- Class Filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Class</label>
+              <select 
+                v-model="filters.class" 
+                @change="applyFilters"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Classes</option>
+                <option v-for="n in 12" :key="n" :value="n">Class {{ n }}</option>
+              </select>
+            </div>
+
+            <!-- Clear Filters Button -->
+            <div class="flex items-end">
+              <button 
+                @click="clearFilters"
+                class="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+          
+          <!-- Filter Results Summary -->
+          <div class="mt-4 text-sm text-gray-600">
+            Showing {{ filteredLessons.length }} of {{ allLessons.length }} lessons
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Overview -->
+      <div v-if="!loading && lessons && lessons.length > 0" class="mb-8">
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
           <div class="flex flex-col md:flex-row items-center justify-between mb-6">
             <div>
-              <h2 class="text-2xl font-bold text-gray-800 mb-2">Weekly Lesson Progress</h2>
-              <p class="text-gray-600">{{ Math.round((lessons.length / 10) * 100) }}% Complete</p>
+              <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Lesson Updates</h2>
+              <p class="text-gray-600">{{ filteredLessons?.length || 0 }} lessons found</p>
             </div>
             <div class="text-6xl animate-bounce">🎓</div>
           </div>
-          <!-- Progress Bar -->
-          <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
-            <div
-              class="bg-gradient-to-r from-blue-400 to-green-400 h-4 rounded-full transition-all duration-1000 ease-out"
-              :style="{ width: `${(lessons.length / 10) * 100}%` }"
-            ></div>
+          
+          <!-- Quick Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="text-center p-3 bg-blue-50 rounded-lg">
+              <p class="text-2xl font-bold text-blue-600">{{ lessons?.length || 0 }}</p>
+              <p class="text-sm text-gray-600">Total Lessons</p>
+            </div>
+            <div class="text-center p-3 bg-green-50 rounded-lg">
+              <p class="text-2xl font-bold text-green-600">{{ uniqueSubjects?.length || 0 }}</p>
+              <p class="text-sm text-gray-600">Subjects</p>
+            </div>
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <p class="text-2xl font-bold text-purple-600">{{ uniqueClasses?.length || 0 }}</p>
+              <p class="text-sm text-gray-600">Classes</p>
+            </div>
           </div>
+
           <!-- Subjects Covered -->
           <div class="flex flex-wrap gap-2 mt-2">
             <span v-for="subject in uniqueSubjects" :key="subject" class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
@@ -62,7 +174,7 @@
       <!-- Lessons Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
-          v-for="(lesson, index) in lessons"
+          v-for="(lesson, index) in filteredLessons"
           :key="index"
           class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 relative overflow-hidden group"
         >
@@ -96,9 +208,10 @@
             <span v-else>📚</span>
           </div>
           <div class="relative z-10">
-            <div class="flex items-center mb-2">
-              <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold mr-2">{{ lesson.day }}</span>
+            <div class="flex items-center mb-2 flex-wrap gap-2">
+              <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">{{ lesson.day }}</span>
               <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">{{ lesson.subject }}</span>
+              <span class="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">Class {{ lesson.class }}</span>
             </div>
             <h3 class="font-bold text-gray-800 mb-2 text-lg">{{ lesson.lesson }}</h3>
             <p class="text-sm text-gray-600 mb-3">{{ lesson.activity }}</p>
@@ -107,10 +220,10 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="lessons.length === 0" class="text-center py-16">
+      <div v-if="!loading && filteredLessons && filteredLessons.length === 0" class="text-center py-16">
         <div class="text-6xl mb-4">🔍</div>
         <h3 class="text-xl font-bold text-gray-800 mb-2">No lessons found</h3>
-        <p class="text-gray-600">No lesson updates available for this week.</p>
+        <p class="text-gray-600">No lesson updates available. Click the + button to create your first lesson!</p>
       </div>
     </main>
 
@@ -156,6 +269,13 @@
               <option value="Science">Science</option>
               <option value="Social Studies">Social Studies</option>
               <option value="Computers">Computers</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Class/Grade</label>
+            <select v-model="newLesson.class_" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option v-for="n in 12" :key="n" :value="n">Class {{ n }}</option>
             </select>
           </div>
           
@@ -237,6 +357,13 @@
           </div>
           
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Class/Grade</label>
+            <select v-model="editingLesson.class_" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option v-for="n in 12" :key="n" :value="n">Class {{ n }}</option>
+            </select>
+          </div>
+          
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Lesson Title</label>
             <input
               v-model="editingLesson.lesson"
@@ -288,104 +415,255 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeftIcon, PlusIcon, XIcon, Trash2Icon, EditIcon } from 'lucide-vue-next'
+import api from '@/plugins/axios'
 
 const router = useRouter()
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const editingIndex = ref(-1)
+const loading = ref(false)
+const error = ref('')
+const successMessage = ref('')
 
 const goHome = () => {
   router.push('/teacher/home')
 }
 
-const lessons = ref([
-  { day: 'Monday', subject: 'Math', lesson: 'Algebra: Solving for x', activity: 'Explained variables and solved equations on board' },
-  { day: 'Monday', subject: 'English', lesson: 'Essay Writing', activity: 'Guided students through brainstorming and outlining' },
-  { day: 'Tuesday', subject: 'Science', lesson: 'Photosynthesis', activity: 'Lab experiment with leaves and sunlight' },
-  { day: 'Wednesday', subject: 'Social Studies', lesson: 'World War II Overview', activity: 'Timeline activity and group discussion' },
-  { day: 'Thursday', subject: 'Computers', lesson: 'Introduction to Coding', activity: 'Scratch programming basics' },
-  { day: 'Friday', subject: 'Math', lesson: 'Geometry: Area & Perimeter', activity: 'Hands-on measurement activity' },
-])
+const lessons = ref([])
+const allLessons = ref([]) // Store all lessons for filtering
+
+// Filters
+const filters = ref({
+  date: new Date().toISOString().split('T')[0], // Today's date by default
+  subject: '',
+  class: ''
+})
 
 const newLesson = ref({
   day: 'Monday',
   subject: 'Math',
   lesson: '',
-  activity: ''
+  activity: '',
+  class_: 1
 })
 
 const editingLesson = ref({
+  id: null,
   day: 'Monday',
   subject: 'Math',
   lesson: '',
-  activity: ''
+  activity: '',
+  class_: 1
 })
 
 const uniqueSubjects = computed(() => {
+  if (!lessons.value || lessons.value.length === 0) return []
   const set = new Set(lessons.value.map(l => l.subject))
   return Array.from(set)
 })
 
-const deleteLesson = (index: number) => {
-  if (confirm('Are you sure you want to delete this lesson?')) {
-    lessons.value.splice(index, 1)
+const uniqueClasses = computed(() => {
+  if (!lessons.value || lessons.value.length === 0) return []
+  const set = new Set(lessons.value.map(l => l.class))
+  return Array.from(set).sort((a, b) => a - b)
+})
+
+// Helper function to get day of week from date
+const getDayOfWeek = (dateString: string): string => {
+  const date = new Date(dateString)
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  return days[date.getDay()]
+}
+
+// Filter lessons based on current filters
+const filteredLessons = computed(() => {
+  if (!allLessons.value || allLessons.value.length === 0) return []
+  
+  return allLessons.value.filter((lesson: any) => {
+    // Date filter
+    if (filters.value.date) {
+      const filterDay = getDayOfWeek(filters.value.date)
+      if (lesson.day !== filterDay) return false
+    }
+    
+    // Subject filter
+    if (filters.value.subject && lesson.subject !== filters.value.subject) {
+      return false
+    }
+    
+    // Class filter
+    if (filters.value.class && lesson.class !== filters.value.class) {
+      return false
+    }
+    
+    return true
+  })
+})
+
+// Apply filters
+const applyFilters = () => {
+  // Filters are automatically applied through the computed property
+  // This function exists for the @change handlers
+}
+
+// Clear all filters
+const clearFilters = () => {
+  filters.value = {
+    date: '',
+    subject: '',
+    class: ''
   }
 }
 
-const addLesson = () => {
-  if (newLesson.value.lesson && newLesson.value.activity) {
-    lessons.value.push({
-      day: newLesson.value.day,
-      subject: newLesson.value.subject,
-      lesson: newLesson.value.lesson,
-      activity: newLesson.value.activity
-    })
-    
-    // Reset form
-    newLesson.value = {
-      day: 'Monday',
-      subject: 'Math',
-      lesson: '',
-      activity: ''
+// Auto-hide success/error messages
+const showSuccessMessage = (message: string) => {
+  successMessage.value = message
+  setTimeout(() => {
+    successMessage.value = ''
+  }, 3000)
+}
+
+// Fetch lessons from API
+const fetchLessons = async () => {
+  try {
+    loading.value = true
+    error.value = ''
+    const response = await api.get('/api/teacher/lesson-updates')
+    lessons.value = response.data.lessons
+    allLessons.value = response.data.lessons
+    applyFilters()
+  } catch (err) {
+    console.error('Error fetching lessons:', err)
+    error.value = 'Failed to load lessons. Please refresh the page.'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load lessons on component mount
+onMounted(() => {
+  fetchLessons()
+})
+
+const deleteLesson = async (index: number) => {
+  const lesson = filteredLessons.value[index]
+  if (confirm(`Are you sure you want to delete "${lesson.lesson}"?`)) {
+    try {
+      loading.value = true
+      await api.delete(`/api/teacher/lesson-updates/${lesson.id}`)
+      
+      // Remove from both arrays
+      const originalIndex = lessons.value.findIndex(l => l.id === lesson.id)
+      if (originalIndex !== -1) {
+        lessons.value.splice(originalIndex, 1)
+      }
+      const allIndex = allLessons.value.findIndex(l => l.id === lesson.id)
+      if (allIndex !== -1) {
+        allLessons.value.splice(allIndex, 1)
+      }
+      
+      showSuccessMessage('Lesson deleted successfully!')
+    } catch (err) {
+      console.error('Error deleting lesson:', err)
+      error.value = 'Failed to delete lesson. Please try again.'
+    } finally {
+      loading.value = false
     }
-    
-    showAddModal.value = false
+  }
+}
+
+const addLesson = async () => {
+  if (newLesson.value.lesson && newLesson.value.activity) {
+    try {
+      loading.value = true
+      error.value = ''
+      
+      const response = await api.post('/api/teacher/lesson-updates', {
+        day: newLesson.value.day,
+        subject: newLesson.value.subject,
+        lesson: newLesson.value.lesson,
+        activity: newLesson.value.activity,
+        class_: newLesson.value.class_
+      })
+      
+      // Add the new lesson to both arrays
+      lessons.value.unshift(response.data.lesson)
+      allLessons.value.unshift(response.data.lesson)
+      
+      // Reset form
+      newLesson.value = {
+        day: 'Monday',
+        subject: 'Math',
+        lesson: '',
+        activity: '',
+        class_: 1
+      }
+      
+      showAddModal.value = false
+      showSuccessMessage('Lesson created successfully!')
+    } catch (err) {
+      console.error('Error adding lesson:', err)
+      error.value = 'Failed to add lesson. Please try again.'
+    } finally {
+      loading.value = false
+    }
   }
 }
 
 const editLesson = (index: number) => {
-  editingIndex.value = index
-  const lesson = lessons.value[index]
+  const lesson = filteredLessons.value[index]
+  const originalIndex = lessons.value.findIndex(l => l.id === lesson.id)
+  editingIndex.value = originalIndex
+  
   editingLesson.value = {
+    id: lesson.id,
     day: lesson.day,
     subject: lesson.subject,
     lesson: lesson.lesson,
-    activity: lesson.activity
+    activity: lesson.activity,
+    class_: lesson.class
   }
   showEditModal.value = true
 }
 
-const updateLesson = () => {
+const updateLesson = async () => {
   if (editingLesson.value.lesson && editingLesson.value.activity && editingIndex.value >= 0) {
-    lessons.value[editingIndex.value] = {
-      day: editingLesson.value.day,
-      subject: editingLesson.value.subject,
-      lesson: editingLesson.value.lesson,
-      activity: editingLesson.value.activity
+    try {
+      loading.value = true
+      error.value = ''
+      
+      const response = await api.put(`/api/teacher/lesson-updates/${editingLesson.value.id}`, {
+        day: editingLesson.value.day,
+        subject: editingLesson.value.subject,
+        lesson: editingLesson.value.lesson,
+        activity: editingLesson.value.activity,
+        class_: editingLesson.value.class_
+      })
+      
+      // Update the lesson in the list
+      lessons.value[editingIndex.value] = response.data.lesson
+      
+      // Reset form and close modal
+      editingLesson.value = {
+        id: null,
+        day: 'Monday',
+        subject: 'Math',
+        lesson: '',
+        activity: '',
+        class_: 1
+      }
+      editingIndex.value = -1
+      showEditModal.value = false
+      showSuccessMessage('Lesson updated successfully!')
+    } catch (err) {
+      console.error('Error updating lesson:', err)
+      error.value = 'Failed to update lesson. Please try again.'
+    } finally {
+      loading.value = false
     }
-    
-    // Reset form and close modal
-    editingLesson.value = {
-      day: 'Monday',
-      subject: 'Math',
-      lesson: '',
-      activity: ''
-    }
-    editingIndex.value = -1
-    showEditModal.value = false
   }
 }
 </script>

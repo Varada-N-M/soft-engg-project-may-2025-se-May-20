@@ -695,7 +695,7 @@ class StudentLessonUpdates(Resource):
     def get(self):
         """
         Get all lesson updates for the logged-in child user.
-        Returns lesson updates from all teachers linked to the child.
+        Returns lesson updates from teachers linked to the child, filtered by the child's class level.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -714,8 +714,14 @@ class StudentLessonUpdates(Resource):
             if not teacher_ids:
                 return {'message': 'No teachers linked to this child.'}, 200
 
-            # Get all lesson updates from these teachers
-            lesson_updates = LessonUpdates.query.filter(LessonUpdates.teacher_id.in_(teacher_ids)).order_by(LessonUpdates.created_at.desc()).all()
+            # Get lesson updates from linked teachers, filtered by child's class level
+            query = LessonUpdates.query.filter(LessonUpdates.teacher_id.in_(teacher_ids))
+            
+            # Filter by child's class if the child has a class assigned
+            if child.class_:
+                query = query.filter(LessonUpdates.class_ == child.class_)
+            
+            lesson_updates = query.order_by(LessonUpdates.created_at.desc()).all()
 
             result = []
             for lesson in lesson_updates:
@@ -723,8 +729,11 @@ class StudentLessonUpdates(Resource):
                 teacher_user = Users.query.filter_by(user_id=teacher.user_id).first() if teacher else None
                 result.append({
                     'lesson_id': lesson.id,
+                    'day': lesson.day,
+                    'subject': lesson.subject,
                     'lesson': lesson.lesson,
-                    'summary': lesson.summary,
+                    'activity': lesson.activity,
+                    'class': lesson.class_,
                     'created_at': lesson.created_at.isoformat(),
                     'teacher_name': f"{teacher_user.first_name} {teacher_user.last_name}" if teacher_user else None
                 })

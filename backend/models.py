@@ -53,6 +53,7 @@ class LessonUpdates(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id'))
+    class_ = db.Column('class', db.Integer, nullable=False)  # Class/Grade level (1-12)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     day = db.Column(db.String(20), nullable=False)  # Monday, Tuesday, etc.
     subject = db.Column(db.String(100), nullable=False)  # Math, English, Science, etc.

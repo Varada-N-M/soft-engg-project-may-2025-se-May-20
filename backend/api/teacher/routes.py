@@ -119,6 +119,7 @@ class TeacherLessonUpdates(Resource):
                     'subject': lesson.subject,
                     'lesson': lesson.lesson,
                     'activity': lesson.activity,
+                    'class': lesson.class_,
                     'created_at': lesson.created_at.isoformat(),
                 })
 
@@ -146,7 +147,7 @@ class TeacherLessonUpdates(Resource):
             data = request.get_json()
             
             # Validate required fields
-            required_fields = ['day', 'subject', 'lesson', 'activity']
+            required_fields = ['day', 'subject', 'lesson', 'activity', 'class_']
             for field in required_fields:
                 if not data.get(field):
                     return {'error': f'{field} is required'}, 400
@@ -161,9 +162,15 @@ class TeacherLessonUpdates(Resource):
             if data['subject'] not in valid_subjects:
                 return {'error': 'Invalid subject. Must be one of: Math, English, Science, Social Studies, Computers'}, 400
 
+            # Validate class
+            class_level = data.get('class_')
+            if not isinstance(class_level, int) or class_level < 1 or class_level > 12:
+                return {'error': 'Invalid class level. Must be an integer between 1 and 12'}, 400
+
             # Create new lesson update
             new_lesson = LessonUpdates(
                 teacher_id=teacher.teacher_id,
+                class_=data['class_'],
                 day=data['day'],
                 subject=data['subject'],
                 lesson=data['lesson'],
@@ -181,6 +188,7 @@ class TeacherLessonUpdates(Resource):
                     'subject': new_lesson.subject,
                     'lesson': new_lesson.lesson,
                     'activity': new_lesson.activity,
+                    'class': new_lesson.class_,
                     'created_at': new_lesson.created_at.isoformat(),
                 }
             }, 201
@@ -217,6 +225,7 @@ class TeacherLessonUpdateDetail(Resource):
                 'subject': lesson.subject,
                 'lesson': lesson.lesson,
                 'activity': lesson.activity,
+                'class': lesson.class_,
                 'created_at': lesson.created_at.isoformat(),
             }, 200
 
@@ -246,7 +255,7 @@ class TeacherLessonUpdateDetail(Resource):
             data = request.get_json()
             
             # Validate required fields
-            required_fields = ['day', 'subject', 'lesson', 'activity']
+            required_fields = ['day', 'subject', 'lesson', 'activity', 'class_']
             for field in required_fields:
                 if not data.get(field):
                     return {'error': f'{field} is required'}, 400
@@ -261,11 +270,17 @@ class TeacherLessonUpdateDetail(Resource):
             if data['subject'] not in valid_subjects:
                 return {'error': 'Invalid subject. Must be one of: Math, English, Science, Social Studies, Computers'}, 400
 
+            # Validate class
+            class_level = data.get('class_')
+            if not isinstance(class_level, int) or class_level < 1 or class_level > 12:
+                return {'error': 'Invalid class level. Must be an integer between 1 and 12'}, 400
+
             # Update lesson
             lesson.day = data['day']
             lesson.subject = data['subject']
             lesson.lesson = data['lesson']
             lesson.activity = data['activity']
+            lesson.class_ = data['class_']
 
             db.session.commit()
 
@@ -277,6 +292,7 @@ class TeacherLessonUpdateDetail(Resource):
                     'subject': lesson.subject,
                     'lesson': lesson.lesson,
                     'activity': lesson.activity,
+                    'class': lesson.class_,
                     'created_at': lesson.created_at.isoformat(),
                 }
             }, 200

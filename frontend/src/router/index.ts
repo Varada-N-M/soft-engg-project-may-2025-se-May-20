@@ -23,6 +23,7 @@ import StudentJournal from "../pages/student/StudentJournal.vue";
 import LinkChild from '../pages/parent/LinkChild.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
+import TeacherDashboard from "../pages/teacher/Dashboard.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -60,6 +61,8 @@ const routes = [
 
     // BEGIN TEACHER SECTION
     {path: '/teacher/login', component: LoginTeacher},
+    {path: '/teacher/dashboard', component: TeacherDashboard},
+    {path: '/teacher/home', component: TeacherDashboard},
     {path: '/teacher/survey-report', component: SurveyReport},
     {path: '/teacher/lesson-updates', component: TeacherLessonUpdates},
     {path: '/teacher/add-student', component: AddStudent},

@@ -479,47 +479,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Modals
-    <div v-if="showCongratulationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" @click="showCongratulationsModal = false">
-      <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl" @click.stop>
-        <div class="text-center">
-          <div class="bg-yellow-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Congratulations Sent!</h3>
-          <p class="text-gray-600 mb-4">Your encouraging message has been sent to Alex. Keep supporting their learning journey!</p>
-          <button 
-            @click="showCongratulationsModal = false"
-            class="bg-green-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-green-600 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showEncouragementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" @click="showEncouragementModal = false">
-      <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl" @click.stop>
-        <div class="text-center">
-          <div class="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Encouragement Sent!</h3>
-          <p class="text-gray-600 mb-4">Alex will receive a motivational message to continue their amazing learning progress!</p>
-          <button 
-            @click="showEncouragementModal = false"
-            class="bg-blue-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div> -->
+    
   </div>
 </template>
 

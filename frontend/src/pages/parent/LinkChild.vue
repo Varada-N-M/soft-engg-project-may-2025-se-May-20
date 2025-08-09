@@ -105,7 +105,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ParentNavbar from "@/components/partials/ParentNavbar.vue";
+import ParentNavbar from "../../components/partials/ParentNavbar.vue";
 import api from '@/plugins/axios.ts';
 
 const childKey = ref('');

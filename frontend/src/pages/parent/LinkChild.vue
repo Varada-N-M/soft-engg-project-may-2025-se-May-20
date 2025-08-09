@@ -2,12 +2,12 @@
   <div class="min-h-screen bg-gray-100 flex page-font">
     <!-- Parent Navbar -->
     <ParentNavbar page-title="Link Child" />
-    
+
     <!-- Main Content -->
     <div class="flex-1 lg:ml-64">
       <!-- Mobile Header Spacing -->
       <div class="h-16 lg:h-0"></div>
-      
+
       <div class="p-6">
         <div class="max-w-2xl mx-auto">
           <!-- Header -->
@@ -105,8 +105,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ParentNavbar from "../../components/partials/ParentNavbar.vue";
-import api from '@/plugins/axios.ts';
+import ParentNavbar from "@/components/partials/ParentNavbar.vue";
 
 const childKey = ref('');
 const isLinking = ref(false);
@@ -132,23 +131,28 @@ const linkChild = async () => {
   message.value = null;
 
   try {
-    const response = await api.post('/api/parent/link-child', {
-      child_key: childKey.value.trim()
-    });
+    // TODO: Replace with actual API call
+    // const response = await axios.post('/api/parent/link-child', {
+    //   child_key: childKey.value.trim()
+    // });
 
+    // Simulate API call for now
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Mock success response
     message.value = {
       success: true,
-      text: response.data.message || 'Child account linked successfully! You can now monitor their learning progress.'
+      text: 'Child account linked successfully! You can now monitor their learning progress.'
     };
 
     // Clear the form
     childKey.value = '';
-    
+
   } catch (error) {
     console.error('Link child error:', error);
-    
+
     let errorMessage = 'Failed to link child account. Please try again.';
-    
+
     if (error.response) {
       if (error.response.status === 404) {
         errorMessage = 'Invalid child key. Please check the key and try again.';
@@ -170,7 +174,6 @@ const linkChild = async () => {
 </script>
 
 <style scoped>
-
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
 }

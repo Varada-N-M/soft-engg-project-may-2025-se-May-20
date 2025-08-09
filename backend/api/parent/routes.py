@@ -103,3 +103,78 @@ class ParentProfile(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+#### The query used in this need to optimize ####
+class GetLinkedChildren(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get all children linked to the current parent.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'message': 'Parent not found'}, 404
+            
+            # Use joins to get linked children data
+            linked_children_query = (
+                db.session.query(
+                    Child.child_id,
+                    Child.dob,
+                    Child.class_,
+                    Child.school_name,
+                    Child.gender,
+                    Child.unique_key,
+                    Child.is_linked,
+                    Child.created_at,
+                    Child.streak,
+                    Child.xp_points,
+                    Users.first_name,
+                    Users.last_name,
+                    Users.email,
+                    ParentChild.linked_at
+                )
+                .join(ParentChild, Child.child_id == ParentChild.child_id)
+                .join(Users, Child.user_id == Users.user_id)
+                .filter(ParentChild.parent_id == parent.parent_id)
+                .filter(Child.is_linked == True)
+                .order_by(ParentChild.linked_at.desc())
+            )
+            if not linked_children_query:
+                return {'message': 'No linked children found'}, 404
+
+            # Execute the query
+            results = linked_children_query.all()
+            
+            # Format the data
+            children_data = []
+            for result in results:
+                child_data = {
+                    'child_id': result.child_id,
+                    'first_name': result.first_name,
+                    'last_name': result.last_name,
+                    'email': result.email,
+                    'date_of_birth': result.dob.isoformat() if result.dob else None,
+                    'class': result.class_,
+                    'school_name': result.school_name,
+                    'gender': result.gender,
+                    'unique_key': result.unique_key,
+                    'is_linked': result.is_linked,
+                    'created_at': result.created_at.isoformat(),
+                    'linked_at': result.linked_at.isoformat(),
+                    'streak': result.streak,
+                    'xp_points': result.xp_points
+                }
+                children_data.append(child_data)
+            
+            return {
+                'linked_children': children_data
+            }, 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'message': 'An error occurred while retrieving linked children', 
+                'error': str(e)}, 500

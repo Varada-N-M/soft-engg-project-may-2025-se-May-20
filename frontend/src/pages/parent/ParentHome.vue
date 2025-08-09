@@ -1,103 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-100 flex page-font">
-    <!-- Sidebar -->
-    <div class="w-64 bg-white shadow-lg hidden lg:block">
-      <div class="p-6">
-        <!-- Logo -->
-        <div class="flex items-center gap-3 mb-8">
-          <div class="bg-blue-500 p-2 rounded-2xl">
-          </div>
-          <div>
-            <h2 class="text-lg font-bold text-gray-800">Parent Portal</h2>
-            <p class="text-xs text-gray-500">Alex's Learning</p>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="space-y-2">
-          <button 
-            @click="currentPage = 'dashboard'"
-            :class="currentPage === 'dashboard' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-          >
-            Dashboard
-          </button>
-
-          <button 
-            @click="currentPage = 'lessons'"
-            :class="currentPage === 'lessons' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-          >
-            Lessons
-          </button>
-
-          <button 
-            @click="currentPage = 'safesteps'"
-            :class="currentPage === 'safesteps' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-          >
-
-            SafeSteps
-          </button>
-          <router-link to="/parent/link-child" class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left text-gray-600 hover:bg-gray-100">
-            Link Child
-          </router-link>
-        </nav>
-      </div>
-    </div>
-
-    <!-- Mobile Sidebar -->
-    <div v-if="sidebarOpen" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden" @click="sidebarOpen = false">
-      <div class="w-64 bg-white h-full" @click.stop>
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-8">
-            <h2 class="text-lg font-bold text-gray-800">Parent Portal</h2>
-            <button @click="sidebarOpen = false" class="p-2 hover:bg-gray-100 rounded-[15px]">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <nav class="space-y-2">
-            <button 
-              @click="currentPage = 'dashboard'; sidebarOpen = false"
-              :class="currentPage === 'dashboard' ? 'bg-blue-500 text-white' : 'text-gray-600'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-            >
-              Dashboard
-            </button>
-            <button 
-              @click="currentPage = 'lessons'; sidebarOpen = false"
-              :class="currentPage === 'lessons' ? 'bg-blue-500 text-white' : 'text-gray-600'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-            >
-              Lessons
-            </button>
-            <button 
-              @click="currentPage = 'safesteps'; sidebarOpen = false"
-              :class="currentPage === 'safesteps' ? 'bg-blue-500 text-white' : 'text-gray-600'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left"
-            >
-              SafeSteps
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
+    <!-- Parent Navbar -->
+    <ParentNavbar :page-title="getPageTitle()" />
 
     <!-- Main Content -->
-    <div class="flex-1">
-      <!-- Mobile Header -->
-      <div class="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
-        <button @click="sidebarOpen = true" class="p-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-        <h1 class="text-lg font-semibold">{{ getPageTitle() }}</h1>
-        <div class="w-10"></div>
-      </div>
+    <div class="flex-1 lg:ml-64">
+      <!-- Mobile Header Spacing -->
+      <div class="h-16 lg:h-0"></div>
 
       <!-- Page Content -->
       <div class="p-6">
@@ -437,13 +346,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import ParentNavbar from "@/components/partials/ParentNavbar.vue"
 
 // Reactive data
 const showCongratulationsModal = ref(false)
 const showEncouragementModal = ref(false)
 const currentPage = ref('dashboard')
-const sidebarOpen = ref(false)
+
+// Router
+const route = useRoute()
+const router = useRouter()
 
 // Methods
 const getPageTitle = () => {

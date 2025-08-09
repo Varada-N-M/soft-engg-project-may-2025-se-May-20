@@ -24,6 +24,7 @@ import LinkChild from '../pages/parent/LinkChild.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
 import TeacherDashboard from "../pages/teacher/Dashboard.vue";
+import NotFound from "../pages/NotFound.vue";
 
 const routes = [
     {path: '/', component: LandingPage},
@@ -68,6 +69,8 @@ const routes = [
     {path: '/teacher/add-student', component: AddStudent},
     // END TEACHER SECTION
 
+    // 404 Catch-all route - must be last
+    {path: '/:pathMatch(.*)*', component: NotFound},
 ]
 
 const router = createRouter({

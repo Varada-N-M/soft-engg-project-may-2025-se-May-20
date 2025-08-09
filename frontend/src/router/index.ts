@@ -21,6 +21,7 @@ import TeacherLessonUpdates from "../pages/teacher/LessonUpdates.vue";
 import AddStudent from "../pages/teacher/AddStudent.vue";
 import StudentJournal from "../pages/student/StudentJournal.vue";
 import LinkChild from '../pages/parent/LinkChild.vue';
+import LinkedChildren from '../pages/parent/LinkedChildren.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
 import TeacherDashboard from "../pages/teacher/Dashboard.vue";

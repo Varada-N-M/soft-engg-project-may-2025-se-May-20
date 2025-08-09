@@ -72,5 +72,34 @@ class LinkChildToParent(Resource):
             db.session.rollback()
             return {'message': 'An error occurred while unlinking child from parent', 'error': str(e)}, 500
         
-        
+class ParentProfile(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the profile of the logged-in parent user.
+        Returns basic information about the parent user.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.PARENT).first()
 
+            if not user:
+                return {'error': 'Only active parent users can view their profile'}, 403
+
+            parent = Parent.query.filter_by(user_id=user.user_id).first()
+            if not parent:
+                return {'error': 'parent profile not found'}, 404
+
+            profile_data = {
+                'user_id': user.user_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'phone_number': parent.phone_number,
+                'parent_id': parent.parent_id
+            }
+            
+            return {'profile': profile_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

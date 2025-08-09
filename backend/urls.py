@@ -1,10 +1,9 @@
 from flask_restful import Api
 from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization, SignupTeacher, SignupAdmin
-from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill
-from api.parent.routes import LinkChildToParent
-from api.student.routes import Skills
+from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill,Skills,StudentProfile
+from api.parent.routes import LinkChildToParent,ParentProfile
 from api.teacher.routes import (AddStudent, RemoveStudent, TeacherLessonUpdates, TeacherLessonUpdateDetail, CreateSchool, 
-                                LinkStudentToTeacher, UnlinkStudentFromTeacher)
+                                LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile)
 from api.organization.routes import OrganizationStats
 from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
 
@@ -33,9 +32,11 @@ api.add_resource(ToDoListResource, '/api/todos', '/api/todos/<int:todo_id>')
 api.add_resource(StudentLessonUpdates, '/api/child/lesson-updates')
 api.add_resource(Skills, '/api/child/skills', '/api/child/skills/<int:skill_id>')
 api.add_resource(CompleteSkill, '/api/child/skills/<int:skill_id>/complete')
+api.add_resource(StudentProfile, '/api/child/profile')
 
 # Parent
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')
+api.add_resource(ParentProfile, '/api/parent/profile')
 
 # Teacher
 api.add_resource(AddStudent, '/api/teacher/add-student')
@@ -44,6 +45,6 @@ api.add_resource(TeacherLessonUpdates, '/api/teacher/lesson-updates')
 api.add_resource(TeacherLessonUpdateDetail, '/api/teacher/lesson-updates/<int:lesson_id>')
 api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
-
+api.add_resource(TeacherProfile, '/api/teacher/profile')
 # Organization
 api.add_resource(OrganizationStats, '/api/organization/stats')

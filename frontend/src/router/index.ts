@@ -57,6 +57,7 @@ const routes = [
     {path: '/parent/login', component: LoginParent},
     {path: '/parent/home', component: ParentHome},
     {path: '/parent/link-child', component: LinkChild},
+    {path: '/parent/children', component: LinkedChildren},
     // END PARENT SECTION
 
 

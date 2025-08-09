@@ -15,6 +15,7 @@ import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
 import SurveyPage from "../pages/student/SurveyPage.vue";
 import WeeklyReport from "../pages/student/WeeklyReport.vue";
+import AIChat from "../pages/student/AIChat.vue";
 import LoginTeacher from '../pages/teacher/LoginTeacher.vue';
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
 import TeacherLessonUpdates from "../pages/teacher/LessonUpdates.vue";
@@ -40,6 +41,7 @@ const routes = [
     {path: '/student/survey', component: SurveyPage},
     {path: '/student/journal', component: StudentJournal},
     {path: '/student/weekly-report', component: WeeklyReport},
+    {path: '/student/ai-companion', component: AIChat},
     // END STUDENT SECTION
 
 

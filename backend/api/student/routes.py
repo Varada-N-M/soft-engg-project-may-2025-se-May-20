@@ -210,7 +210,48 @@ class GratitudeEntry(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-        
+
+
+class BadgeCountAPI(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the total number of badges for the logged-in child user.
+        Optional:
+        - ?earned=true/false → count only earned or unearned badges
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            query = Badge.query.filter_by(child_id=child.child_id)
+
+            # Optional filter by earned status
+            earned_status = request.args.get('earned')
+            if earned_status is not None:
+                if earned_status.lower() not in ['true', 'false']:
+                    return {'error': 'Invalid earned status. Use true or false'}, 400
+                query = query.filter_by(is_earned=(earned_status.lower() == 'true'))
+
+            badge_count = query.count()
+
+            return {
+                'badge_count': badge_count
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
 
 class Habits(Resource):
     @jwt_required()
@@ -408,6 +449,48 @@ class Habits(Resource):
 
         except Exception as e:
             db.session.rollback()
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+class HabitsToday(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the latest 6 habits for the logged-in child.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view habits'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            habits = Habit.query.filter_by(child_id=child.child_id) \
+                .order_by(Habit.created_at.desc()) \
+                .limit(6).all()
+
+            return {
+                'habits': [
+                    {
+                        'habit_id': habit.id,
+                        'name': habit.name,
+                        'description': habit.description,
+                        'category': habit.category,
+                        'habit_xp': habit.habit_xp,
+                        'created_at': habit.created_at.isoformat()
+                    }
+                    for habit in habits
+                ]
+            }, 200
+
+        except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
 
@@ -947,6 +1030,41 @@ class CompleteSkill(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
     
+
+class CompletedSkillsCountAPI(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the total number of completed (learned) skills for the logged-in child user.
+        URL: /skills/completed/count
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view completed skills count'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            completed_count = SkillCompleted.query.filter_by(
+                child_id=child.child_id,
+                is_learned=True
+            ).count()
+
+            return {
+                'completed_skills_count': completed_count
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
 
 class StudentProfile(Resource):
     @jwt_required()

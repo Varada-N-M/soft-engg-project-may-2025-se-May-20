@@ -6,7 +6,7 @@ from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListRe
 from api.parent.routes import LinkChildToParent, GetLinkedChildren
 from api.student.routes import Skills
 from api.teacher.routes import (AddStudent, RemoveStudent, TeacherLessonUpdates, TeacherLessonUpdateDetail, CreateSchool, 
-                                LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile)
+                                LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile, GetLinkedStudents)
 from api.organization.routes import OrganizationStats
 from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
 
@@ -50,5 +50,6 @@ api.add_resource(TeacherLessonUpdateDetail, '/api/teacher/lesson-updates/<int:le
 api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
 api.add_resource(TeacherProfile, '/api/teacher/profile')
+api.add_resource(GetLinkedStudents, '/api/teacher/linked-students')
 # Organization
 api.add_resource(OrganizationStats, '/api/organization/stats')

@@ -489,32 +489,14 @@ class ToDoListResource(Resource):
             to_do = data['to_do'].strip()
             description = data['description'].strip()
             is_daily = data.get('is_daily', False)
+            is_done = data.get('is_done', False)
             created_at = datetime.now(timezone.utc)
 
             # Optional fields
-            start_date_str = data.get('start_date')  # ISO 8601 string
-            due_date_str = data.get('due_date')      # ISO 8601 string
+            completion_date_str = data.get('completion_date')      # ISO 8601 string
             
-            start_date = None
-            due_date = None
+            completion_date = None
 
-            # Parse and validate start_date
-            if start_date_str:
-                try:
-                    start_date = datetime.fromisoformat(start_date_str)
-                    if start_date < created_at:
-                        return {'error': 'Start date cannot be before creation time'}, 400
-                except ValueError:
-                    return {'error': 'Invalid start_date format. Use ISO 8601 format.'}, 400
-
-            # Parse and validate due_date
-            if due_date_str:
-                try:
-                    due_date = datetime.fromisoformat(due_date_str)
-                    if start_date and due_date <= start_date:
-                        return {'error': 'Due date must be after start date'}, 400
-                except ValueError:
-                    return {'error': 'Invalid due_date format. Use ISO 8601 format.'}, 400
 
             # Create to-do item
             todo_item = ToDoList(
@@ -522,9 +504,9 @@ class ToDoListResource(Resource):
                 to_do=to_do,
                 description=description,
                 is_daily=is_daily,
+                is_done=is_done,
                 created_at=created_at,
-                start_date=start_date,
-                due_date=due_date
+                completion_date=completion_date
             )
             
             db.session.add(todo_item)
@@ -538,8 +520,7 @@ class ToDoListResource(Resource):
                 'is_daily': todo_item.is_daily,
                 'is_done': todo_item.is_done,
                 'created_at': todo_item.created_at.isoformat(),
-                'start_date': todo_item.start_date.isoformat() if todo_item.start_date else None,
-                'due_date': todo_item.due_date.isoformat() if todo_item.due_date else None
+                'completion_date': todo_item.completion_date.isoformat() if todo_item.completion_date else None
             }
             
             return response_data, 201
@@ -598,6 +579,7 @@ class ToDoListResource(Resource):
                         'description': todo.description,
                         'is_done': todo.is_done,
                         'is_daily': todo.is_daily,
+                        'is_done': todo.is_done,
                         'created_at': todo.created_at.isoformat(),
                         'completion_date': todo.completion_date.isoformat() if todo.completion_date else None
                     } for todo in todos
@@ -965,3 +947,43 @@ class CompleteSkill(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
     
+
+class StudentProfile(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the profile of the logged-in child user.
+        Returns basic information about the child user.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
+            if not user:
+                return {'error': 'Only active child users can view their profile'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            profile_data = {
+                'user_id': user.user_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'child_id': child.child_id,
+                'dob': child.dob.isoformat() if child.dob else None,
+                'gender': child.gender,
+                'class_level': child.class_,
+                'created_at': child.created_at.isoformat(),
+                'unique_key': child.unique_key,
+                'school_name': child.school_name,
+                'streak': child.streak,
+                'xp_points': child.xp_points,
+                'is_linked': child.is_linked,
+            }
+            
+            return {'profile': profile_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

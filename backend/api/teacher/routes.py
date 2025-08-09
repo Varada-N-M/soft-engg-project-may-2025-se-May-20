@@ -450,3 +450,71 @@ class UnlinkStudentFromTeacher(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+class TeacherProfile(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the profile of the logged-in teacher user.
+        Returns basic information about the teacher user.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can view their profile'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            return {
+                'user_id': user.user_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'school_id': teacher.school_id,
+                'teacher_id': teacher.teacher_id,
+                'subject': teacher.subject,
+                'created_at': user.created_at.isoformat(),
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class GetLinkedStudents(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get all students linked to the logged-in teacher.
+        Returns a list of students linked to this teacher.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+
+            if not user:
+                return {'error': 'Only active teacher users can view linked students'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
+            students = []
+            for link in links:
+                student = Child.query.get(link.child_id)
+                if student:
+                    students.append({
+                        'student_id': student.child_id,
+                        'first_name': student.user.first_name,
+                        'last_name': student.user.last_name,
+                        'email': student.user.email,
+                    })
+
+            return {'students': students}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

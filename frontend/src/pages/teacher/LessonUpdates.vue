@@ -1,35 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <!-- Back Arrow -->
-            <button
-              @click="goHome"
-              class="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-100"
-            >
-              <ArrowLeftIcon class="w-6 h-6" />
-            </button>
-            <h1 class="text-xl font-bold text-gray-800 font-fancy">📚 Lesson Updates (Teacher)</h1>
-          </div>
-          <div class="flex items-center space-x-6">
-            <router-link to="/teacher/add-student" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Add Student
-            </router-link>
-            <div class="text-center">
-              <p class="text-2xl font-bold text-blue-600">{{ lessons?.length || 0 }}</p>
-              <p class="text-xs text-gray-600">Lessons</p>
-            </div>
-            <div class="text-center">
-              <p class="text-2xl font-bold text-green-600">{{ uniqueSubjects?.length || 0 }}</p>
-              <p class="text-xs text-gray-600">Subjects</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Navbar -->
+    <TeacherNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -417,8 +389,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeftIcon, PlusIcon, XIcon, Trash2Icon, EditIcon } from 'lucide-vue-next'
+import { PlusIcon, XIcon, Trash2Icon, EditIcon } from 'lucide-vue-next'
 import api from '@/plugins/axios'
+import TeacherNavbar from '@/components/app/TeacherNavbar.vue'
 
 const router = useRouter()
 const showAddModal = ref(false)
@@ -427,10 +400,6 @@ const editingIndex = ref(-1)
 const loading = ref(false)
 const error = ref('')
 const successMessage = ref('')
-
-const goHome = () => {
-  router.push('/teacher/home')
-}
 
 const lessons = ref([])
 const allLessons = ref([]) // Store all lessons for filtering

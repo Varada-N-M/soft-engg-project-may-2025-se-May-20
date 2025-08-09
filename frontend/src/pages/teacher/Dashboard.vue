@@ -1,27 +1,7 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold text-gray-800">👨‍🏫 Teacher Dashboard</h1>
-          </div>
-          <div class="flex items-center space-x-6">
-            <div class="text-center">
-              <p class="text-sm font-medium text-gray-600">Welcome back,</p>
-              <p class="text-lg font-bold text-blue-600">{{ teacherName }}</p>
-            </div>
-            <button
-              @click="logout"
-              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Navbar -->
+    <TeacherNavbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -230,6 +210,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import TeacherNavbar from '@/components/app/TeacherNavbar.vue'
 
 const router = useRouter()
 const teacherName = ref('Teacher')

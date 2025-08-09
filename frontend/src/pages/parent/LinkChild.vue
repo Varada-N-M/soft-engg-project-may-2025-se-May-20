@@ -2,12 +2,12 @@
   <div class="min-h-screen bg-gray-100 flex page-font">
     <!-- Parent Navbar -->
     <ParentNavbar page-title="Link Child" />
-    
+
     <!-- Main Content -->
     <div class="flex-1 lg:ml-64">
       <!-- Mobile Header Spacing -->
       <div class="h-16 lg:h-0"></div>
-      
+
       <div class="p-6">
         <div class="max-w-2xl mx-auto">
           <!-- Header -->
@@ -44,12 +44,12 @@
               </div>
 
               <div>
-                <button
+                <Button
                   type="submit"
                   :disabled="isLinking"
-                  class="w-full px-4 py-3 font-bold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  class="w-full px-4 py-3 rounded-xl  focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  <span v-if="!isLinking" class="text-lg">Link Child Account</span>
+                  <span v-if="!isLinking" >Link Child Account</span>
                   <span v-else class="flex items-center justify-center text-lg">
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -57,7 +57,7 @@
                     </svg>
                     Linking...
                   </span>
-                </button>
+                </Button>
               </div>
             </form>
 
@@ -106,6 +106,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import ParentNavbar from "@/components/partials/ParentNavbar.vue";
+import {Button} from "@/components/ui/button/index.js";
 
 const childKey = ref('');
 const isLinking = ref(false);
@@ -147,12 +148,12 @@ const linkChild = async () => {
 
     // Clear the form
     childKey.value = '';
-    
+
   } catch (error) {
     console.error('Link child error:', error);
-    
+
     let errorMessage = 'Failed to link child account. Please try again.';
-    
+
     if (error.response) {
       if (error.response.status === 404) {
         errorMessage = 'Invalid child key. Please check the key and try again.';
@@ -174,7 +175,6 @@ const linkChild = async () => {
 </script>
 
 <style scoped>
-
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
 }

@@ -3,7 +3,7 @@ from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, Sign
 from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill,Skills,StudentProfile
 from api.parent.routes import LinkChildToParent,ParentProfile
 from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill
-from api.parent.routes import LinkChildToParent, GetLinkedChildren
+from api.parent.routes import LinkChildToParent, GetLinkedChildren, ParentChildrenLessonUpdates
 from api.student.routes import Skills
 from api.teacher.routes import (AddStudent, RemoveStudent, TeacherLessonUpdates, TeacherLessonUpdateDetail, CreateSchool, 
                                 LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile, GetLinkedStudents)
@@ -41,6 +41,7 @@ api.add_resource(StudentProfile, '/api/child/profile')
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')
 api.add_resource(ParentProfile, '/api/parent/profile')
 api.add_resource(GetLinkedChildren, '/api/parent/linked-children')
+api.add_resource(ParentChildrenLessonUpdates, '/api/parent/children/lesson-updates')
 
 # Teacher
 api.add_resource(AddStudent, '/api/teacher/add-student')

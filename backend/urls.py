@@ -12,7 +12,8 @@ from api.student.routes import (AnalyzeWriting, BadgeCountAPI,
                                 CompleteSkill, GrammarCheck, GratitudeEntry,
                                 Habits, ImproveSentence, Skills, StoryStarter,
                                 StudentLessonUpdates, StudentProfile,
-                                ToDoListResource, VocabularySuggestions)
+                                ToDoListDetailResource, ToDoListResource,
+                                VocabularySuggestions)
 from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
                                 LinkStudentToTeacher, RemoveStudent,
                                 TeacherLessonUpdateDetail,
@@ -50,7 +51,7 @@ api.add_resource(BadgeCountAPI, '/api/child/badge/count')
 api.add_resource(CompletedSkillsCountAPI, '/api/child/skills/completed/count')
 
 #AI features
-api.add_resource(ImproveSentence, '/api/improve-sentence')
+api.add_resource(ImproveSentence, '/api/child/improve-sentence')
 api.add_resource(AnalyzeWriting, '/api/child/analyze-writing')
 api.add_resource(GrammarCheck, '/api/child/grammar-check')
 api.add_resource(VocabularySuggestions, '/api/child/vocabulary-suggestions')

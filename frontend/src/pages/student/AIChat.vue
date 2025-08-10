@@ -371,7 +371,7 @@ export default {
       this.sentenceResults = null
       
       try {
-        const response = await api.post('/child/improve-sentence', {
+        const response = await api.post('api/child/improve-sentence', {
           sentence: this.sentenceInput
         })
         

@@ -170,8 +170,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/plugins/axios';
+import { onMounted, ref } from 'vue';
 
 // --- Reactive Data ---
 const showModal = ref(false);
@@ -202,7 +202,7 @@ const fetchTodos = async () => {
   }
 
   try {
-    const response = await axios.get('/api/todos', {
+    const response = await api.get('/api/todos', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -232,7 +232,7 @@ const createTodo = async () => {
   }
 
   try {
-    const response = await axios.post('/api/todos', {
+    const response = await api.post('/api/todos', {
       to_do: todoForm.value.task_name.trim(),
       description: todoForm.value.description.trim(),
       is_daily: todoForm.value.is_daily || false,
@@ -273,7 +273,7 @@ const updateTodo = async () => {
   if (!token || !editingTodo.value?.id) return;
 
   try {
-    await axios.put(`/api/todos/${editingTodo.value.id}`, {
+    await api.put(`/api/todos/${editingTodo.value.id}`, {
       to_do: todoForm.value.task_name.trim(),
       description: todoForm.value.description.trim(),
       is_daily: todoForm.value.is_daily || false,
@@ -307,7 +307,7 @@ const deleteTodo = async () => {
 
   const token = localStorage.getItem('access_token');
   try {
-    await axios.delete(`/api/todos/${editingTodo.value.id}`, {
+    await api.delete(`/api/todos/${editingTodo.value.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     todos.value = todos.value.filter(t => t.id !== editingTodo.value.id);

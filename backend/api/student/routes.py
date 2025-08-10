@@ -1206,3 +1206,70 @@ class ImproveSentence(Resource):
         
         except Exception as e:
             return {"error": "Oops! Something went wrong, but keep trying - you're doing great!"}, 500
+
+class AnalyzeWriting(Resource):
+    @jwt_required()
+    def post(self):
+        """Analyze longer writing pieces - child-friendly version"""
+        try:
+            data = request.get_json()
+            if not data or 'text' not in data:
+                return {"error": "Please share your writing so I can help make it even better!"}, 400
+            
+            text = data['text'].strip()
+            writing_type = data.get('type', 'story')  # Default to story for kids
+            
+            if not text:
+                return {"error": "It looks like you haven't written anything yet. Give it a try!"}, 400
+            
+            # Analyze the writing
+            analysis = communication_helper.analyze_writing(text, writing_type)
+            
+            # Get AI feedback with child-friendly prompting
+            try:
+                feedback_prompt = f"""
+                You are helping a child aged 8-14 improve their {writing_type}. Be very encouraging and positive!
+                
+                Here's what they wrote: "{text}"
+                
+                Please provide feedback that:
+                1. Starts with genuine praise for what they did well (be specific!)
+                2. Gives 2-3 gentle suggestions for improvement using simple, friendly language
+                3. Encourages them to keep writing and practicing
+                4. Includes one fun writing tip they can try next time
+                
+                Use encouraging language like "Great job!", "I love how you...", "You're really good at..."
+                Keep suggestions positive: "You could try..." instead of "You should fix..."
+                Make it sound like a helpful friend, not a teacher grading their work.
+                Use simple words and short sentences.
+                """
+                
+                ai_response = model.generate_content(feedback_prompt)
+                ai_feedback = ai_response.text
+            except Exception as e:
+                ai_feedback = f"{communication_helper.get_positive_starter()} Your writing shows great imagination! Keep practicing and you'll get even better!"
+            
+            # Speaking tips for this type of writing
+            speaking_tips = communication_helper.get_speaking_tips(writing_type)
+            
+            # Fun writing badges based on their work
+            badges = []
+            if analysis["word_count"] > 50:
+                badges.append("📝 Word Champion")
+            if analysis["sentence_count"] > 5:
+                badges.append("⭐ Sentence Star")
+            if writing_type == "story":
+                badges.append("📚 Storyteller")
+            
+            return {
+                "analysis": analysis,
+                "ai_feedback": ai_feedback,
+                "speaking_tips": speaking_tips,
+                "writing_type": writing_type,
+                "readability_score": "Perfect for your age!" if analysis["avg_sentence_length"] < 20 else "Great job! Try shorter sentences next time",
+                "badges_earned": badges,
+                "encouragement": communication_helper.get_child_friendly_encouragement()
+            }
+        
+        except Exception as e:
+            return {"error": "Something went wrong, but your writing is awesome! Keep it up!"}, 500

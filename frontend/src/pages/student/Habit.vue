@@ -164,9 +164,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { onMounted, ref } from 'vue';
 
+import api from '@/plugins/axios.ts';
 // --- Reactive Data ---
 const showModal = ref(false);
 const editingHabit = ref(null);
@@ -202,7 +202,7 @@ const fetchHabits = async () => {
   const token = localStorage.getItem('access_token');
 
   try {
-    const response = await axios.get('/api/child/habits', {
+    const response = await api.get('/api/child/habit', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -230,7 +230,7 @@ const fetchHabits = async () => {
 const completeHabit = async (habitId) => {
   const token = localStorage.getItem('access_token');
   try {
-    await axios.post(`/api/habits/${habitId}/complete`, null, {
+    await api.post(`/api/habit/${habitId}/complete`, null, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -254,7 +254,7 @@ const completeHabit = async (habitId) => {
 const createHabit = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    const response = await axios.post('/api/child/habits', {
+    const response = await api.post('/api/child/habit', {
       habit_name: habitForm.value.name,
       habit_description: habitForm.value.description,
       habit_category: habitForm.value.category,
@@ -282,7 +282,7 @@ const createHabit = async () => {
 const updateHabit = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    await axios.put(`/api/habits/${editingHabit.value.id}`, {
+    await api.put(`/api/habit/${editingHabit.value.id}`, {
       habit_name: habitForm.value.name,
       habit_description: habitForm.value.description,
       habit_category: habitForm.value.category,
@@ -308,7 +308,7 @@ const deleteHabit = async () => {
 
   const token = localStorage.getItem('access_token');
   try {
-    await axios.delete(`/api/child/habits/${editingHabit.value.id}`, {
+    await api.delete(`/api/child/habit/${editingHabit.value.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 

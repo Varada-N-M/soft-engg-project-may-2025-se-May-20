@@ -1,13 +1,24 @@
+import os
 from datetime import date, datetime, timedelta, timezone
 
+import dotenv
+import google.generativeai as genai
+from dotenv import load_dotenv
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
+from google.generativeai import GenerativeModel
 from sqlalchemy import func
 
+from config import config
 from models import *
 from utils import *
 
+GEMINI_API_KEY = config['default'].GEMINI_API_KEY
+GEMINI_MODEL = config['default'].GEMINI_MODEL
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = GenerativeModel(GEMINI_MODEL)
 
 class GratitudeEntry(Resource):
     @jwt_required()
@@ -210,7 +221,48 @@ class GratitudeEntry(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-        
+
+
+class BadgeCountAPI(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the total number of badges for the logged-in child user.
+        Optional:
+        - ?earned=true/false → count only earned or unearned badges
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view badges'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            query = Badge.query.filter_by(child_id=child.child_id)
+
+            # Optional filter by earned status
+            earned_status = request.args.get('earned')
+            if earned_status is not None:
+                if earned_status.lower() not in ['true', 'false']:
+                    return {'error': 'Invalid earned status. Use true or false'}, 400
+                query = query.filter_by(is_earned=(earned_status.lower() == 'true'))
+
+            badge_count = query.count()
+
+            return {
+                'badge_count': badge_count
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
 
 class Habits(Resource):
     @jwt_required()
@@ -410,6 +462,45 @@ class Habits(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
+class HabitsToday(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view habits'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            habits = Habit.query.filter_by(child_id=child.child_id) \
+                .order_by(Habit.created_at.desc()) \
+                .all()
+
+            return {
+                'habits': [
+                    {
+                        'habit_id': habit.id,
+                        'name': habit.name,
+                        'description': habit.description,
+                        'category': habit.category,
+                        'habit_xp': habit.habit_xp,
+                        'created_at': habit.created_at.isoformat()
+                    }
+                    for habit in habits
+                ]
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
 
 class CompleteHabit(Resource):
     @jwt_required()
@@ -464,6 +555,7 @@ class CompleteHabit(Resource):
 
 class ToDoListResource(Resource):
     """Manage to-do list items."""
+    
     @jwt_required()
     def post(self):
         """Create a new to-do item."""
@@ -491,13 +583,15 @@ class ToDoListResource(Resource):
             is_daily = data.get('is_daily', False)
             is_done = data.get('is_done', False)
             created_at = datetime.now(timezone.utc)
-
-            # Optional fields
-            completion_date_str = data.get('completion_date')      # ISO 8601 string
+            completion_date_str = data.get('completion_date')
             
             completion_date = None
-
-
+            if completion_date_str:
+                try:
+                    completion_date = datetime.fromisoformat(completion_date_str)
+                except ValueError:
+                    return {'error': 'Invalid completion_date format. Use ISO 8601.'}, 400
+            
             # Create to-do item
             todo_item = ToDoList(
                 child_id=child.child_id,
@@ -529,7 +623,6 @@ class ToDoListResource(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
-    
     @jwt_required()
     def get(self):
         """Get to-do items for the logged-in child."""
@@ -544,30 +637,7 @@ class ToDoListResource(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
             
-            # Query parameters
-            is_done = request.args.get('is_done')
-            is_daily = request.args.get('is_daily')
-            date_str = request.args.get('date')
-            
             query = ToDoList.query.filter_by(child_id=child.child_id)
-            
-            # Filter by completion status
-            if is_done is not None:
-                is_done_bool = is_done.lower() == 'true'
-                query = query.filter_by(is_done=is_done_bool)
-            
-            # Filter by daily tasks
-            if is_daily is not None:
-                is_daily_bool = is_daily.lower() == 'true'
-                query = query.filter_by(is_daily=is_daily_bool)
-            
-            # Filter by date
-            if date_str:
-                try:
-                    target_date = datetime.strptime(date_str, "%d-%m-%y").date()
-                    query = query.filter(func.date(ToDoList.created_at) == target_date)
-                except ValueError:
-                    return {'error': 'Invalid date format. Use DD-MM-YY'}, 400
             
             todos = query.order_by(ToDoList.created_at.desc()).all()
             
@@ -579,7 +649,6 @@ class ToDoListResource(Resource):
                         'description': todo.description,
                         'is_done': todo.is_done,
                         'is_daily': todo.is_daily,
-                        'is_done': todo.is_done,
                         'created_at': todo.created_at.isoformat(),
                         'completion_date': todo.completion_date.isoformat() if todo.completion_date else None
                     } for todo in todos
@@ -588,7 +657,10 @@ class ToDoListResource(Resource):
             
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
-    
+
+class ToDoListDetailResource(Resource):
+    """Manage a single to-do list item by ID."""
+
     @jwt_required()
     def put(self, todo_id):
         """Update a to-do item."""
@@ -603,15 +675,11 @@ class ToDoListResource(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
             
-            data = request.get_json()
-            list_id = data.get('list_id')
-            
-            if not list_id:
-                return {'error': 'list_id is required'}, 400
-            
-            todo_item = ToDoList.query.filter_by(list_id=list_id, child_id=child.child_id).first()
+            todo_item = ToDoList.query.filter_by(list_id=todo_id, child_id=child.child_id).first()
             if not todo_item:
                 return {'error': 'To-do item not found'}, 404
+            
+            data = request.get_json()
             
             # Update fields
             if 'to_do' in data:
@@ -626,6 +694,12 @@ class ToDoListResource(Resource):
                     todo_item.completion_date = datetime.now(timezone.utc)
                 elif not data['is_done']:
                     todo_item.completion_date = None
+            if 'completion_date' in data:
+                completion_date_str = data['completion_date']
+                try:
+                    todo_item.completion_date = datetime.fromisoformat(completion_date_str) if completion_date_str else None
+                except ValueError:
+                    return {'error': 'Invalid completion_date format. Use ISO 8601.'}, 400
             
             db.session.commit()
             
@@ -642,7 +716,7 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-        
+
     @jwt_required()
     def delete(self, todo_id):
         """Delete a to-do item."""
@@ -669,7 +743,6 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-
 
 
 class StudentLessonUpdates(Resource):
@@ -948,6 +1021,41 @@ class CompleteSkill(Resource):
             return {'error': 'Internal server error', 'details': str(e)}, 500
     
 
+class CompletedSkillsCountAPI(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get the total number of completed (learned) skills for the logged-in child user.
+        URL: /skills/completed/count
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(
+                user_id=current_user_id,
+                is_active=True,
+                role_type=UserRole.CHILD
+            ).first()
+
+            if not user:
+                return {'error': 'Only active child users can view completed skills count'}, 403
+
+            child = Child.query.filter_by(user_id=user.user_id).first()
+            if not child:
+                return {'error': 'Child profile not found'}, 404
+
+            completed_count = SkillCompleted.query.filter_by(
+                child_id=child.child_id,
+                is_learned=True
+            ).count()
+
+            return {
+                'completed_skills_count': completed_count
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
 class StudentProfile(Resource):
     @jwt_required()
     def get(self):
@@ -987,3 +1095,554 @@ class StudentProfile(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+
+
+class CommunicationHelper:
+    def __init__(self):
+        self.grammar_patterns = {
+            # Common grammar issues
+            'had_to_have': r'\b(have|has)\s+had\s+to\b',
+            'double_past': r'\b(told|said|asked)\s+.*\s+(have|has)\s+had\b',
+            'tense_consistency': r'\b(yesterday|last)\s+.*\s+(have|has)\b',
+            'redundant_that': r'\bthat\s+that\b',
+            'run_on': r'^[^.!?]{100,}$',  # Very long sentences without punctuation
+            'lowercase_i': r'\bi\b',
+            'double_spaces': r'\s{2,}',
+            'missing_punctuation': r'[a-zA-Z]$',
+            'missing_capital': r'^[a-z]'
+        }
+        
+        # Child-friendly encouragement phrases
+        self.encouragements = [
+            "Great job trying!",
+            "You're doing awesome!",
+            "Nice work!",
+            "Keep it up, superstar!",
+            "You're getting better every day!",
+            "Fantastic effort!",
+            "Way to go!",
+            "You're a writing champion!"
+        ]
+        
+        self.positive_starters = [
+            "Wow, this is a great start!",
+            "I love your creativity!",
+            "You have some really cool ideas here!",
+            "This is coming along nicely!",
+            "You're thinking like a real writer!"
+        ]
+
+        # Vocabulary enhancement suggestions
+        self.common_replacements = {
+            'good': ['amazing', 'awesome', 'fantastic', 'wonderful'],
+            'bad': ['terrible', 'awful', 'horrible', 'yucky'],
+            'big': ['huge', 'gigantic', 'enormous', 'massive'],
+            'small': ['tiny', 'itty-bitty', 'mini', 'little'],
+            'very': ['super', 'really', 'extremely', 'totally'],
+            'said': ['shouted', 'whispered', 'exclaimed', 'announced'],
+            'went': ['rushed', 'strolled', 'marched', 'wandered'],
+            'happy': ['joyful', 'cheerful', 'delighted', 'thrilled'],
+            'sad': ['gloomy', 'disappointed', 'upset', 'blue'],
+            'fast': ['speedy', 'quick', 'rapid', 'swift'],
+            'slow': ['sluggish', 'gradual', 'leisurely', 'pokey']
+        }
+    
+    def get_child_friendly_encouragement(self):
+        """Get a random encouraging phrase for kids"""
+        return random.choice(self.encouragements)
+    
+    def get_positive_starter(self):
+        """Get a positive conversation starter"""
+        return random.choice(self.positive_starters)
+    
+    def analyze_sentence(self, sentence):
+        """Analyze sentence for common issues - child-friendly version"""
+        issues = []
+        suggestions = []
+        
+        # Check for grammar patterns with kid-friendly language
+        if re.search(self.grammar_patterns['tense_consistency'], sentence, re.IGNORECASE):
+            issues.append("Let's check when things happened - past or present?")
+            suggestions.append("Try using the same time (past or present) throughout your sentence")
+        
+        if re.search(self.grammar_patterns['double_past'], sentence, re.IGNORECASE):
+            issues.append("We might be mixing up our past tenses")
+            suggestions.append("Pick one way to talk about the past and stick with it")
+        
+        if re.search(self.grammar_patterns['redundant_that'], sentence, re.IGNORECASE):
+            issues.append("Looks like 'that' appears twice - we only need it once!")
+            suggestions.append("Remove the extra 'that' word")
+        
+        if re.search(self.grammar_patterns['run_on'], sentence):
+            issues.append("This sentence is getting pretty long!")
+            suggestions.append("Try breaking it into 2 or 3 shorter sentences - it'll be easier to read!")
+        
+        # Check sentence length and complexity
+        word_count = len(sentence.split())
+        if word_count > 25:
+            issues.append("This sentence has lots of words!")
+            suggestions.append("Let's split this into smaller sentences so it's easier to understand")
+        
+        return issues, suggestions
+
+    def improve_sentence_with_ai(self, sentence):
+        """Use AI to improve the sentence - child-friendly version"""
+        try:
+            prompt = f"""
+            You are helping a child aged 8-14 improve their writing. Be encouraging, positive, and use simple language.
+            
+            Please help improve this sentence: "{sentence}"
+            
+            Provide:
+            1. An improved version that keeps their original idea
+            2. A simple, encouraging explanation of what you changed (use kid-friendly language)
+            3. One fun tip to remember for next time
+            
+            Be very positive and encouraging. Start with praise for their effort!
+            Keep the language simple and age-appropriate for children 8-14.
+            Make it sound like a helpful friend, not a teacher.
+            """
+            
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            print(f"AI improvement error: {e}")
+            return f"{self.get_child_friendly_encouragement()} I'm having trouble right now, but your sentence looks great! Keep practicing!"
+
+    def analyze_writing(self, text, writing_type="general"):
+        """Analyze longer writing pieces - child-friendly version"""
+        sentences = re.split(r'[.!?]+', text)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        analysis = {
+            "sentence_count": len(sentences),
+            "word_count": len(text.split()),
+            "avg_sentence_length": len(text.split()) / max(len(sentences), 1),
+            "issues": [],
+            "suggestions": [],
+            "praise_points": []  # Added praise points for kids
+        }
+        
+        # Add praise points based on what they did well
+        if analysis["sentence_count"] >= 3:
+            analysis["praise_points"].append("You wrote multiple sentences - great storytelling!")
+        
+        if analysis["word_count"] > 20:
+            analysis["praise_points"].append("Wow, you used lots of words to express your ideas!")
+        
+        if writing_type == "story" and any(word in text.lower() for word in ['once', 'then', 'finally', 'suddenly']):
+            analysis["praise_points"].append("You used great story words to connect your ideas!")
+        
+        # Check each sentence with encouraging language
+        for i, sentence in enumerate(sentences):
+            issues, suggestions = self.analyze_sentence(sentence)
+            if issues:
+                analysis["issues"].extend([f"In sentence {i+1}: {issue}" for issue in issues])
+                analysis["suggestions"].extend(suggestions)
+        
+        # Overall writing suggestions with positive framing
+        if analysis["avg_sentence_length"] > 20:
+            analysis["suggestions"].append("Try using shorter sentences - they're easier to read and understand!")
+        
+        if analysis["sentence_count"] < 3 and analysis["word_count"] > 50:
+            analysis["suggestions"].append("You have great ideas! Try breaking them into more sentences.")
+        
+        return analysis
+
+    def check_grammar(self, text):
+        """Comprehensive grammar check with corrections"""
+        issues = []
+        corrections = []
+        compliments = []
+        corrected_text = text
+        
+        # Check for lowercase 'i'
+        if re.search(self.grammar_patterns['lowercase_i'], text):
+            issues.append("Remember to use capital 'I' when talking about yourself!")
+            corrected_text = re.sub(r'\bi\b', 'I', corrected_text)
+        else:
+            compliments.append("Great job using capital letters correctly!")
+        
+        # Check for missing capital at start
+        if re.search(self.grammar_patterns['missing_capital'], text.strip()):
+            issues.append("Don't forget to start with a capital letter!")
+            corrected_text = corrected_text.strip()
+            corrected_text = corrected_text[0].upper() + corrected_text[1:] if len(corrected_text) > 1 else corrected_text.upper()
+        else:
+            compliments.append("Perfect start with a capital letter!")
+        
+        # Check for missing punctuation
+        if not text.rstrip().endswith(('.', '!', '?')):
+            issues.append("Your sentence needs an ending mark like . ! or ?")
+            corrected_text = corrected_text.rstrip() + '.'
+        else:
+            compliments.append("Nice job ending your sentence with punctuation!")
+        
+        # Check for double spaces
+        if re.search(self.grammar_patterns['double_spaces'], text):
+            issues.append("Try using just one space between words")
+            corrected_text = re.sub(r'\s+', ' ', corrected_text)
+        
+        return issues, corrections, compliments, corrected_text
+
+    def check_grammar_with_ai(self, text):
+        """
+        Enhanced grammar check combining pattern matching with AI analysis
+        """
+        # Basic pattern-based check
+        issues, corrections, compliments, corrected_text = self.check_grammar(text)
+        
+        try:
+            # AI analysis for more sophisticated grammar checking
+            ai_prompt = f"""
+            Analyze this text for grammar issues. Focus on:
+            1. Subject-verb agreement
+            2. Tense consistency
+            3. Pronoun usage
+            4. Sentence structure
+            5. Punctuation
+            
+            Text: "{text}"
+            
+            Provide specific issues found and suggestions for improvement.
+            Use child-friendly language suitable for ages 8-14.
+            Be encouraging and positive in your feedback.
+            """
+            
+            ai_response = model.generate_content(ai_prompt)
+            ai_analysis = ai_response.text
+            
+            return {
+                "basic_issues": issues,
+                "basic_corrections": corrections,
+                "compliments": compliments,
+                "corrected_text": corrected_text,
+                "ai_analysis": ai_analysis
+            }
+            
+        except Exception as e:
+            print(f"AI grammar analysis error: {e}")
+            return {
+                "basic_issues": issues,
+                "basic_corrections": corrections,
+                "compliments": compliments,
+                "corrected_text": corrected_text,
+                "ai_analysis": "AI analysis unavailable, but basic grammar check completed!"
+            }
+
+    def get_vocabulary_suggestions(self, text):
+        """Get vocabulary enhancement suggestions"""
+        suggestions = []
+        words = text.lower().split()
+        
+        for word in words:
+            clean_word = re.sub(r'[^\w]', '', word)
+            if clean_word in self.common_replacements:
+                suggestions.append({
+                    "original": word,
+                    "alternatives": self.common_replacements[clean_word],
+                    "tip": f"Instead of '{word}', try one of these exciting words!"
+                })
+        
+        return suggestions
+
+# Initialize the helper
+communication_helper = CommunicationHelper()
+
+# Resource Classes
+class HealthCheck(Resource):
+    def get(self):
+        return {"status": "healthy", "message": "Grammar Helper API is running for awesome kids!"}
+
+class ImproveSentence(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Improve a sentence using AI - child-friendly version.
+        URL: /improve-sentence
+        """
+        try:
+            data = request.get_json()
+            if not data or 'sentence' not in data:
+                return {"error": "Please share a sentence you'd like help with!"}, 400
+            
+            sentence = data['sentence'].strip()
+            if not sentence:
+                return {"error": "Oops! The sentence seems to be empty. Try typing something!"}, 400
+            
+            # Basic analysis
+            issues, suggestions = communication_helper.analyze_sentence(sentence)
+            
+            # AI improvement
+            ai_improvement = communication_helper.improve_sentence_with_ai(sentence)
+            
+            # Add encouragement
+            encouragement = communication_helper.get_child_friendly_encouragement()
+            
+            return {
+                "original_sentence": sentence,
+                "issues": issues,
+                "suggestions": suggestions,
+                "ai_improvement": ai_improvement,
+                "word_count": len(sentence.split()),
+                "encouragement": encouragement,
+                "fun_fact": "Did you know? The average sentence has about 15-20 words!"
+            }
+        
+        except Exception as e:
+            print(f"Error improving sentence: {e}")
+            return {"error": "Oops! Something went wrong, but keep trying - you're doing great!"}, 500
+
+class AnalyzeWriting(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Analyze longer writing pieces - child-friendly version
+        URL: /analyze-writing
+        """
+        try:
+            data = request.get_json()
+            if not data or 'text' not in data:
+                return {"error": "Please share your writing so I can help make it even better!"}, 400
+            
+            text = data['text'].strip()
+            writing_type = data.get('type', 'story')  # Default to story for kids
+            
+            if not text:
+                return {"error": "It looks like you haven't written anything yet. Give it a try!"}, 400
+            
+            # Analyze the writing
+            analysis = communication_helper.analyze_writing(text, writing_type)
+            
+            # Get AI feedback with child-friendly prompting
+            try:
+                feedback_prompt = f"""
+                You are helping a child aged 8-14 improve their {writing_type}. Be very encouraging and positive!
+                
+                Here's what they wrote: "{text}"
+                
+                Please provide feedback that:
+                1. Starts with genuine praise for what they did well (be specific!)
+                2. Gives 2-3 gentle suggestions for improvement using simple, friendly language
+                3. Encourages them to keep writing and practicing
+                4. Includes one fun writing tip they can try next time
+                
+                Use encouraging language like "Great job!", "I love how you...", "You're really good at..."
+                Keep suggestions positive: "You could try..." instead of "You should fix..."
+                Make it sound like a helpful friend, not a teacher grading their work.
+                Use simple words and short sentences.
+                """
+                
+                ai_response = model.generate_content(feedback_prompt)
+                ai_feedback = ai_response.text
+            except Exception as e:
+                print(f"AI feedback error: {e}")
+                ai_feedback = f"{communication_helper.get_positive_starter()} Your writing shows great imagination! Keep practicing and you'll get even better!"
+            
+            # Fun writing badges based on their work
+            badges = []
+            if analysis["word_count"] > 50:
+                badges.append("📝 Word Champion")
+            if analysis["sentence_count"] > 5:
+                badges.append("⭐ Sentence Star")
+            if writing_type == "story":
+                badges.append("📚 Storyteller")
+            
+            return {
+                "analysis": analysis,
+                "ai_feedback": ai_feedback,
+                "writing_type": writing_type,
+                "readability_score": "Perfect for your age!" if analysis["avg_sentence_length"] < 20 else "Great job! Try shorter sentences next time",
+                "badges_earned": badges,
+                "encouragement": communication_helper.get_child_friendly_encouragement()
+            }
+        
+        except Exception as e:
+            print(f"Error analyzing writing: {e}")
+            return {"error": "Something went wrong, but your writing is awesome! Keep it up!"}, 500
+
+class GrammarCheck(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Kid-friendly grammar check with AI enhancement
+        URL: /grammar-check
+        """
+        try:
+            data = request.get_json()
+            if not data or 'text' not in data:
+                return {"error": "Please share some text so I can help check it!"}, 400
+            
+            text = data['text'].strip()
+            if not text:
+                return {"error": "Looks like you haven't written anything yet!"}, 400
+            
+            # Basic grammar check using patterns
+            issues, corrections, compliments, corrected_text = communication_helper.check_grammar(text)
+            
+            # AI-powered grammar analysis and improvement
+            ai_grammar_feedback = None
+            ai_improved_text = None
+            
+            try:
+                ai_prompt = f"""
+                You are a friendly grammar helper for children aged 8-14. Please analyze this text for grammar issues and provide helpful suggestions.
+                
+                Text to check: "{text}"
+                
+                Please provide:
+                1. A corrected version of the text (if needed)
+                2. A list of grammar issues you found, explained in simple, kid-friendly language
+                3. Specific tips for improvement that a child can understand
+                4. Encouragement and praise for what they did well
+                5. One fun grammar tip they can remember for next time
+                
+                Use encouraging language like:
+                - "Great job with..." 
+                - "Let's fix this together..."
+                - "Here's a cool trick..."
+                - "You're getting better at..."
+                
+                Keep explanations simple and positive. Focus on helping them learn, not just correcting mistakes.
+                If the grammar is already good, celebrate that!
+                """
+                
+                ai_response = model.generate_content(ai_prompt)
+                ai_grammar_feedback = ai_response.text
+                
+                # Get AI-improved version
+                improvement_prompt = f"""
+                Please improve the grammar of this text while keeping the child's original ideas and voice: "{text}"
+                
+                Make minimal changes - only fix grammar issues. Keep their creativity and personality intact.
+                If the grammar is already good, just return the original text.
+                Return only the improved text, nothing else.
+                """
+                
+                ai_improvement_response = model.generate_content(improvement_prompt)
+                ai_improved_text = ai_improvement_response.text.strip()
+                print(f"AI improved text: {ai_improved_text}")
+                
+            except Exception as e:
+                print(f"AI grammar check error: {e}")
+                ai_grammar_feedback = f"{communication_helper.get_child_friendly_encouragement()} I'm having trouble with my AI helper right now, but your writing looks great!"
+                ai_improved_text = corrected_text
+            
+            # Combine basic and AI results
+            grammar_score = max(0, 100 - (len(issues) * 15))  # Simple scoring system
+            
+            # Additional encouragement based on performance
+            if grammar_score >= 90:
+                overall_feedback = "Outstanding grammar! You're a grammar superstar! 🌟"
+            elif grammar_score >= 75:
+                overall_feedback = "Great job! Just a few small things to practice. 👍"
+            elif grammar_score >= 60:
+                overall_feedback = "Good effort! You're learning fast! Keep it up! 📚"
+            else:
+                overall_feedback = "You're trying hard and that's awesome! Every mistake helps you learn! 💪"
+            
+            return {
+                "original_text": text,
+                "basic_corrected_text": corrected_text,
+                "ai_improved_text": ai_improved_text,
+                "basic_issues": issues,
+                "basic_corrections": corrections,
+                "compliments": compliments,
+                "ai_feedback": ai_grammar_feedback,
+                "grammar_score": grammar_score,
+                "overall_feedback": overall_feedback,
+                "is_perfect": len(issues) == 0 and grammar_score >= 95,
+                "encouragement": "You're getting better at grammar every day!" if issues else "Perfect grammar - you're amazing!",
+                "fun_grammar_tips": [
+                    "Read your sentences out loud to catch mistakes!",
+                    "Every sentence needs a capital letter at the start and punctuation at the end!",
+                    "When writing about yourself, always use capital 'I'!",
+                    "Short sentences are often clearer than long ones!"
+                ],
+                "badges_earned": self._get_grammar_badges(grammar_score, len(issues))
+            }
+        
+        except Exception as e:
+            print(f"Error checking grammar: {e}")
+            return {"error": "Something went wrong, but keep practicing your grammar!"}, 500
+    
+    def _get_grammar_badges(self, score, issue_count):
+        """Award fun badges based on grammar performance"""
+        badges = []
+        
+        if score >= 95:
+            badges.append("🏆 Grammar Champion")
+        elif score >= 85:
+            badges.append("⭐ Grammar Star")
+        elif score >= 70:
+            badges.append("📝 Grammar Explorer")
+        
+        if issue_count == 0:
+            badges.append("✨ Perfect Writer")
+        elif issue_count <= 2:
+            badges.append("🎯 Almost Perfect")
+        
+        return badges
+
+class VocabularySuggestions(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Kid-friendly vocabulary improvement suggestions
+        URL: /vocabulary-suggestions
+        """
+        try:
+            data = request.get_json()
+            if not data or 'text' not in data:
+                return {"error": "Share some text and I'll help you find even cooler words to use!"}, 400
+            
+            text = data['text'].strip()
+            if not text:
+                return {"error": "Write something first, then I can suggest awesome new words!"}, 400
+            
+            # Get vocabulary suggestions
+            suggestions = communication_helper.get_vocabulary_suggestions(text)
+            
+            return {
+                "text": text,
+                "vocabulary_suggestions": suggestions[:5],
+                "tip": "Using different words makes your writing more exciting and fun to read!",
+                "encouragement": "You're building an awesome vocabulary! 📚✨",
+                "fun_fact": "Learning new words is like collecting treasures for your brain!"
+            }
+        
+        except Exception as e:
+            print(f"Error getting vocabulary suggestions: {e}")
+            return {"error": "Oops! Try again - you're doing great with words!"}, 500
+
+class StoryStarter(Resource):
+    def get(self):
+        """
+        Get fun story starters for kids
+        URL: /story-starter
+        """
+        story_starters = [
+            "Once upon a time, there was a dragon who was afraid of flying...",
+            "The door to the secret garden could only be opened with a magic word...",
+            "When I woke up this morning, I discovered I could talk to animals...",
+            "The old lighthouse keeper had a mysterious treasure map...",
+            "In a world where gravity worked backwards...",
+            "The lost puppy I found turned out to be a superhero in disguise...",
+            "Every night at midnight, the toys in my room come to life...",
+            "I found a bottle on the beach with a message from the future...",
+            "The new kid at school had a backpack full of magical supplies...",
+            "When I looked in the mirror, I saw someone completely different..."
+        ]
+        
+        return {
+            "story_starter": random.choice(story_starters),
+            "writing_tips": [
+                "Think about what your main character looks like",
+                "Describe the setting using your five senses",
+                "What problem will your character need to solve?",
+                "Don't forget to give your story an exciting ending!"
+            ],
+            "encouragement": "Every great author started with just one story. This could be yours! ✨"
+        }

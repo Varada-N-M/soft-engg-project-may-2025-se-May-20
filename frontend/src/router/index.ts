@@ -15,6 +15,9 @@ import Habit from '../pages/student/Habit.vue';
 import LessonUpdates from "../pages/student/LessonUpdates.vue";
 import SurveyPage from "../pages/student/SurveyPage.vue";
 import WeeklyReport from "../pages/student/WeeklyReport.vue";
+import AIChat from "../pages/student/AIChat.vue";
+import TodoList from "../pages/student/MyTodos.vue";
+import StudentProfile from "../pages/student/StudentProfile.vue";
 import LoginTeacher from '../pages/teacher/LoginTeacher.vue';
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
 import TeacherLessonUpdates from "../pages/teacher/LessonUpdates.vue";
@@ -40,6 +43,9 @@ const routes = [
     {path: '/student/survey', component: SurveyPage},
     {path: '/student/journal', component: StudentJournal},
     {path: '/student/weekly-report', component: WeeklyReport},
+    {path: '/student/ai-companion', component: AIChat},
+    {path: '/student/todolist', component: TodoList},
+    {path: '/student/profile', component: StudentProfile},
     // END STUDENT SECTION
 
 

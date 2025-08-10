@@ -22,7 +22,7 @@ const items = [
   {
     title: "Teachers",
     url: "/org/teachers",
-    icon: Users,s
+    icon: Users,
   },
   {
     title: "Add Teacher",

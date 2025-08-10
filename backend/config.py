@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,6 +19,9 @@ class Config:
     JWT_SECRET_KEY = os.environ.get("JWT_KEY") or 'dev'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+    GEMINI_MODEL = "gemini-2.0-flash"
 
 
 class DevelopmentConfig(Config):

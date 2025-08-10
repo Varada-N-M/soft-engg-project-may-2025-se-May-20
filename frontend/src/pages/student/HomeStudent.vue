@@ -1,318 +1,394 @@
 <template>
   <div class="min-h-screen flex">
-    <aside class="w-64 bg-white bg-opacity-90 backdrop-blur-sm p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.1)] fixed left-0 top-0 h-screen overflow-y-auto">
+    <aside class="w-64 bg-white bg-opacity-90 backdrop-blur-sm p-6 fixed left-0 top-0 h-screen overflow-y-auto z-50 shadow-lg flex flex-col">
       <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mt-15">Student Dashboard</h2>
+        <h2 class="text-3xl font-extrabold text-gray-900 mt-6">My Dashboard</h2>
       </div>
-      <nav class="space-y-4">
-        <router-link to="/student/home" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-yellow-100 hover:text-yellow-600 transition-colors duration-200">
-          <span class="text-xl">🏠</span> Home  
-        </router-link>
-        <router-link to="/student/badges" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200">
-          <span class="text-xl">🏅</span> Badges
-        </router-link>
-        <router-link to="/student/habit" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-600 transition-colors duration-200">
-          <span class="text-xl">🎯</span> Habit
-        </router-link>
-        <router-link to="/student/lesson-updates" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors duration-200">
-          <span class="text-xl">📚</span> Lesson Updates
-        </router-link>
-        <router-link to="/student/journal" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-yellow-100 hover:text-yellow-600 transition-colors duration-200">
-          <span class="text-xl">✍️</span> Student Journal
-        </router-link>
-        <router-link to="/student/weekly-report" class="w-full text-left flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-red-100 hover:text-red-600 transition-colors duration-200">
-          <span class="text-xl">📊</span> Weekly Report
-        </router-link>
-        <router-link to="/student/survey" class="w-full text-left flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-green-100 hover:text-green-600 transition-colors duration-200">
-          <span class="text-xl">🔍</span> Survey
+      <nav class="space-y-3">
+        <router-link
+          v-for="link in navLinks"
+          :key="link.name"
+          :to="link.path"
+          class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-700 hover:bg-yellow-100 hover:text-yellow-600 transition-colors duration-200 font-medium"
+        >
+          <span class="text-xl">{{ link.icon }}</span> {{ link.name }}
         </router-link>
       </nav>
+
+      <router-link to="/student/profile"
+        @click="logout"
+        class="mt-30 flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium justify-center"
+      >
+        Profile
+      </router-link>
+      <!-- Logout button at bottom -->
+      <button
+        @click="logout"
+        class="mt-3 flex items-center gap-3 py-3 px-4 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium justify-center"
+      >
+        Logout
+      </button>
     </aside>
 
-    <div class="flex-1 ml-64 p-4 overflow-y-auto">
-      <div v-if="!showWeeklyReport" class="max-w-6xl mx-auto mt-10">
-        <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl p-6 mb-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
+    <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
+      <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-800 mb-2">Good evening, Alex! 🌈</h1>
-              <p class="text-gray-600">Ready for another amazing day of learning?</p>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2" v-if="studentProfile">
+                Hello, {{ studentProfile.first_name }}! 👋
+              </h1>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2" v-else>
+                Welcome!
+              </h1>
+              <p class="text-gray-600 text-lg">
+                Your adventure awaits. Let's make today a great day to learn!
+              </p>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">XP Points</p>
-                <h3 class="text-3xl font-bold text-orange-500">2450</h3>
-              </div>
-              <div class="text-4xl">⭐</div>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-              <div class="bg-orange-400 h-2 rounded-full" style="width: 82%"></div>
-            </div>
-            <p class="text-xs text-gray-500">550 XP to next level</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard icon="✨" label="Total XP" :value="xpPoints" />
+          <StatCard icon="🏅" label="Badges Earned" :value="badgeCount" :loading="isBadgeCountLoading" />
+          <StatCard icon="🎯" label="Total Habits" :value="habits.length" />
+          <StatCard icon="✅" label="Activities Completed" :value="completedSkillsCount" :loading="isCompletedSkillsLoading" unit="this week" />
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              🎯 Today's Habits
+            </h2>
+            <router-link
+              to="/student/habit"
+              class="text-blue-600 hover:text-blue-800 font-semibold"
+            >
+              View All
+            </router-link>
           </div>
 
-          <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Badges</p>
-                <h3 class="text-3xl font-bold text-purple-500">12</h3>
-              </div>
-              <div class="text-4xl">🏅</div>
-            </div>
-            <p class="text-green-600 text-sm font-medium">+2 this week!</p>
-          </div>
-
-          <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Streak</p>
-                <h3 class="text-3xl font-bold text-red-500">7</h3>
-              </div>
-              <div class="text-4xl">🔥</div>
-            </div>
-            <p class="text-gray-500 text-sm">days in a row</p>
-          </div>
-
-          <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <p class="text-gray-600 text-sm font-medium">Lessons</p>
-                <h3 class="text-3xl font-bold text-green-500">34</h3>
-              </div>
-              <div class="text-4xl">📚</div>
-            </div>
-            <p class="text-gray-500 text-sm">completed</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ActivityCard
+              v-for="habit in habits"
+              :key="habit.habit_id"
+              :activity="{
+                id: habit.habit_id,
+                emoji: '📌', // you can map categories to emojis if you want
+                title: habit.name,
+                description: habit.description,
+                category: habit.category,
+                xp: habit.habit_xp,
+                completed: false // replace if you track completion
+              }"
+              @toggle="toggleHabit(habit.habit_id)"
+            />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                📚 Continue Learning
-              </h2>
-              <button class="text-blue-500 hover:text-blue-600 font-medium">View All</button>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="bg-white rounded-3xl p-8 shadow-md">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-6">
+              💖 Daily Gratitude
+            </h2>
+            <div v-if="todaysGratitude" class="bg-pink-50 p-6 rounded-2xl">
+              <p class="text-gray-800 italic text-lg leading-relaxed">
+                "{{ todaysGratitude }}"
+              </p>
+              <div class="flex items-center gap-2 mt-4">
+                <span class="text-green-500">✅</span>
+                <span class="text-sm text-gray-600 font-medium">You completed this today!</span>
+              </div>
             </div>
+            <div v-else class="text-center py-6">
+              <div class="text-5xl mb-4">💭</div>
+              <p class="text-gray-700 text-lg mb-4">
+                What's one thing you're thankful for today?
+              </p>
+              <router-link
+                to="/student/journal"
+                class="bg-pink-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:bg-pink-600 transition-colors inline-block text-center"
+              >
+                Write Gratitude
+              </router-link>
+            </div>
+          </div>
 
-            <div class="space-y-4">
-              <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors cursor-pointer">
-                <div class="bg-blue-500 text-white rounded-lg p-3 text-sm font-bold">1+1</div>
-                <div class="flex-1">
-                  <h3 class="font-semibold text-gray-800">Math Adventures</h3>
-                  <p class="text-gray-600 text-sm">Addition and Subtraction Fun</p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">75% complete</p>
+          <div class="bg-white rounded-3xl p-8 shadow-md">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-6">
+              🤖 Your AI Learning Buddy
+            </h2>
+            <div class="bg-indigo-50 p-6 rounded-2xl">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                  <span class="text-white text-xl">🤖</span>
                 </div>
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
+                <div class="text-lg text-gray-700 font-medium">Meet Rohit!</div>
               </div>
+              <p class="text-gray-800 mb-4 leading-relaxed">
+                "Hi! I'm here to chat, answer questions, and help you practice new things. How are you feeling today?"
+              </p>
+              <router-link
+                to="/student/ai-companion"
+                class="bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:bg-blue-600 transition-colors inline-block text-center"
+              >
+                Chat Now
+              </router-link>
+            </div>
+          </div>
+        </div>
 
-              <div class="flex items-center gap-4 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors cursor-pointer">
-                <div class="bg-green-500 text-white rounded-lg p-3 text-lg">📖</div>
-                <div class="flex-1">
-                  <h3 class="font-semibold text-gray-800">Reading Quest</h3>
-                  <p class="text-gray-600 text-sm">Story Comprehension</p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 45%"></div>
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-6">
+            🛠️ Weekly Skills Challenge
+          </h2>
+          <div class="bg-gradient-to-r from-teal-50 to-cyan-50 p-6 rounded-2xl border border-teal-200">
+            <div class="flex items-start gap-5">
+              <div class="text-5xl">{{ currentLifeSkill.emoji }}</div>
+              <div class="flex-1">
+                <h3 class="font-bold text-gray-900 text-xl mb-2">{{ currentLifeSkill.title }}</h3>
+                <p class="text-gray-700 mb-4">{{ currentLifeSkill.description }}</p>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-3 w-full">
+                    <div class="w-full bg-gray-200 rounded-full h-3 flex-1">
+                      <div class="bg-teal-500 h-3 rounded-full" :style="`width: ${currentLifeSkill.progress}%`"></div>
+                    </div>
+                    <span class="text-sm text-gray-600 font-medium">{{ currentLifeSkill.progress }}%</span>
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">45% complete</p>
+                  <button class="bg-teal-500 text-white font-semibold px-6 py-2 rounded-xl hover:bg-teal-600 transition-colors">
+                    Continue
+                  </button>
                 </div>
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div class="flex items-center gap-4 p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors cursor-pointer">
-                <div class="bg-purple-500 text-white rounded-lg p-3 text-lg">🧪</div>
-                <div class="flex-1">
-                  <h3 class="font-semibold text-gray-800">Science Lab</h3>
-                  <p class="text-gray-600 text-sm">Simple Experiments</p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div class="bg-purple-500 h-2 rounded-full" style="width: 20%"></div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">20% complete</p>
-                </div>
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              📖 Life Lessons
+            </h2>
+            <router-link to="/student/stories" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LearningStoryCard
+              v-for="story in learningStories.slice(0, 2)"
+              :key="story.id"
+              :story="story"
+            />
+          </div>
+        </div>
 
-              <div class="flex items-center gap-4 p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-colors cursor-pointer">
-                <div class="bg-red-500 text-white rounded-lg p-3 text-lg">🧪</div>
-                <div class="flex-1">
-                  <h3 class="font-semibold text-gray-800">Rocket Science Lab</h3>
-                  <p class="text-gray-600 text-sm">Build an explosion using Cocola & Mentos :) </p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">100% complete</p>
-                </div>
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              📚 Recent Lessons
+            </h2>
+            <router-link to="/student/lesson-updates" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
+          </div>
+
+          <div v-if="isLoading" class="space-y-4">
+            <div v-for="i in 3" :key="i" class="animate-pulse flex items-center gap-4 p-4 bg-gray-100 rounded-2xl">
+              <div class="bg-gray-200 rounded-lg p-3 h-12 w-12"></div>
+              <div class="flex-1">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
               </div>
             </div>
           </div>
 
-          <div class="space-y-6">
-            <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-              <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                🚀 Quick Start
-              </h2>
-              <div class="grid grid-cols-2 gap-3">
-                <div class="bg-red-100 rounded-xl p-4 text-center hover:bg-red-200 transition-colors cursor-pointer">
-                  <div class="text-2xl mb-2">✏️</div>
-                  <p class="text-sm font-medium text-gray-700">Practice</p>
-                </div>
-                <div class="bg-blue-100 rounded-xl p-4 text-center hover:bg-blue-200 transition-colors cursor-pointer">
-                  <div class="text-2xl mb-2">🎮</div>
-                  <p class="text-sm font-medium text-gray-700">Games</p>
-                </div>
-                <div class="bg-pink-100 rounded-xl p-4 text-center hover:bg-pink-200 transition-colors cursor-pointer">
-                  <div class="text-2xl mb-2">🧠</div>
-                  <p class="text-sm font-medium text-gray-700">Quiz</p>
-                </div>
-                <div class="bg-green-100 rounded-xl p-4 text-center hover:bg-green-200 transition-colors cursor-pointer">
-                  <div class="text-2xl mb-2">📚</div>
-                  <p class="text-sm font-medium text-gray-700">Stories</p>
-                </div>
-              </div>
-            </div>
+          <div v-else-if="lessonUpdates.length > 0" class="space-y-4">
+            <LessonUpdateCard
+              v-for="lesson in lessonUpdates.slice(0, 4)"
+              :key="lesson.lesson_id"
+              :lesson="lesson"
+            />
+          </div>
 
-            <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-6 drop-shadow-[0_0_12px_rgba(0,0,0,0.15)]">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  🏆 Latest Badges
-                </h2>
-                <button class="text-purple-500 hover:text-purple-600 font-medium text-sm">View All</button>
-              </div>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
-                  <div class="text-2xl">🏅</div>
-                  <div>
-                    <h4 class="font-medium text-gray-800">Math Master</h4>
-                    <p class="text-xs text-gray-600">Solved 50 math problems</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                  <div class="text-2xl">📖</div>
-                  <div>
-                    <h4 class="font-medium text-gray-800">Story Explorer</h4>
-                    <p class="text-xs text-gray-600">Read 10 stories</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div v-else class="text-center py-10">
+            <div class="text-5xl mb-4">📚</div>
+            <h3 class="text-xl font-medium text-gray-800">No lessons to show yet!</h3>
+            <p class="text-gray-500 mt-2">Check back later for updates from your teacher.</p>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue';
+import axios from 'axios';
 
-const showWeeklyReport = ref(false)
+// Import smaller, reusable components (assuming they are created)
+import StatCard from './StatCard.vue';
+import ActivityCard from './ActivityCard.vue';
+import LearningStoryCard from './LearningStoryCard.vue';
+import LessonUpdateCard from './LessonUpdateCard.vue';
 
+const habits = ref([])
+const studentProfile = ref(null);
+const isLoading = ref(true);
+const xpPoints = ref(0);
+const error = ref(null);
 
+const navLinks = ref([
+  { name: 'Home', path: '/student/home', icon: '🏠' },
+  { name: 'Habits', path: '/student/habit', icon: '🎯' },
+  { name: 'Badges', path: '/student/badges', icon: '🏅' },
+  { name: 'Life Lessons', path: '/student/stories', icon: '📖' },
+  { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
+  // { name: 'Activities', path: '/student/daily-activities', icon: '📅' },
+  // { name: 'Weekly Challenge', path: '/student/life-skills', icon: '🛠️' },
+  { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },
+  // { name: 'Lesson Updates', path: '/student/lesson-updates', icon: '📚' },
+  // { name: 'Weekly Report', path: '/student/weekly-report', icon: '📊' },
+]);
 
-// Favorite subjects data
-const favoriteSubjects = [
-  {
-    name: 'Mathematics',
-    emoji: '🔢',
-    description: 'You solved 25 problems this week!',
-    progress: 85,
-    bgColor: 'bg-blue-100',
-    barColor: 'bg-blue-500'
-  },
-  {
-    name: 'Science',
-    emoji: '🧪',
-    description: 'Completed 3 fun experiments!',
-    progress: 70,
-    bgColor: 'bg-green-100',
-    barColor: 'bg-green-500'
-  },
-  {
-    name: 'Reading',
-    emoji: '📖',
-    description: 'Read 4 amazing stories!',
-    progress: 92,
-    bgColor: 'bg-purple-100',
-    barColor: 'bg-purple-500'
+const categoryToEmojiMap = {
+  reading: '📚',
+  health: '💧',
+  chores: '🧹',
+  sports: '🏃',
+  creative: '🎨',
+  other: '🎯',
+};
+
+const getEmojiForCategory = (category) => {
+  return categoryToEmojiMap[category] || '🎯';
+};
+
+const fetchHabits = async () => {
+  const token = localStorage.getItem('access_token');
+  try {
+    const response = await axios.get('/api/child/habits', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    habits.value = response.data.habits_created || [];
+
+    const today = new Date().toISOString().split('T')[0];
+    habits.value = response.data.habits_created.map(habit => {
+      const isCompletedToday = response.data.completed_habits.some(
+        c => c.habit_id === habit.habit_id && c.completion_date && c.completion_date.startsWith(today)
+      );
+
+      return {
+        id: habit.habit_id,
+        emoji: getEmojiForCategory(habit.category),
+        title: habit.name,
+        description: habit.description,
+        category: habit.category,
+        xp: habit.habit_xp,
+        completed: isCompletedToday,
+      };
+    });
+  } catch (err) {
+    console.error('Failed to fetch habits:', err);
+    // You could show an error message to the user here
+  } finally {
+    isLoading.value = false;
   }
-]
+};
 
-// New skills data
-const newSkills = [
-  {
-    name: 'Multiplication Master',
-    emoji: '✖️',
-    description: 'You can now multiply numbers up to 8!'
-  },
-  {
-    name: 'Story Detective',
-    emoji: '🕵️',
-    description: 'Great at finding main ideas in stories!'
-  },
-  {
-    name: 'Science Explorer',
-    emoji: '🔬',
-    description: 'Understanding how plants grow!'
-  },
-  {
-    name: 'Creative Writer',
-    emoji: '✍️',
-    description: 'Writing amazing descriptive paragraphs!'
-  }
-]
+const toggleHabit = async (habitId) => {
+  const token = localStorage.getItem('access_token');
+  const habitToToggle = habits.value.find(h => h.id === habitId);
 
-// Weekly achievements data
-const weeklyAchievements = [
-  {
-    title: 'Math Champion',
-    emoji: '🏆',
-    description: 'Solved 50 math problems',
-    date: 'Dec 20'
-  },
-  {
-    title: 'Reading Star',
-    emoji: '⭐',
-    description: 'Read 10 stories this month',
-    date: 'Dec 22'
-  },
-  {
-    title: 'Streak Master',
-    emoji: '🔥',
-    description: '7 days of learning in a row',
-    date: 'Dec 24'
-  },
-  {
-    title: 'Science Whiz',
-    emoji: '🧬',
-    description: 'Completed all experiments',
-    date: 'Dec 21'
-  },
-  {
-    title: 'Perfect Score',
-    emoji: '💯',
-    description: '100% on reading quiz',
-    date: 'Dec 23'
-  },
-  {
-    title: 'Helper Hero',
-    emoji: '🦸',
-    description: 'Helped classmates learn',
-    date: 'Dec 19'
+  // Prevent multiple clicks and mark as done
+  if (habitToToggle && !habitToToggle.completed) {
+    try {
+      // The backend POST endpoint marks it as complete
+      await axios.post(`/api/child/habit/${habitId}/complete`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Update the UI after successful API call
+      habitToToggle.completed = true;
+      alert(`🎉 You earned +${habitToToggle.xp} XP!`);
+
+    } catch (err) {
+      console.error('Failed to complete habit:', err);
+      if (err.response && err.response.status === 400) {
+        alert('This habit is already completed for today!');
+      } else {
+        alert('An error occurred. Please try again.');
+      }
+    }
   }
-]
+};
+
+const fetchUserProfile = async () => {
+  const token = localStorage.getItem('access_token');
+  try {
+    // Assuming you have an endpoint like '/api/child/profile'
+    const response = await axios.get('/api/child/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    xpPoints.value = response.data.xp_points;
+  } catch (err) {
+    error.value = 'Failed to fetch user profile data.';
+    console.error('Failed to fetch user profile:', err);
+  }
+};
+
+const todaysGratitude = ref('');
+
+const currentLifeSkill = ref({
+  title: 'Making a Simple Sandwich',
+  description: 'Learn to prepare your own healthy lunch! This week we\'ll practice making different types of sandwiches safely.',
+  emoji: '🥪',
+  progress: 65,
+});
+
+const learningStories = ref([
+  { id: 1, title: 'Emma\'s Piggy Bank Adventure', description: 'Learn about saving money with Emma...', topic: 'Money Management', emoji: '🐷' },
+  { id: 2, title: 'The Feelings Rainbow', description: 'Discover different emotions and how to express them...', topic: 'Emotional Intelligence', emoji: '🌈' },
+]);
+
+// Dynamic data fetched from API
+const lessonUpdates = ref([]);
+const badgeCount = ref(0);
+const isBadgeCountLoading = ref(true);
+const completedSkillsCount = ref(0);
+const isCompletedSkillsLoading = ref(true);
+
+const toggleActivity = (activityId) => {
+  const activity = todaysActivities.value.find((a) => a.id === activityId);
+  if (activity && !activity.completed) {
+    activity.completed = true;
+  }
+};
+
+const fetchData = async (url, loadingRef, dataRef, transform = (d) => d, key = '') => {
+  const token = localStorage.getItem('access_token');
+  if (!token) return;
+
+  loadingRef.value = true;
+  try {
+    const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
+    dataRef.value = transform(response.data[key] || response.data) || [];
+  } catch (err) {
+    console.error(`Error fetching data from ${url}:`, err);
+  } finally {
+    loadingRef.value = false;
+  }
+};
+
+onMounted(async () => {
+  await fetchData('/api/child/profile', isLoading, studentProfile, null, 'profile');
+
+  await Promise.all([
+    fetchData('/api/child/lesson-updates', isLoading, lessonUpdates, null, 'lesson_updates'),
+    fetchData('/api/child/badge/count', isBadgeCountLoading, badgeCount, (data) => data.badge_count),
+    fetchData('/api/child/skills/completed/count', isCompletedSkillsLoading, completedSkillsCount, (data) => data.completed_skills_count),
+    fetchHabits(),
+    fetchUserProfile()
+  ]);
+});
+
 </script>

@@ -8,6 +8,15 @@ from sqlalchemy import func
 from models import *
 from utils import *
 
+from google.generativeai import GenerativeModel
+import google.generativeai as genai
+from config import config
+
+GEMINI_API_KEY = config['default'].GEMINI_API_KEY
+GEMINI_MODEL = config['default'].GEMINI_MODEL
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = GenerativeModel(GEMINI_MODEL)
 
 class GratitudeEntry(Resource):
     @jwt_required()
@@ -987,3 +996,213 @@ class StudentProfile(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class CommunicationHelper:
+    def __init__(self):
+        self.grammar_patterns = {
+            # Common grammar issues
+            'had_to_have': r'\b(have|has)\s+had\s+to\b',
+            'double_past': r'\b(told|said|asked)\s+.*\s+(have|has)\s+had\b',
+            'tense_consistency': r'\b(yesterday|last)\s+.*\s+(have|has)\b',
+            'redundant_that': r'\bthat\s+that\b',
+            'run_on': r'^[^.!?]{100,}$'  # Very long sentences without punctuation
+        }
+        
+        # Child-friendly encouragement phrases
+        self.encouragements = [
+            "Great job trying!",
+            "You're doing awesome!",
+            "Nice work!",
+            "Keep it up, superstar!",
+            "You're getting better every day!",
+            "Fantastic effort!",
+            "Way to go!",
+            "You're a writing champion!"
+        ]
+        
+        self.positive_starters = [
+            "Wow, this is a great start!",
+            "I love your creativity!",
+            "You have some really cool ideas here!",
+            "This is coming along nicely!",
+            "You're thinking like a real writer!"
+        ]
+    
+    def get_child_friendly_encouragement(self):
+        """Get a random encouraging phrase for kids"""
+        import random
+        return random.choice(self.encouragements)
+    
+    def get_positive_starter(self):
+        """Get a positive conversation starter"""
+        import random
+        return random.choice(self.positive_starters)
+    
+    def analyze_sentence(self, sentence):
+        """Analyze sentence for common issues - child-friendly version"""
+        issues = []
+        suggestions = []
+        
+        # Check for grammar patterns with kid-friendly language
+        if re.search(self.grammar_patterns['tense_consistency'], sentence, re.IGNORECASE):
+            issues.append("Let's check when things happened - past or present?")
+            suggestions.append("Try using the same time (past or present) throughout your sentence")
+        
+        if re.search(self.grammar_patterns['double_past'], sentence, re.IGNORECASE):
+            issues.append("We might be mixing up our past tenses")
+            suggestions.append("Pick one way to talk about the past and stick with it")
+        
+        if re.search(self.grammar_patterns['redundant_that'], sentence, re.IGNORECASE):
+            issues.append("Looks like 'that' appears twice - we only need it once!")
+            suggestions.append("Remove the extra 'that' word")
+        
+        if re.search(self.grammar_patterns['run_on'], sentence):
+            issues.append("This sentence is getting pretty long!")
+            suggestions.append("Try breaking it into 2 or 3 shorter sentences - it'll be easier to read!")
+        
+        # Check sentence length and complexity
+        word_count = len(sentence.split())
+        if word_count > 25:
+            issues.append("This sentence has lots of words!")
+            suggestions.append("Let's split this into smaller sentences so it's easier to understand")
+        
+        return issues, suggestions
+
+    def improve_sentence_with_ai(self, sentence):
+        """Use AI to improve the sentence - child-friendly version"""
+        try:
+            prompt = f"""
+            You are helping a child aged 8-14 improve their writing. Be encouraging, positive, and use simple language.
+            
+            Please help improve this sentence: "{sentence}"
+            
+            Provide:
+            1. An improved version that keeps their original idea
+            2. A simple, encouraging explanation of what you changed (use kid-friendly language)
+            3. One fun tip to remember for next time
+            
+            Be very positive and encouraging. Start with praise for their effort!
+            Keep the language simple and age-appropriate for children 8-14.
+            Make it sound like a helpful friend, not a teacher.
+            """
+            
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            return f"{self.get_child_friendly_encouragement()} I'm having trouble right now, but your sentence looks great! Keep practicing!"
+
+    def get_speaking_tips(self, text_type="general"):
+        """Get kid-friendly speaking tips"""
+        tips = {
+            "general": [
+                "Take your time - there's no rush! 🌟",
+                "Take deep breaths between sentences",
+                "Look at your audience and smile 😊",
+                "Practice tricky words a few times before speaking"
+            ],
+            "presentation": [
+                "Start by saying hello and introducing yourself",
+                "Use words like 'first,' 'next,' and 'finally' to organize your ideas",
+                "End with something exciting or interesting",
+                "Practice in front of a mirror or with family first!"
+            ],
+            "conversation": [
+                "Ask questions like 'What do you think?' or 'How about you?'",
+                "Listen carefully when others speak",
+                "Use a voice that everyone can hear clearly",
+                "Show you're interested by nodding and looking at the speaker"
+            ],
+            "story": [
+                "Use exciting words to describe characters and places",
+                "Make your voice change for different characters",
+                "Pause at exciting parts to build suspense",
+                "Don't forget to have fun telling your story!"
+            ]
+        }
+        return tips.get(text_type, tips["general"])
+
+    def analyze_writing(self, text, writing_type="general"):
+        """Analyze longer writing pieces - child-friendly version"""
+        sentences = re.split(r'[.!?]+', text)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        analysis = {
+            "sentence_count": len(sentences),
+            "word_count": len(text.split()),
+            "avg_sentence_length": len(text.split()) / max(len(sentences), 1),
+            "issues": [],
+            "suggestions": [],
+            "praise_points": []  # Added praise points for kids
+        }
+        
+        # Add praise points based on what they did well
+        if analysis["sentence_count"] >= 3:
+            analysis["praise_points"].append("You wrote multiple sentences - great storytelling!")
+        
+        if analysis["word_count"] > 20:
+            analysis["praise_points"].append("Wow, you used lots of words to express your ideas!")
+        
+        if writing_type == "story" and any(word in text.lower() for word in ['once', 'then', 'finally', 'suddenly']):
+            analysis["praise_points"].append("You used great story words to connect your ideas!")
+        
+        # Check each sentence with encouraging language
+        for i, sentence in enumerate(sentences):
+            issues, suggestions = self.analyze_sentence(sentence)
+            if issues:
+                analysis["issues"].extend([f"In sentence {i+1}: {issue}" for issue in issues])
+                analysis["suggestions"].extend(suggestions)
+        
+        # Overall writing suggestions with positive framing
+        if analysis["avg_sentence_length"] > 20:
+            analysis["suggestions"].append("Try using shorter sentences - they're easier to read and understand!")
+        
+        if analysis["sentence_count"] < 3 and analysis["word_count"] > 50:
+            analysis["suggestions"].append("You have great ideas! Try breaking them into more sentences.")
+        
+        return analysis
+
+communication_helper = CommunicationHelper()
+
+
+class ImproveSentence(Resource):
+    @jwt_required()
+    def post(self):
+        """
+        Improve a sentence using AI - child-friendly version.
+        URL: /improve-sentence
+        """
+        try:
+            data = request.get_json()
+            if not data or 'sentence' not in data:
+                return {"error": "Please share a sentence you'd like help with!"}, 400
+            
+            sentence = data['sentence'].strip()
+            if not sentence:
+                return {"error": "Oops! The sentence seems to be empty. Try typing something!"}, 400
+            
+            # Basic analysis
+            issues, suggestions = communication_helper.analyze_sentence(sentence)
+            
+            # AI improvement
+            ai_improvement = communication_helper.improve_sentence_with_ai(sentence)
+            
+            # Speaking tips
+            speaking_tips = communication_helper.get_speaking_tips("general")
+            
+            # Add encouragement
+            encouragement = communication_helper.get_child_friendly_encouragement()
+            
+            return {
+                "original_sentence": sentence,
+                "issues": issues,
+                "suggestions": suggestions,
+                "ai_improvement": ai_improvement,
+                "speaking_tips": speaking_tips[:3],
+                "word_count": len(sentence.split()),
+                "encouragement": encouragement,
+                "fun_fact": "Did you know? The average sentence has about 15-20 words!"
+            }
+        
+        except Exception as e:
+            return {"error": "Oops! Something went wrong, but keep trying - you're doing great!"}, 500

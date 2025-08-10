@@ -9,6 +9,7 @@ from api.teacher.routes import (AddStudent, RemoveStudent, TeacherLessonUpdates,
                                 LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile, GetLinkedStudents)
 from api.organization.routes import OrganizationStats
 from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
+from api.student.routes import ImproveSentence
 
 api = Api()
 
@@ -36,6 +37,7 @@ api.add_resource(StudentLessonUpdates, '/api/child/lesson-updates')
 api.add_resource(Skills, '/api/child/skills', '/api/child/skills/<int:skill_id>')
 api.add_resource(CompleteSkill, '/api/child/skills/<int:skill_id>/complete')
 api.add_resource(StudentProfile, '/api/child/profile')
+api.add_resource(ImproveSentence, '/api/child/improve-sentence')
 
 # Parent
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')

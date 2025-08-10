@@ -202,7 +202,7 @@ const fetchHabits = async () => {
   const token = localStorage.getItem('access_token');
 
   try {
-    const response = await axios.get('/api/habits', {
+    const response = await axios.get('/api/child/habits', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -254,7 +254,7 @@ const completeHabit = async (habitId) => {
 const createHabit = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    const response = await axios.post('/api/habits', {
+    const response = await axios.post('/api/child/habits', {
       habit_name: habitForm.value.name,
       habit_description: habitForm.value.description,
       habit_category: habitForm.value.category,
@@ -308,7 +308,7 @@ const deleteHabit = async () => {
 
   const token = localStorage.getItem('access_token');
   try {
-    await axios.delete(`/api/habits/${editingHabit.value.id}`, {
+    await axios.delete(`/api/child/habits/${editingHabit.value.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 

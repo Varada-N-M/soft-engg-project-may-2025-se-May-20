@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 p-8">
+    <!-- Header Section -->
     <header class="max-w-4xl mx-auto mb-8 text-center">
       <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -13,8 +14,10 @@
       </p>
     </header>
 
+    <!-- Main Content -->
     <main class="max-w-6xl mx-auto">
-      <div class="flex justify-center mb-8">
+      <!-- Show "New Entry" button only if logged in -->
+      <div v-if="isLoggedIn" class="flex justify-center mb-8">
         <button
           @click="openCreateModal"
           class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center"
@@ -24,7 +27,29 @@
         </button>
       </div>
 
-      <div v-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Loading, Error, or Content -->
+      <div v-if="isLoading" class="text-center py-20">
+        <p class="text-lg text-gray-600">Loading journal entries...</p>
+      </div>
+
+      <div v-else-if="error" class="text-center py-20">
+        <p class="text-lg text-red-500 font-medium">{{ error }}</p>
+      </div>
+
+      <!-- Show entries if logged in and has data -->
+      <div v-else-if="!isLoggedIn" class="text-center py-20">
+        <div class="text-6xl mb-4">🔒</div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">You Need to Log In</h2>
+        <p class="text-gray-600 mb-4">Please log in to access your learning journal and start writing entries.</p>
+        <router-link
+          to="/login"
+          class="inline-block mt-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+        >
+          Go to Login
+        </router-link>
+      </div>
+
+      <div v-else-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="entry in journalEntries"
           :key="entry.id"
@@ -32,17 +57,13 @@
           class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-105 cursor-pointer flex flex-col justify-between"
         >
           <div>
-            <h3 class="font-bold text-gray-800 text-lg mb-2">{{ entry.title }}</h3>
+            <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>
             <p class="text-sm text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
-          </div>
-          <div class="flex items-center text-xs text-gray-500">
-            <span class="font-semibold">{{ formatDate(entry.date) }}</span>
-            <span class="mx-2">•</span>
-            <span class="font-medium">{{ entry.moodEmoji }}</span>
-            <span class="ml-1">{{ entry.mood }}</span>
           </div>
         </div>
       </div>
+
+      <!-- Empty journal (logged in but no entries) -->
       <div v-else class="text-center py-20">
         <div class="text-6xl mb-4">📖</div>
         <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Journal is Empty</h2>
@@ -50,6 +71,7 @@
       </div>
     </main>
 
+    <!-- Create/Edit Journal Modal -->
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
@@ -65,41 +87,14 @@
 
         <form @submit.prevent="saveEntry" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-            <input
-              v-model="journalForm.title"
-              type="text"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="What did you learn today?"
-              required
-            >
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Your Thoughts</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Your Journal Entry</label>
             <textarea
               v-model="journalForm.content"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Describe your day, your feelings, or what you learned."
-              rows="6"
+              placeholder="What are you grateful for today? What did you learn?"
+              rows="8"
               required
             ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">How are you feeling?</label>
-            <div class="flex space-x-2">
-              <button
-                v-for="mood in availableMoods"
-                :key="mood.emoji"
-                type="button"
-                @click="journalForm.mood = mood.name; journalForm.moodEmoji = mood.emoji"
-                class="p-3 text-2xl rounded-xl border-2 transition-all duration-200"
-                :class="journalForm.moodEmoji === mood.emoji ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'"
-              >
-                {{ mood.emoji }}
-              </button>
-            </div>
           </div>
 
           <div class="flex space-x-3 pt-4">
@@ -133,42 +128,141 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 // --- Reactive Data ---
 const showModal = ref(false);
 const editingEntry = ref(null);
 const journalEntries = ref([]);
+const isLoading = ref(true);
+const error = ref(null);
 
-// Form data for the modal
 const journalForm = ref({
   id: null,
-  title: '',
   content: '',
-  date: '',
-  mood: 'Happy',
-  moodEmoji: '😊',
 });
 
-// Available moods for the journal entry
-const availableMoods = ref([
-  { name: 'Happy', emoji: '😊' },
-  { name: 'Excited', emoji: '🤩' },
-  { name: 'Calm', emoji: '😌' },
-  { name: 'Confused', emoji: '🤔' },
-  { name: 'Stressed', emoji: '😥' },
-  { name: 'Tired', emoji: '😴' },
-]);
+// --- Check Login Status ---
+const token = localStorage.getItem('access_token');
+const isLoggedIn = ref(!!token); // true if token exists
 
-// --- Methods for Modal and CRUD operations ---
+// --- Methods ---
+const fetchJournalEntries = async () => {
+  if (!isLoggedIn.value) {
+    error.value = 'Please log in to view your journal.';
+    isLoading.value = false;
+    return;
+  }
+
+  isLoading.value = true;
+  error.value = null;
+
+  try {
+    const response = await axios.get('/api/gratitude', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (response.data.entries) {
+      journalEntries.value = response.data.entries.map(entry => ({
+        id: entry.entry_id,
+        content: entry.gratitude_text,
+        date: entry.created_at,
+      }));
+    } else {
+      journalEntries.value = [];
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+    if (err.response?.status === 401) {
+      error.value = 'Session expired. Please log in again.';
+      isLoggedIn.value = false;
+      localStorage.removeItem('access_token');
+    } else {
+      error.value = 'Failed to load journal entries.';
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const createEntry = async () => {
+  if (!isLoggedIn.value) return;
+
+  try {
+    const response = await axios.post('/api/gratitude', {
+      gratitude_text: journalForm.value.content,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const newEntry = {
+      id: response.data.entry_id,
+      content: journalForm.value.content,
+      date: response.data.created_at,
+    };
+    journalEntries.value.unshift(newEntry);
+    closeModal();
+  } catch (err) {
+    error.value = 'Failed to create entry.';
+    console.error('Create error:', err);
+  }
+};
+
+const updateEntry = async () => {
+  if (!isLoggedIn.value) return;
+
+  try {
+    await axios.put(`/api/gratitude/${editingEntry.value.id}`, {
+      gratitude_text: journalForm.value.content,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const index = journalEntries.value.findIndex(e => e.id === editingEntry.value.id);
+    if (index !== -1) {
+      journalEntries.value[index].content = journalForm.value.content;
+    }
+    closeModal();
+  } catch (err) {
+    error.value = 'Failed to update entry.';
+    console.error('Update error:', err);
+  }
+};
+
+const deleteEntry = async () => {
+  if (!isLoggedIn.value) return;
+
+  const confirmed = confirm("Are you sure you want to delete this entry?");
+  if (!confirmed) return;
+
+  try {
+    await axios.delete(`/api/gratitude/${editingEntry.value.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    journalEntries.value = journalEntries.value.filter(e => e.id !== editingEntry.value.id);
+    closeModal();
+  } catch (err) {
+    error.value = 'Failed to delete entry.';
+    console.error('Delete error:', err);
+  }
+};
+
+// --- Modal Logic ---
 const openCreateModal = () => {
+  if (!isLoggedIn.value) {
+    alert('Please log in to create a journal entry.');
+    return;
+  }
   editingEntry.value = null;
   resetForm();
   showModal.value = true;
 };
 
 const openEditModal = (entry) => {
+  if (!isLoggedIn.value) return;
   editingEntry.value = entry;
-  journalForm.value = { ...entry }; // Populate form with existing entry data
+  journalForm.value = { ...entry };
   showModal.value = true;
 };
 
@@ -179,39 +273,17 @@ const closeModal = () => {
 };
 
 const resetForm = () => {
-  journalForm.value = {
-    id: null,
-    title: '',
-    content: '',
-    date: '',
-    mood: 'Happy',
-    moodEmoji: '😊',
-  };
+  journalForm.value = { id: null, content: '' };
 };
 
 const saveEntry = () => {
-  if (editingEntry.value) {
-    // Logic to update an existing journal entry
-    const index = journalEntries.value.findIndex(e => e.id === editingEntry.value.id);
-    if (index !== -1) {
-      journalEntries.value[index] = { ...journalForm.value };
-    }
-  } else {
-    // Logic to create a new journal entry
-    const newEntry = {
-      id: Date.now(), // Simple unique ID
-      ...journalForm.value,
-      date: new Date().toISOString().split('T')[0], // Set current date
-    };
-    journalEntries.value.unshift(newEntry); // Add to the beginning of the array
-  }
-  closeModal();
-};
+  if (!isLoggedIn.value) return;
+  if (!journalForm.value.content.trim()) return;
 
-const deleteEntry = () => {
-  if (confirm(`Are you sure you want to delete this journal entry?`)) {
-    journalEntries.value = journalEntries.value.filter(e => e.id !== editingEntry.value.id);
-    closeModal();
+  if (editingEntry.value) {
+    updateEntry();
+  } else {
+    createEntry();
   }
 };
 
@@ -227,38 +299,11 @@ const formatDate = (dateString) => {
 
 // --- Lifecycle Hook ---
 onMounted(() => {
-  // In a real application, you would fetch journal entries from an API here
-  journalEntries.value = [
-    {
-      id: 1,
-      title: 'First Day of School',
-      content: 'Today was my first day back at school. I met my new teacher, Ms. Smith, and she seems really nice. We learned about fractions in math and read a new book called "The Starship Adventure." It was a great day!',
-      date: '2025-08-01',
-      mood: 'Happy',
-      moodEmoji: '😊',
-    },
-    {
-      id: 2,
-      title: 'Science Project Ideas',
-      content: 'I have to come up with a science project idea for next week. I am thinking of either making a volcano with baking soda or building a small robot. I think the robot sounds more challenging but also more fun! I will do some more research tonight.',
-      date: '2025-08-05',
-      mood: 'Excited',
-      moodEmoji: '🤩',
-    },
-    {
-      id: 3,
-      title: 'Feeling a bit tired',
-      content: 'I stayed up a little too late last night finishing my book. I need to make sure I go to bed earlier so I am not so sleepy in class. I will try to read for only 20 minutes before bed tonight.',
-      date: '2025-08-08',
-      mood: 'Tired',
-      moodEmoji: '😴',
-    },
-  ];
+  fetchJournalEntries();
 });
 </script>
 
 <style scoped>
-/* Tailwind's line-clamp utility for truncating text */
 .line-clamp-4 {
   overflow: hidden;
   display: -webkit-box;

@@ -89,12 +89,6 @@ const allBadges = ref([
   }
 ]);
 
-// --- Computed Properties ---
 const earnedBadges = computed(() => allBadges.value.filter(badge => badge.earned));
 
-// --- Lifecycle Hook ---
-onMounted(() => {
-  // In a real app, you would fetch the badges from the backend here.
-  // Example: fetchBadgesFromAPI();
-});
 </script>

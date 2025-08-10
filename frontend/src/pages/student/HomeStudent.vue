@@ -43,9 +43,9 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard icon="⭐" label="XP Points" :value="studentProfile?.xp_points" />
+          <StatCard icon="✨" label="Total XP" :value="xpPoints" />
           <StatCard icon="🏅" label="Badges Earned" :value="badgeCount" :loading="isBadgeCountLoading" />
-          <StatCard icon="🔥" label="Learning Streak" :value="studentProfile?.streak" unit="days" />
+          <StatCard icon="🎯" label="Total Habits" :value="habits.length" />
           <StatCard icon="✅" label="Activities Completed" :value="completedSkillsCount" :loading="isCompletedSkillsLoading" unit="this week" />
         </div>
 
@@ -225,6 +225,7 @@ import LessonUpdateCard from './LessonUpdateCard.vue';
 const habits = ref([])
 const studentProfile = ref(null);
 const isLoading = ref(true);
+const xpPoints = ref(0);
 const error = ref(null);
 
 const navLinks = ref([
@@ -256,11 +257,12 @@ const getEmojiForCategory = (category) => {
 const fetchHabits = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    const response = await axios.get('/api/habits', {
+    const response = await axios.get('/api/child/habits', {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // Map habit data and determine completion status for today
+    habits.value = response.data.habits_created || [];
+
     const today = new Date().toISOString().split('T')[0];
     habits.value = response.data.habits_created.map(habit => {
       const isCompletedToday = response.data.completed_habits.some(
@@ -293,7 +295,7 @@ const toggleHabit = async (habitId) => {
   if (habitToToggle && !habitToToggle.completed) {
     try {
       // The backend POST endpoint marks it as complete
-      await axios.post(`/api/habits/${habitId}/complete`, null, {
+      await axios.post(`/api/child/habit/${habitId}/complete`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -309,6 +311,21 @@ const toggleHabit = async (habitId) => {
         alert('An error occurred. Please try again.');
       }
     }
+  }
+};
+
+const fetchUserProfile = async () => {
+  const token = localStorage.getItem('access_token');
+  try {
+    // Assuming you have an endpoint like '/api/child/profile'
+    const response = await axios.get('/api/child/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    xpPoints.value = response.data.xp_points;
+  } catch (err) {
+    error.value = 'Failed to fetch user profile data.';
+    console.error('Failed to fetch user profile:', err);
   }
 };
 
@@ -333,20 +350,13 @@ const isBadgeCountLoading = ref(true);
 const completedSkillsCount = ref(0);
 const isCompletedSkillsLoading = ref(true);
 
-// --- Functions & Computed Properties ---
 const toggleActivity = (activityId) => {
   const activity = todaysActivities.value.find((a) => a.id === activityId);
   if (activity && !activity.completed) {
     activity.completed = true;
-    // Add logic to update backend and give XP
-    // e.g., axios.post('/api/child/activity/complete', { activityId });
   }
 };
 
-/**
- * A generic function to fetch data and handle loading/errors.
- * This reduces repetitive code.
- */
 const fetchData = async (url, loadingRef, dataRef, transform = (d) => d, key = '') => {
   const token = localStorage.getItem('access_token');
   if (!token) return;
@@ -367,9 +377,10 @@ onMounted(async () => {
 
   await Promise.all([
     fetchData('/api/child/lesson-updates', isLoading, lessonUpdates, null, 'lesson_updates'),
-    fetchData('/api/badge/count', isBadgeCountLoading, badgeCount, (data) => data.badge_count),
-    fetchData('/api/skills/completed/count', isCompletedSkillsLoading, completedSkillsCount, (data) => data.completed_skills_count),
+    fetchData('/api/child/badge/count', isBadgeCountLoading, badgeCount, (data) => data.badge_count),
+    fetchData('/api/child/skills/completed/count', isCompletedSkillsLoading, completedSkillsCount, (data) => data.completed_skills_count),
     fetchHabits(),
+    fetchUserProfile()
   ]);
 });
 

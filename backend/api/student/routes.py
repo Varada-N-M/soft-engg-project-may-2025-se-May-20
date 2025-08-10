@@ -454,9 +454,6 @@ class Habits(Resource):
 class HabitsToday(Resource):
     @jwt_required()
     def get(self):
-        """
-        Get the latest 6 habits for the logged-in child.
-        """
         try:
             current_user_id = get_jwt_identity()
             user = Users.query.filter_by(
@@ -474,7 +471,7 @@ class HabitsToday(Resource):
 
             habits = Habit.query.filter_by(child_id=child.child_id) \
                 .order_by(Habit.created_at.desc()) \
-                .limit(6).all()
+                .all()
 
             return {
                 'habits': [

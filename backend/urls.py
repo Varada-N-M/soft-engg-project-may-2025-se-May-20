@@ -1,6 +1,6 @@
 from flask_restful import Api
 from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization, SignupTeacher, SignupAdmin
-from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill,Skills,StudentProfile, BadgeCountAPI, CompletedSkillsCountAPI
+from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill,Skills,StudentProfile, BadgeCountAPI, CompletedSkillsCountAPI, ToDoListDetailResource
 from api.parent.routes import LinkChildToParent,ParentProfile
 from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill
 from api.parent.routes import LinkChildToParent, GetLinkedChildren, ParentChildrenLessonUpdates
@@ -31,7 +31,8 @@ api.add_resource(ChangePassword, '/api/auth/change-password')
 api.add_resource(GratitudeEntry, '/api/child/gratitude', '/api/child/gratitude/<int:entry_id>')
 api.add_resource(Habits, '/api/child/habit', '/api/child/habit/<int:habit_id>')
 api.add_resource(CompleteHabit, '/api/child/habit/<int:habit_id>/complete')
-api.add_resource(ToDoListResource, '/api/todos', '/api/todos/<int:todo_id>')
+api.add_resource(ToDoListResource, '/api/todos')
+api.add_resource(ToDoListDetailResource, '/api/todos/<int:todo_id>')
 api.add_resource(StudentLessonUpdates, '/api/child/lesson-updates')
 api.add_resource(Skills, '/api/child/skills', '/api/child/skills/<int:skill_id>')
 api.add_resource(CompleteSkill, '/api/child/skills/<int:skill_id>/complete')

@@ -544,6 +544,7 @@ class CompleteHabit(Resource):
 
 class ToDoListResource(Resource):
     """Manage to-do list items."""
+    
     @jwt_required()
     def post(self):
         """Create a new to-do item."""
@@ -571,13 +572,15 @@ class ToDoListResource(Resource):
             is_daily = data.get('is_daily', False)
             is_done = data.get('is_done', False)
             created_at = datetime.now(timezone.utc)
-
-            # Optional fields
-            completion_date_str = data.get('completion_date')      # ISO 8601 string
+            completion_date_str = data.get('completion_date')
             
             completion_date = None
-
-
+            if completion_date_str:
+                try:
+                    completion_date = datetime.fromisoformat(completion_date_str)
+                except ValueError:
+                    return {'error': 'Invalid completion_date format. Use ISO 8601.'}, 400
+            
             # Create to-do item
             todo_item = ToDoList(
                 child_id=child.child_id,
@@ -609,7 +612,6 @@ class ToDoListResource(Resource):
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
-    
     @jwt_required()
     def get(self):
         """Get to-do items for the logged-in child."""
@@ -624,30 +626,7 @@ class ToDoListResource(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
             
-            # Query parameters
-            is_done = request.args.get('is_done')
-            is_daily = request.args.get('is_daily')
-            date_str = request.args.get('date')
-            
             query = ToDoList.query.filter_by(child_id=child.child_id)
-            
-            # Filter by completion status
-            if is_done is not None:
-                is_done_bool = is_done.lower() == 'true'
-                query = query.filter_by(is_done=is_done_bool)
-            
-            # Filter by daily tasks
-            if is_daily is not None:
-                is_daily_bool = is_daily.lower() == 'true'
-                query = query.filter_by(is_daily=is_daily_bool)
-            
-            # Filter by date
-            if date_str:
-                try:
-                    target_date = datetime.strptime(date_str, "%d-%m-%y").date()
-                    query = query.filter(func.date(ToDoList.created_at) == target_date)
-                except ValueError:
-                    return {'error': 'Invalid date format. Use DD-MM-YY'}, 400
             
             todos = query.order_by(ToDoList.created_at.desc()).all()
             
@@ -659,7 +638,6 @@ class ToDoListResource(Resource):
                         'description': todo.description,
                         'is_done': todo.is_done,
                         'is_daily': todo.is_daily,
-                        'is_done': todo.is_done,
                         'created_at': todo.created_at.isoformat(),
                         'completion_date': todo.completion_date.isoformat() if todo.completion_date else None
                     } for todo in todos
@@ -668,7 +646,10 @@ class ToDoListResource(Resource):
             
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
-    
+
+class ToDoListDetailResource(Resource):
+    """Manage a single to-do list item by ID."""
+
     @jwt_required()
     def put(self, todo_id):
         """Update a to-do item."""
@@ -683,15 +664,11 @@ class ToDoListResource(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
             
-            data = request.get_json()
-            list_id = data.get('list_id')
-            
-            if not list_id:
-                return {'error': 'list_id is required'}, 400
-            
-            todo_item = ToDoList.query.filter_by(list_id=list_id, child_id=child.child_id).first()
+            todo_item = ToDoList.query.filter_by(list_id=todo_id, child_id=child.child_id).first()
             if not todo_item:
                 return {'error': 'To-do item not found'}, 404
+            
+            data = request.get_json()
             
             # Update fields
             if 'to_do' in data:
@@ -706,6 +683,12 @@ class ToDoListResource(Resource):
                     todo_item.completion_date = datetime.now(timezone.utc)
                 elif not data['is_done']:
                     todo_item.completion_date = None
+            if 'completion_date' in data:
+                completion_date_str = data['completion_date']
+                try:
+                    todo_item.completion_date = datetime.fromisoformat(completion_date_str) if completion_date_str else None
+                except ValueError:
+                    return {'error': 'Invalid completion_date format. Use ISO 8601.'}, 400
             
             db.session.commit()
             
@@ -722,7 +705,7 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-        
+
     @jwt_required()
     def delete(self, todo_id):
         """Delete a to-do item."""
@@ -749,7 +732,6 @@ class ToDoListResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
-
 
 
 class StudentLessonUpdates(Resource):

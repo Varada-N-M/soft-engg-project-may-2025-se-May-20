@@ -2,7 +2,7 @@
   <div class="min-h-screen flex">
     <aside class="w-64 bg-white bg-opacity-90 backdrop-blur-sm p-6 fixed left-0 top-0 h-screen overflow-y-auto z-50 shadow-lg flex flex-col">
       <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-gray-900 mt-15">My Journey</h2>
+        <h2 class="text-3xl font-extrabold text-gray-900 mt-6">My Dashboard</h2>
       </div>
       <nav class="space-y-3">
         <router-link
@@ -15,10 +15,16 @@
         </router-link>
       </nav>
 
+      <router-link to="/student/profile"
+        @click="logout"
+        class="mt-30 flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium justify-center"
+      >
+        Profile
+      </router-link>
       <!-- Logout button at bottom -->
       <button
         @click="logout"
-        class="mt-auto flex items-center gap-3 py-3 px-4 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium justify-center"
+        class="mt-3 flex items-center gap-3 py-3 px-4 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium justify-center"
       >
         Logout
       </button>
@@ -234,6 +240,7 @@ const navLinks = ref([
   { name: 'Badges', path: '/student/badges', icon: '🏅' },
   { name: 'Life Lessons', path: '/student/stories', icon: '📖' },
   { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
   // { name: 'Activities', path: '/student/daily-activities', icon: '📅' },
   // { name: 'Weekly Challenge', path: '/student/life-skills', icon: '🛠️' },
   { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },

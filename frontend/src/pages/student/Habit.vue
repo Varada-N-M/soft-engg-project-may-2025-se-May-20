@@ -230,7 +230,7 @@ const fetchHabits = async () => {
 const completeHabit = async (habitId) => {
   const token = localStorage.getItem('access_token');
   try {
-    await api.post(`/api/habit/${habitId}/complete`, null, {
+    await api.post(`/api/child/habit/${habitId}/complete`, null, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

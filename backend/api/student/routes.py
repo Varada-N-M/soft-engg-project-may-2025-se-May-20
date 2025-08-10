@@ -2,20 +2,17 @@ import os
 from datetime import date, datetime, timedelta, timezone
 
 import dotenv
+import google.generativeai as genai
 from dotenv import load_dotenv
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
+from google.generativeai import GenerativeModel
 from sqlalchemy import func
 
+from config import config
 from models import *
 from utils import *
-
-from config import config
-
-from google.generativeai import GenerativeModel
-import google.generativeai as genai
-from config import config
 
 GEMINI_API_KEY = config['default'].GEMINI_API_KEY
 GEMINI_MODEL = config['default'].GEMINI_MODEL
@@ -1120,7 +1117,6 @@ class StudentProfile(Resource):
 
 
 
-
 class CommunicationHelper:
     def __init__(self):
         self.grammar_patterns = {
@@ -1309,6 +1305,51 @@ class CommunicationHelper:
         
         return issues, corrections, compliments, corrected_text
 
+    def check_grammar_with_ai(self, text):
+        """
+        Enhanced grammar check combining pattern matching with AI analysis
+        """
+        # Basic pattern-based check
+        issues, corrections, compliments, corrected_text = self.check_grammar(text)
+        
+        try:
+            # AI analysis for more sophisticated grammar checking
+            ai_prompt = f"""
+            Analyze this text for grammar issues. Focus on:
+            1. Subject-verb agreement
+            2. Tense consistency
+            3. Pronoun usage
+            4. Sentence structure
+            5. Punctuation
+            
+            Text: "{text}"
+            
+            Provide specific issues found and suggestions for improvement.
+            Use child-friendly language suitable for ages 8-14.
+            Be encouraging and positive in your feedback.
+            """
+            
+            ai_response = model.generate_content(ai_prompt)
+            ai_analysis = ai_response.text
+            
+            return {
+                "basic_issues": issues,
+                "basic_corrections": corrections,
+                "compliments": compliments,
+                "corrected_text": corrected_text,
+                "ai_analysis": ai_analysis
+            }
+            
+        except Exception as e:
+            print(f"AI grammar analysis error: {e}")
+            return {
+                "basic_issues": issues,
+                "basic_corrections": corrections,
+                "compliments": compliments,
+                "corrected_text": corrected_text,
+                "ai_analysis": "AI analysis unavailable, but basic grammar check completed!"
+            }
+
     def get_vocabulary_suggestions(self, text):
         """Get vocabulary enhancement suggestions"""
         suggestions = []
@@ -1444,7 +1485,7 @@ class GrammarCheck(Resource):
     @jwt_required()
     def post(self):
         """
-        Kid-friendly grammar check
+        Kid-friendly grammar check with AI enhancement
         URL: /grammar-check
         """
         try:
@@ -1456,23 +1497,112 @@ class GrammarCheck(Resource):
             if not text:
                 return {"error": "Looks like you haven't written anything yet!"}, 400
             
-            # Comprehensive grammar check
+            # Basic grammar check using patterns
             issues, corrections, compliments, corrected_text = communication_helper.check_grammar(text)
+            
+            # AI-powered grammar analysis and improvement
+            ai_grammar_feedback = None
+            ai_improved_text = None
+            
+            try:
+                ai_prompt = f"""
+                You are a friendly grammar helper for children aged 8-14. Please analyze this text for grammar issues and provide helpful suggestions.
+                
+                Text to check: "{text}"
+                
+                Please provide:
+                1. A corrected version of the text (if needed)
+                2. A list of grammar issues you found, explained in simple, kid-friendly language
+                3. Specific tips for improvement that a child can understand
+                4. Encouragement and praise for what they did well
+                5. One fun grammar tip they can remember for next time
+                
+                Use encouraging language like:
+                - "Great job with..." 
+                - "Let's fix this together..."
+                - "Here's a cool trick..."
+                - "You're getting better at..."
+                
+                Keep explanations simple and positive. Focus on helping them learn, not just correcting mistakes.
+                If the grammar is already good, celebrate that!
+                """
+                
+                ai_response = model.generate_content(ai_prompt)
+                ai_grammar_feedback = ai_response.text
+                
+                # Get AI-improved version
+                improvement_prompt = f"""
+                Please improve the grammar of this text while keeping the child's original ideas and voice: "{text}"
+                
+                Make minimal changes - only fix grammar issues. Keep their creativity and personality intact.
+                If the grammar is already good, just return the original text.
+                Return only the improved text, nothing else.
+                """
+                
+                ai_improvement_response = model.generate_content(improvement_prompt)
+                ai_improved_text = ai_improvement_response.text.strip()
+                print(f"AI improved text: {ai_improved_text}")
+                
+            except Exception as e:
+                print(f"AI grammar check error: {e}")
+                ai_grammar_feedback = f"{communication_helper.get_child_friendly_encouragement()} I'm having trouble with my AI helper right now, but your writing looks great!"
+                ai_improved_text = corrected_text
+            
+            # Combine basic and AI results
+            grammar_score = max(0, 100 - (len(issues) * 15))  # Simple scoring system
+            
+            # Additional encouragement based on performance
+            if grammar_score >= 90:
+                overall_feedback = "Outstanding grammar! You're a grammar superstar! 🌟"
+            elif grammar_score >= 75:
+                overall_feedback = "Great job! Just a few small things to practice. 👍"
+            elif grammar_score >= 60:
+                overall_feedback = "Good effort! You're learning fast! Keep it up! 📚"
+            else:
+                overall_feedback = "You're trying hard and that's awesome! Every mistake helps you learn! 💪"
             
             return {
                 "original_text": text,
-                "corrected_text": corrected_text,
-                "issues": issues,
-                "corrections": corrections,
+                "basic_corrected_text": corrected_text,
+                "ai_improved_text": ai_improved_text,
+                "basic_issues": issues,
+                "basic_corrections": corrections,
                 "compliments": compliments,
-                "is_perfect": len(issues) == 0,
-                "encouragement": "You're getting better at grammar!" if issues else "Perfect grammar - you're amazing!",
-                "fun_tip": "Reading your sentences out loud can help you catch mistakes!"
+                "ai_feedback": ai_grammar_feedback,
+                "grammar_score": grammar_score,
+                "overall_feedback": overall_feedback,
+                "is_perfect": len(issues) == 0 and grammar_score >= 95,
+                "encouragement": "You're getting better at grammar every day!" if issues else "Perfect grammar - you're amazing!",
+                "fun_grammar_tips": [
+                    "Read your sentences out loud to catch mistakes!",
+                    "Every sentence needs a capital letter at the start and punctuation at the end!",
+                    "When writing about yourself, always use capital 'I'!",
+                    "Short sentences are often clearer than long ones!"
+                ],
+                "badges_earned": self._get_grammar_badges(grammar_score, len(issues))
             }
         
         except Exception as e:
             print(f"Error checking grammar: {e}")
             return {"error": "Something went wrong, but keep practicing your grammar!"}, 500
+    
+    def _get_grammar_badges(self, score, issue_count):
+        """Award fun badges based on grammar performance"""
+        badges = []
+        
+        if score >= 95:
+            badges.append("🏆 Grammar Champion")
+        elif score >= 85:
+            badges.append("⭐ Grammar Star")
+        elif score >= 70:
+            badges.append("📝 Grammar Explorer")
+        
+        if issue_count == 0:
+            badges.append("✨ Perfect Writer")
+        elif issue_count <= 2:
+            badges.append("🎯 Almost Perfect")
+        
+        return badges
 
 class VocabularySuggestions(Resource):
     @jwt_required()
@@ -1534,4 +1664,3 @@ class StoryStarter(Resource):
             ],
             "encouragement": "Every great author started with just one story. This could be yours! ✨"
         }
-

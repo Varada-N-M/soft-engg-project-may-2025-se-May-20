@@ -248,23 +248,37 @@
           </button>
 
           <div v-if="grammarResults" class="results">
+            <!-- Show AI improved text if available -->
+            <div v-if="grammarResults.ai_improved_text" class="result-section">
+              <h3>✏️ AI Improved Version</h3>
+              <div class="improved-text">{{ grammarResults.ai_improved_text }}</div>
+            </div>
+
+            <!-- Show grammar status -->
             <div v-if="grammarResults.is_correct" class="success">
               ✅ Great! No major grammar issues found.
             </div>
-            <div v-else>
-              <div v-if="grammarResults.issues && grammarResults.issues.length > 0" class="result-section">
-                <h3>⚠️ Grammar Issues</h3>
-                <ul class="issues-list">
-                  <li v-for="issue in grammarResults.issues" :key="issue">{{ issue }}</li>
-                </ul>
-              </div>
+            
+            <!-- Show grammar issues if any -->
+            <div v-if="grammarResults.issues && grammarResults.issues.length > 0" class="result-section">
+              <h3>⚠️ Grammar Issues</h3>
+              <ul class="issues-list">
+                <li v-for="issue in grammarResults.issues" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
 
-              <div v-if="grammarResults.corrections && grammarResults.corrections.length > 0" class="result-section">
-                <h3>✏️ Suggested Corrections</h3>
-                <div v-for="correction in grammarResults.corrections" :key="correction" class="improved-text">
-                  {{ correction }}
-                </div>
+            <!-- Show corrections if any -->
+            <div v-if="grammarResults.corrections && grammarResults.corrections.length > 0" class="result-section">
+              <h3>✏️ Suggested Corrections</h3>
+              <div v-for="correction in grammarResults.corrections" :key="correction" class="improved-text">
+                {{ correction }}
               </div>
+            </div>
+
+            <!-- Show any other feedback -->
+            <div v-if="grammarResults.feedback" class="result-section">
+              <h3>💭 Feedback</h3>
+              <div class="improved-text">{{ grammarResults.feedback }}</div>
             </div>
 
             <!-- Vocabulary Suggestions Button -->
@@ -279,10 +293,10 @@
               </button>
             </div>
 
-            <!-- Vocabulary Results -->
-            <div v-if="vocabResults && vocabResults.vocabulary_suggestions && vocabResults.vocabulary_suggestions.length > 0" class="result-section">
+            <!-- Vocabulary Results - Fixed to use grammarResults -->
+            <div v-if="grammarResults && grammarResults.vocabulary_suggestions && grammarResults.vocabulary_suggestions.length > 0" class="result-section">
               <h3>📚 Vocabulary Enhancements</h3>
-              <div v-for="suggestion in vocabResults.vocabulary_suggestions" :key="suggestion.original" class="vocab-suggestion">
+              <div v-for="suggestion in grammarResults.vocabulary_suggestions" :key="suggestion.original" class="vocab-suggestion">
                 <strong>"{{ suggestion.original }}"</strong> could be replaced with:
                 <div class="vocab-alternatives">
                   <span v-for="alt in suggestion.alternatives" :key="alt" class="vocab-alt">
@@ -290,12 +304,12 @@
                   </span>
                 </div>
               </div>
-              <div class="success" v-if="vocabResults.tip">
-                💡 {{ vocabResults.tip }}
+              <div class="success" v-if="grammarResults.tip">
+                💡 {{ grammarResults.tip }}
               </div>
             </div>
             
-            <div v-else-if="vocabResults && vocabResults.vocabulary_suggestions && vocabResults.vocabulary_suggestions.length === 0" class="success">
+            <div v-else-if="grammarResults && grammarResults.vocabulary_suggestions && grammarResults.vocabulary_suggestions.length === 0" class="success">
               ✅ Your vocabulary looks good! No obvious improvements needed.
             </div>
           </div>
@@ -338,8 +352,8 @@ export default {
       
       // Grammar Check
       grammarInput: '',
-      grammarResults: null,
-      vocabResults: null
+      grammarResults: null
+      // Removed vocabResults since we're merging into grammarResults
     }
   },
   
@@ -421,15 +435,15 @@ export default {
       this.loading = true
       this.error = null
       this.grammarResults = null
-      this.vocabResults = null
       
       try {
-        const response = await api.post('/api/grammar-check', {
+        const response = await api.post('/api/child/grammar-check', {
           text: this.grammarInput
         })
         
         this.grammarResults = response.data
         console.log('Grammar results:', this.grammarResults)
+        console.log('Grammar results keys:', Object.keys(this.grammarResults))
       } catch (err) {
         console.error('Error checking grammar:', err)
         this.error = err.response?.data?.error || 'An error occurred while checking grammar.'
@@ -438,6 +452,7 @@ export default {
       }
     },
     
+    // Fixed getVocabSuggestions method
     async getVocabSuggestions() {
       if (!this.grammarInput.trim()) return
       
@@ -445,12 +460,23 @@ export default {
       this.error = null
       
       try {
-        const response = await api.post('/api/vocabulary-suggestions', {
+        const response = await api.post('/api/child/vocabulary-suggestions', {
           text: this.grammarInput
         })
         
-        this.vocabResults = response.data
-        console.log('Vocabulary results:', this.vocabResults)
+        // Fix: Merge vocabulary data into existing grammarResults
+        if (this.grammarResults) {
+          this.grammarResults = {
+            ...this.grammarResults,
+            vocabulary_suggestions: response.data.vocabulary_suggestions,
+            tip: response.data.tip
+          }
+        } else {
+          // If no grammar results exist, create them
+          this.grammarResults = response.data
+        }
+        
+        console.log('Updated grammar results with vocabulary:', this.grammarResults)
       } catch (err) {
         console.error('Error getting vocabulary suggestions:', err)
         this.error = err.response?.data?.error || 'An error occurred while getting vocabulary suggestions.'

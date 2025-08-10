@@ -22,13 +22,7 @@
           >
             Writing Analyzer
           </button>
-          <button 
-            class="tab" 
-            :class="{active: activeTab === 'speaking'}" 
-            @click="activeTab = 'speaking'"
-          >
-            Speaking Practice
-          </button>
+        
           <button 
             class="tab" 
             :class="{active: activeTab === 'grammar'}" 

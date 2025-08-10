@@ -127,9 +127,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-
+import api from '@/plugins/axios.ts';
+import { onMounted, ref } from 'vue';
 // --- Reactive Data ---
 const showModal = ref(false);
 const editingEntry = ref(null);
@@ -158,7 +157,7 @@ const fetchJournalEntries = async () => {
   error.value = null;
 
   try {
-    const response = await axios.get('/api/gratitude', {
+    const response = await api.get('/api/child/gratitude', {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -189,7 +188,7 @@ const createEntry = async () => {
   if (!isLoggedIn.value) return;
 
   try {
-    const response = await axios.post('/api/gratitude', {
+    const response = await api.post('/api/child/gratitude', {
       gratitude_text: journalForm.value.content,
     }, {
       headers: { Authorization: `Bearer ${token}` }
@@ -212,7 +211,7 @@ const updateEntry = async () => {
   if (!isLoggedIn.value) return;
 
   try {
-    await axios.put(`/api/gratitude/${editingEntry.value.id}`, {
+    await api.put(`/api/child/gratitude/${editingEntry.value.id}`, {
       gratitude_text: journalForm.value.content,
     }, {
       headers: { Authorization: `Bearer ${token}` }
@@ -236,7 +235,7 @@ const deleteEntry = async () => {
   if (!confirmed) return;
 
   try {
-    await axios.delete(`/api/gratitude/${editingEntry.value.id}`, {
+    await api.delete(`/api/child/gratitude/${editingEntry.value.id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 

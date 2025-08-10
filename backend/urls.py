@@ -1,14 +1,23 @@
 from flask_restful import Api
-from api.auth.routes import SignupChild, Login, RefreshToken, SignupParent, SignupOrganization, SignupTeacher, SignupAdmin
-from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill,Skills,StudentProfile, BadgeCountAPI, CompletedSkillsCountAPI, ToDoListDetailResource
-from api.parent.routes import LinkChildToParent,ParentProfile
-from api.student.routes import GratitudeEntry, Habits, CompleteHabit, ToDoListResource, StudentLessonUpdates, CompleteSkill
-from api.parent.routes import LinkChildToParent, GetLinkedChildren, ParentChildrenLessonUpdates
-from api.student.routes import Skills
-from api.teacher.routes import (AddStudent, RemoveStudent, TeacherLessonUpdates, TeacherLessonUpdateDetail, CreateSchool, 
-                                LinkStudentToTeacher, UnlinkStudentFromTeacher,TeacherProfile, GetLinkedStudents)
+
+from api.auth.routes import (ChangePassword, ForgotPassword, Login,
+                             RefreshToken, ResetPassword, SignupAdmin,
+                             SignupChild, SignupOrganization, SignupParent,
+                             SignupTeacher)
 from api.organization.routes import OrganizationStats
-from api.auth.routes import ForgotPassword, ResetPassword, ChangePassword
+from api.parent.routes import (GetLinkedChildren, LinkChildToParent,
+                               ParentChildrenLessonUpdates, ParentProfile)
+from api.student.routes import (AnalyzeWriting, BadgeCountAPI,
+                                CompletedSkillsCountAPI, CompleteHabit,
+                                CompleteSkill, GrammarCheck, GratitudeEntry,
+                                Habits, ImproveSentence, Skills, StoryStarter,
+                                StudentLessonUpdates, StudentProfile,
+                                ToDoListResource, VocabularySuggestions)
+from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
+                                LinkStudentToTeacher, RemoveStudent,
+                                TeacherLessonUpdateDetail,
+                                TeacherLessonUpdates, TeacherProfile,
+                                UnlinkStudentFromTeacher)
 
 api = Api()
 
@@ -39,6 +48,13 @@ api.add_resource(CompleteSkill, '/api/child/skills/<int:skill_id>/complete')
 api.add_resource(StudentProfile, '/api/child/profile')
 api.add_resource(BadgeCountAPI, '/api/child/badge/count')
 api.add_resource(CompletedSkillsCountAPI, '/api/child/skills/completed/count')
+
+#AI features
+api.add_resource(ImproveSentence, '/api/improve-sentence')
+api.add_resource(AnalyzeWriting, '/api/child/analyze-writing')
+api.add_resource(GrammarCheck, '/api/child/grammar-check')
+api.add_resource(VocabularySuggestions, '/api/child/vocabulary-suggestions')
+api.add_resource(StoryStarter, '/api/child/story-starter')
 
 # Parent
 api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlink-child/<int:child_id>')

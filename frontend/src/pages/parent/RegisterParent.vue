@@ -348,7 +348,7 @@ const handleSubmit = async () => {
       phone_number: formData.value.phone_number // keep as string, backend expects string
     }
 
-    const res = await api.post('/api/auth/signup/parent', apiData)
+    const res = await api.post('/api/parent/register', apiData)
     const result = res.data
 
     response.value = {

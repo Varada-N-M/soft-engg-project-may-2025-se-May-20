@@ -12,12 +12,14 @@ from api.student.routes import (AnalyzeWriting, BadgeCountAPI,
                                 CompleteSkill, GrammarCheck, GratitudeEntry,
                                 Habits, ImproveSentence, Skills, StoryStarter,
                                 StudentLessonUpdates, StudentProfile,
-                                ToDoListResource, VocabularySuggestions)
+                                ToDoListDetailResource, ToDoListResource,
+                                VocabularySuggestions,StudentEarnedBadgesAPI)
 from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
                                 LinkStudentToTeacher, RemoveStudent,
                                 TeacherLessonUpdateDetail,
                                 TeacherLessonUpdates, TeacherProfile,
-                                UnlinkStudentFromTeacher)
+                                UnlinkStudentFromTeacher,PrincipalTeacher,
+                                PrincipalTeacherManagement)
 
 api = Api()
 
@@ -48,9 +50,10 @@ api.add_resource(CompleteSkill, '/api/child/skills/<int:skill_id>/complete')
 api.add_resource(StudentProfile, '/api/child/profile')
 api.add_resource(BadgeCountAPI, '/api/child/badge/count')
 api.add_resource(CompletedSkillsCountAPI, '/api/child/skills/completed/count')
+api.add_resource(StudentEarnedBadgesAPI, '/api/child/badges/earned')
 
 #AI features
-api.add_resource(ImproveSentence, '/api/improve-sentence')
+api.add_resource(ImproveSentence, '/api/child/improve-sentence')
 api.add_resource(AnalyzeWriting, '/api/child/analyze-writing')
 api.add_resource(GrammarCheck, '/api/child/grammar-check')
 api.add_resource(VocabularySuggestions, '/api/child/vocabulary-suggestions')
@@ -71,5 +74,8 @@ api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
 api.add_resource(TeacherProfile, '/api/teacher/profile')
 api.add_resource(GetLinkedStudents, '/api/teacher/linked-students')
+api.add_resource(PrincipalTeacher, "/principal/teachers")
+api.add_resource(PrincipalTeacherManagement, "/principal/teachers/<int:teacher_id>")
+
 # Organization
 api.add_resource(OrganizationStats, '/api/organization/stats')

@@ -18,6 +18,93 @@
             <p class="text-gray-800">Hello there! I'm your learning companion. How can I assist you today?</p>
           </div>
         </div>
+      </div>
+      
+      <div class="main-content">
+        <div class="tabs">
+          <button 
+            class="tab" 
+            :class="{active: activeTab === 'sentence'}" 
+            @click="activeTab = 'sentence'"
+          >
+            Sentence Improver
+          </button>
+          <button 
+            class="tab" 
+            :class="{active: activeTab === 'writing'}" 
+            @click="activeTab = 'writing'"
+          >
+            Writing Analyzer
+          </button>
+        
+          <button 
+            class="tab" 
+            :class="{active: activeTab === 'grammar'}" 
+            @click="activeTab = 'grammar'"
+          >
+            Grammar Check
+          </button>
+        </div>
+
+        <!-- Sentence Improver Tab -->
+        <div v-show="activeTab === 'sentence'" class="tab-content">
+          <div class="form-group">
+            <label for="sentence-input">Enter your sentence:</label>
+            <textarea 
+              id="sentence-input"
+              v-model="sentenceInput" 
+              class="form-control" 
+              rows="3" 
+              placeholder="Example: Yesterday I told her that I have had to go home"
+            ></textarea>
+          </div>
+          <button 
+            class="btn" 
+            @click="improveSentence" 
+            :disabled="loading || !sentenceInput.trim()"
+          >
+            <span v-if="loading" class="spinner"></span>
+            {{ loading ? 'Analyzing...' : 'Improve Sentence' }}
+          </button>
+
+          <div v-if="sentenceResults" class="results">
+            <div class="result-section">
+              <h3>📝 AI Improved Version</h3>
+              <div class="improved-text" v-html="formatAIResponse(sentenceResults.ai_improvement)"></div>
+            </div>
+
+            <div v-if="sentenceResults.issues && sentenceResults.issues.length > 0" class="result-section">
+              <h3>⚠️ Issues Found</h3>
+              <ul class="issues-list">
+                <li v-for="issue in sentenceResults.issues" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
+
+            <div v-if="sentenceResults.suggestions && sentenceResults.suggestions.length > 0" class="result-section">
+              <h3>💡 Suggestions</h3>
+              <ul class="tips-list">
+                <li v-for="suggestion in sentenceResults.suggestions" :key="suggestion">{{ suggestion }}</li>
+              </ul>
+            </div>
+
+            <div v-if="sentenceResults.speaking_tips && sentenceResults.speaking_tips.length > 0" class="result-section">
+              <h3>🎤 Speaking Tips</h3>
+              <ul class="tips-list">
+                <li v-for="tip in sentenceResults.speaking_tips" :key="tip">{{ tip }}</li>
+              </ul>
+            </div>
+
+            <div class="result-section">
+              <h3>📊 Analysis</h3>
+              <div class="stats">
+                <div class="stat-item">
+                  <div class="stat-number">{{ sentenceResults.word_count || 0 }}</div>
+                  <div class="stat-label">Words</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div v-for="message in messages" :key="message.id" class="flex" :class="message.from === 'user' ? 'justify-end' : 'justify-start'">
           <div v-if="message.from === 'user'" class="bg-purple-500 text-white p-4 rounded-3xl max-w-[80%] transform transition-transform duration-300 ease-out">

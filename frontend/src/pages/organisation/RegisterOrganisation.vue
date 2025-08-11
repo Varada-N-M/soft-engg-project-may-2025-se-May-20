@@ -240,7 +240,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const {data: result} = await api.post('/api/auth/signup/organization', apiData)
+    const {data: result} = await api.post('/api/organization/register', apiData)
     response.value = {
       success: true,
       message: result.message || 'Organization registered successfully! Welcome to CoolKids! 🎉',

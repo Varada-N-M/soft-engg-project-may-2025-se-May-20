@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white bg-opacity-40 backdrop-blur-sm border-b-2 border-gray-200 sticky top-3 z-10 mx-auto max-w-7xl rounded-[35px]">
+  <header class="backdrop-blur-lg bg-opacity-40  sticky top-3 z-10 mx-auto max-w-7xl rounded-[35px]">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
@@ -7,7 +7,7 @@
           <router-link to="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div class="hidden sm:block">
               <h1 class="text-2xl font-black  font-fancy  text-gray-800">
-                CoolKids
+                <logo/>
               </h1>
               <p class="text-xs text-gray-500 -mt-1">Learning Made Fun!</p>
             </div>
@@ -17,52 +17,20 @@
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center space-x-8">
           <!-- Main Navigation Links -->
-<!--          <div class="flex items-center space-x-6">-->
-<!--            <router-link-->
-<!--                to="/about"-->
-<!--                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"-->
-<!--                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/about' }"-->
-<!--            >-->
-<!--              ℹ️ About-->
-<!--            </router-link>-->
 
-<!--            <router-link-->
-<!--                to="/features"-->
-<!--                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"-->
-<!--                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/features' }"-->
-<!--            >-->
-<!--              ✨ Features-->
-<!--            </router-link>-->
-
-<!--            <router-link-->
-<!--                to="/pricing"-->
-<!--                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"-->
-<!--                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/pricing' }"-->
-<!--            >-->
-<!--              💰 Pricing-->
-<!--            </router-link>-->
-
-<!--            <router-link-->
-<!--                to="/contact"-->
-<!--                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"-->
-<!--                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/contact' }"-->
-<!--            >-->
-<!--              📞 Contact-->
-<!--            </router-link>-->
-<!--          </div>-->
 
           <!-- Login/Signup Actions -->
           <div class="flex items-center space-x-4">
             <!-- Login Dropdown -->
             <div class="relative">
-              <button
+              <Button
                   @click="showLoginMenu = !showLoginMenu"
-                  class="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                  class="flex items-center space-x-2 px-4 py-2  hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
               >
                 <LogInIcon class="w-4 h-4" />
                 <span>Sign In</span>
                 <ChevronDownIcon class="w-4 h-4" />
-              </button>
+              </Button>
 
               <!-- Login Menu Dropdown -->
               <div
@@ -134,14 +102,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Get Started Button -->
-            <router-link
-                to="/"
-                class="bg-gradient-to-r from-blue-500 to-pink-500 text-white px-6 py-2 font-medium hover:from-blue-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg rounded-[20px]"
-            >
-              Get Started
-            </router-link>
           </div>
         </div>
 
@@ -297,6 +257,8 @@ import {
   XIcon,
   LogInIcon
 } from 'lucide-vue-next'
+import Logo from "@/components/partials/Logo.vue";
+import {Button} from "@/components/ui/button/index.js";
 
 // Reactive state
 const showMobileMenu = ref(false)

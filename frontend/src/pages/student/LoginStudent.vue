@@ -1,128 +1,133 @@
 <template>
-  <div
-      class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300 flex items-center justify-center p-4">
-    <!-- Floating decorative elements -->
-    <FloatingDecorativeElements/>
+  <div class="bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
 
-    <div class="w-full max-w-md">
-      <!-- Main login card -->
-      <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-        <!-- Decorative top wave -->
-        <div class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-t-3xl"></div>
-
-        <!-- App logo and title -->
-        <div class="relative z-10 text-center mb-8 pt-4">
+    <GuestNavbar/>
+    <div
+        class="min-h-screen  flex items-center justify-center p-4">
+      <!-- Floating decorative elements -->
+      <FloatingDecorativeElements/>
+      <div class="w-full max-w-md">
+        <!-- Main login card -->
+        <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+          <!-- Decorative top wave -->
           <div
-              class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <StarIcon class="w-10 h-10 text-white"/>
-          </div>
-          <h1 class="text-3xl font-bold text-gray-800 mb-2 font-fancy">CoolKids</h1>
-          <p class="text-gray-600 text-sm">Student Login - Let's Learn & Play!</p>
-        </div>
+              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-t-3xl"></div>
 
-        <!-- Response Alert -->
-        <div v-if="response" class="mb-6 p-4 rounded-lg border-2" :class="alertClasses">
-          <div class="flex items-center">
-            <CheckCircleIcon v-if="response.success" class="h-5 w-5 mr-2"
-                             :class="response.success ? 'text-green-600' : 'text-red-600'"/>
-            <AlertCircleIcon v-else class="h-5 w-5 mr-2" :class="response.success ? 'text-green-600' : 'text-red-600'"/>
-            <p :class="response.success ? 'text-green-800' : 'text-red-800'">{{ response.message }}</p>
-          </div>
-        </div>
-
-        <!-- Login form -->
-        <form @submit.prevent="handleLogin" class="space-y-6">
-          <div class="space-y-4">
-            <!-- Username/Email field -->
-            <div class="relative">
-              <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                👤 Username or Email
-              </label>
-              <Input
-                  id="email"
-                  v-model="formData.email"
-                  type="text"
-                  placeholder="Enter your username or email"
-                  class="w-full px-4 py-6 border-2 placeholder-gray-400 text-lg"
-                  :class="getInputClasses('email')"
-                  required
-              />
-              <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
+          <!-- App logo and title -->
+          <div class="relative z-10 text-center mb-2 pt-4">
+            <div
+                class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+              <StarIcon class="w-10 h-10 text-white"/>
             </div>
+            <p class="text-gray-600 text-sm">Student Login - Let's Learn & Play!</p>
+          </div>
 
-            <!-- Password field -->
-            <div class="relative">
-              <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                🔒 Password
-              </label>
+          <!-- Response Alert -->
+          <div v-if="response" class="mb-6 p-4 rounded-lg border-2" :class="alertClasses">
+            <div class="flex items-center">
+              <CheckCircleIcon v-if="response.success" class="h-5 w-5 mr-2"
+                               :class="response.success ? 'text-green-600' : 'text-red-600'"/>
+              <AlertCircleIcon v-else class="h-5 w-5 mr-2"
+                               :class="response.success ? 'text-green-600' : 'text-red-600'"/>
+              <p :class="response.success ? 'text-green-800' : 'text-red-800'">{{ response.message }}</p>
+            </div>
+          </div>
+
+          <!-- Login form -->
+          <form @submit.prevent="handleLogin" class="space-y-6">
+            <div class="space-y-4">
+              <!-- Username/Email field -->
               <div class="relative">
+                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                  👤 Username or Email
+                </label>
                 <Input
-                    id="password"
-                    v-model="formData.password"
-                    :type="showPassword ? 'text' : 'password'"
-                    placeholder="Enter your password"
-                    class="w-full px-4 py-6 border-2  pr-12 text-lg"
-                    :class="getInputClasses('password')"
+                    id="email"
+                    v-model="formData.email"
+                    type="text"
+                    placeholder="Enter your username or email"
+                    class="w-full px-4 py-6 border-2 placeholder-gray-400 text-lg"
+                    :class="getInputClasses('email')"
                     required
                 />
-                <button
-                    type="button"
-                    @click="showPassword = !showPassword"
-                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                >
-                  <EyeIcon v-if="showPassword" class="w-5 h-5"/>
-                  <EyeOffIcon v-else class="w-5 h-5"/>
-                </button>
+                <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+
+              <!-- Password field -->
+              <div class="relative">
+                <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                  🔒 Password
+                </label>
+                <div class="relative">
+                  <Input
+                      id="password"
+                      v-model="formData.password"
+                      :type="showPassword ? 'text' : 'password'"
+                      placeholder="Enter your password"
+                      class="w-full px-4 py-6 border-2  pr-12 text-lg"
+                      :class="getInputClasses('password')"
+                      required
+                  />
+                  <button
+                      type="button"
+                      @click="showPassword = !showPassword"
+                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    <EyeIcon v-if="showPassword" class="w-5 h-5"/>
+                    <EyeOffIcon v-else class="w-5 h-5"/>
+                  </button>
+                </div>
+                <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+              </div>
             </div>
-          </div>
 
 
-          <!-- Login button -->
-          <button
-              type="submit"
-              :disabled="isLoading"
-              class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-4 rounded-xl hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
-          >
+            <!-- Login button -->
+            <button
+                type="submit"
+                :disabled="isLoading"
+                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-4 rounded-xl hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
+            >
             <span v-if="!isLoading" class="flex items-center justify-center">
               🚀 Login
             </span>
-            <span v-else class="flex items-center justify-center">
+              <span v-else class="flex items-center justify-center">
                <Loader class="animate-spin"/>
               Getting Ready...
             </span>
-          </button>
-        </form>
+            </button>
+          </form>
 
-        <!-- Sign up link -->
-        <div class="mt-6 text-center">
-          <p class="text-sm text-gray-600">
-            New to
-            <logo/>
-            ?
-            <a href="/student/register" class="font-semibold text-purple-600 hover:text-purple-800 transition-colors">
-              Create an account
-            </a>
+          <!-- Sign up link -->
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+              New to
+              <logo/>
+              ?
+              <a href="/student/register" class="font-semibold text-purple-600 hover:text-purple-800 transition-colors">
+                Create an account
+              </a>
+            </p>
+          </div>
+
+          <!-- Other login types -->
+          <sign-in-links active-link="student"/>
+
+          <!-- Fun characters at bottom -->
+          <emoji-bounce-animation :emojis="['🎮','📚','🏆','⭐']"/>
+        </Card>
+
+        <!-- Footer text -->
+        <div class="text-center mt-6">
+          <p class="text-white text-sm opacity-80">
+            Learning is fun when you're with CoolKids! 🌈
           </p>
         </div>
-
-        <!-- Other login types -->
-        <sign-in-links active-link="student"/>
-
-        <!-- Fun characters at bottom -->
-        <emoji-bounce-animation :emojis="['🎮','📚','🏆','⭐']"/>
-      </Card>
-
-      <!-- Footer text -->
-      <div class="text-center mt-6">
-        <p class="text-white text-sm opacity-80">
-          Learning is fun when you're with CoolKids! 🌈
-        </p>
       </div>
-    </div>
 
+    </div>
   </div>
+
 </template>
 
 <script setup>
@@ -136,6 +141,7 @@ import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue
 import {Input} from "@/components/ui/input/index.js";
 import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
 import {Card} from "@/components/ui/card/index.js";
+import GuestNavbar from "@/components/app/GuestNavbar.vue";
 
 // Router
 const router = useRouter()

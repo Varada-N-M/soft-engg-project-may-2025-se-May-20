@@ -339,10 +339,10 @@ class CreateSchool(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.ADMIN).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.PRINCIPAL).first()
 
             if not user:
-                return {'error': 'Only admin user can create schools'}, 403
+                return {'error': 'Only principal user can create schools'}, 403
 
             data = request.get_json()
             name = data.get('name')

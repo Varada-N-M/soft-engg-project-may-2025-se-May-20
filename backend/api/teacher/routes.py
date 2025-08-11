@@ -8,7 +8,7 @@ from utils import *
 
 
 class SchoolListResource(Resource):
-    @jwt_required()  
+    
     def get(self):
         schools = School.query.all()
         return [
@@ -527,3 +527,136 @@ class GetLinkedStudents(Resource):
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+  
+
+class PrincipalTeacher(Resource):
+    """
+    GET /principal/teachers -> list all teachers in principal's school (except themselves)
+    """
+
+    @jwt_required()
+    def get(self):
+        try:
+            current_user_id = get_jwt_identity()
+            principal_user = Users.query.filter_by(user_id=current_user_id).first()
+
+            if not principal_user or principal_user.role_type != UserRole.PRINCIPAL:
+                return {"message": "Unauthorized access"}, 401
+
+            # Get principal's school_id from Teacher table
+            principal_teacher_entry = Teacher.query.filter_by(user_id=principal_user.user_id).first()
+            if not principal_teacher_entry:
+                return {"message": "Principal is not linked to any school"}, 404
+
+            school = School.query.filter_by(school_id=principal_teacher_entry.school_id).first()
+            if not school:
+                return {"message": "School not found"}, 404
+
+            # List all teachers in school except principal themselves
+            teachers = Teacher.query.filter(
+                Teacher.school_id == school.school_id,
+                Teacher.user_id != principal_user.user_id
+            ).all()
+
+            teacher_list = []
+            for t in teachers:
+                u = t.user
+                teacher_list.append({
+                    "teacher_id": t.teacher_id,
+                    "user_id": t.user_id,
+                    "first_name": u.first_name if u else None,
+                    "last_name": u.last_name if u else None,
+                    "email": u.email if u else None,
+                    "subject": t.subject,
+                    "created_at": t.created_at.isoformat() if t.created_at else None
+                })
+
+            return {
+                "school_id": school.school_id,
+                "school_name": school.name,
+                "teachers": teacher_list
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
+class PrincipalTeacherManagement(Resource):
+    """
+    GET /principal/teachers/<id> -> get single teacher (if in school)
+    DELETE /principal/teachers/<id> -> remove teacher (not themselves)
+    """
+
+    @jwt_required()
+    def get(self, teacher_id):
+        try:
+            current_user_id = get_jwt_identity()
+            principal_user = Users.query.filter_by(user_id=current_user_id).first()
+
+            if not principal_user or principal_user.role_type != UserRole.PRINCIPAL:
+                return {"message": "Unauthorized access"}, 401
+
+            principal_teacher_entry = Teacher.query.filter_by(user_id=principal_user.user_id).first()
+            if not principal_teacher_entry:
+                return {"message": "Principal is not linked to any school"}, 404
+
+            school = School.query.filter_by(school_id=principal_teacher_entry.school_id).first()
+            if not school:
+                return {"message": "School not found"}, 404
+
+            teacher = Teacher.query.filter_by(
+                teacher_id=teacher_id, school_id=school.school_id
+            ).first()
+
+            if not teacher or teacher.user_id == principal_user.user_id:
+                return {"message": "Teacher not found in your school"}, 404
+
+            user = teacher.user
+            return {
+                "teacher_id": teacher.teacher_id,
+                "user_id": teacher.user_id,
+                "first_name": user.first_name if user else None,
+                "last_name": user.last_name if user else None,
+                "email": user.email if user else None,
+                "subject": teacher.subject,
+                "created_at": teacher.created_at.isoformat() if teacher.created_at else None
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    @jwt_required()
+    def delete(self, teacher_id):
+        try:
+            current_user_id = get_jwt_identity()
+            principal_user = Users.query.filter_by(user_id=current_user_id).first()
+
+            if not principal_user or principal_user.role_type != UserRole.PRINCIPAL:
+                return {"message": "Unauthorized access"}, 401
+
+            principal_teacher_entry = Teacher.query.filter_by(user_id=principal_user.user_id).first()
+            if not principal_teacher_entry:
+                return {"message": "Principal is not linked to any school"}, 404
+
+            school = School.query.filter_by(school_id=principal_teacher_entry.school_id).first()
+            if not school:
+                return {"message": "School not found"}, 404
+
+            teacher = Teacher.query.filter_by(
+                teacher_id=teacher_id, school_id=school.school_id
+            ).first()
+
+            if not teacher or teacher.user_id == principal_user.user_id:
+                return {"message": "Teacher not found in your school"}, 404
+
+            user = Users.query.get(teacher.user_id)
+            db.session.delete(teacher)
+            if user:
+                db.session.delete(user)
+
+            db.session.commit()
+            return {"message": "Teacher removed successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error": str(e)}, 500

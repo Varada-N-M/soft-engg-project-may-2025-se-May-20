@@ -288,11 +288,8 @@ const schools = ref([])
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem('token') // if JWT is stored here
-    const response = await axios.get('/api/schools', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    const token = localStorage.getItem('token') 
+    const response = await axios.get('/api/admin/schools', {
     })
     schools.value = response.data
   } catch (error) {

@@ -14,7 +14,7 @@ from api.student.routes import (AnalyzeWriting, BadgeCountAPI,
                                 StudentLessonUpdates, StudentProfile,
                                 ToDoListDetailResource, ToDoListResource,
                                 VocabularySuggestions,StudentEarnedBadgesAPI)
-from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
+from api.teacher.routes import (AddStudent, CreateSchool,SchoolListResource, GetLinkedStudents,
                                 LinkStudentToTeacher, RemoveStudent,
                                 TeacherLessonUpdateDetail,
                                 TeacherLessonUpdates, TeacherProfile,
@@ -32,6 +32,7 @@ api.add_resource(SignupTeacher, '/api/teacher/register')
 api.add_resource(SignupAdmin, '/api/admin/register')
 
 api.add_resource(CreateSchool, '/api/admin/add-school')
+api.add_resource(SchoolListResource, '/api/admin/schools')
 
 api.add_resource(ForgotPassword, '/api/auth/forgot-password')
 api.add_resource(ResetPassword, '/api/auth/reset-password')
@@ -73,5 +74,6 @@ api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
 api.add_resource(TeacherProfile, '/api/teacher/profile')
 api.add_resource(GetLinkedStudents, '/api/teacher/linked-students')
+
 # Organization
 api.add_resource(OrganizationStats, '/api/organization/stats')

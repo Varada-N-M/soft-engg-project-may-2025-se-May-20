@@ -258,8 +258,19 @@ const fetchTeacherData = async () => {
     error.value = ''
     
     // Fetch lessons
-    const lessonsResponse = await axios.get('/api/teacher/lesson-updates')
+
+    const token = localStorage.getItem('access_token') 
+    
+
+    const lessonsResponse = await axios.get('http://localhost:5000/api/teacher/lesson-updates', {
+    headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
+    console.log('Raw API response:', lessonsResponse.data)
     lessons.value = lessonsResponse.data.lessons || []
+    
+
     
     // Set teacher name from localStorage or token if available
     const storedName = localStorage.getItem('teacherName')

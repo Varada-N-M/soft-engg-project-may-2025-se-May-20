@@ -18,7 +18,8 @@ from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
                                 LinkStudentToTeacher, RemoveStudent,
                                 TeacherLessonUpdateDetail,
                                 TeacherLessonUpdates, TeacherProfile,
-                                UnlinkStudentFromTeacher)
+                                UnlinkStudentFromTeacher,PrincipalTeacher,
+                                PrincipalTeacherManagement)
 
 api = Api()
 
@@ -73,5 +74,8 @@ api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
 api.add_resource(TeacherProfile, '/api/teacher/profile')
 api.add_resource(GetLinkedStudents, '/api/teacher/linked-students')
+api.add_resource(PrincipalTeacher, "/principal/teachers")
+api.add_resource(PrincipalTeacherManagement, "/principal/teachers/<int:teacher_id>")
+
 # Organization
 api.add_resource(OrganizationStats, '/api/organization/stats')

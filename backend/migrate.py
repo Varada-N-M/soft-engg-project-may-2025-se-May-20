@@ -38,6 +38,7 @@ def create_seed_data():
         {"email": "admin@school.edu", "password": "admin123", "first_name": "Admin", "last_name": "User", "role": UserRole.ADMIN},
         
         # Teachers
+        {"email": "mariah.jace@school.edu", "password": "teacher123", "first_name": "Mariah", "last_name": "Jace", "role": UserRole.PRINCIPAL},
         {"email": "sarah.johnson@school.edu", "password": "teacher123", "first_name": "Sarah", "last_name": "Johnson", "role": UserRole.TEACHER},
         {"email": "mike.davis@school.edu", "password": "teacher123", "first_name": "Mike", "last_name": "Davis", "role": UserRole.TEACHER},
         {"email": "lisa.wang@school.edu", "password": "teacher123", "first_name": "Lisa", "last_name": "Wang", "role": UserRole.TEACHER},

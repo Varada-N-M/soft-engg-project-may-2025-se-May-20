@@ -200,7 +200,7 @@ const handleLogin = async () => {
       role_type: 'organization'
     }
 
-    const apiResponse = await axios.post('/api/auth/login', loginData)
+    const apiResponse = await axios.post('/api/login', loginData)
 
     if (apiResponse.data) {
       // Store tokens in localStorage

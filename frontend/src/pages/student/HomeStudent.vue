@@ -170,7 +170,7 @@
             <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
               📖 Life Lessons
             </h2>
-            <router-link to="/student/stories" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
+            <router-link to="/student/life-lessons" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LearningStoryCard
@@ -238,7 +238,7 @@ const navLinks = ref([
   { name: 'Home', path: '/student/home', icon: '🏠' },
   { name: 'Habits', path: '/student/habit', icon: '🎯' },
   { name: 'Badges', path: '/student/badges', icon: '🏅' },
-  { name: 'Life Lessons', path: '/student/stories', icon: '📖' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
   { name: 'Journal', path: '/student/journal', icon: '✍️' },
   { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
   // { name: 'Activities', path: '/student/daily-activities', icon: '📅' },
@@ -346,8 +346,8 @@ const currentLifeSkill = ref({
 });
 
 const learningStories = ref([
-  { id: 1, title: 'Emma\'s Piggy Bank Adventure', description: 'Learn about saving money with Emma...', topic: 'Money Management', emoji: '🐷' },
-  { id: 2, title: 'The Feelings Rainbow', description: 'Discover different emotions and how to express them...', topic: 'Emotional Intelligence', emoji: '🌈' },
+  { id: 1, title: 'The Power of Positive Thinking', description: 'Learn how reframing your thoughts can change your life.',  emoji: '🐷' },
+  { id: 2, title: 'The Feelings Rainbow', description: 'Discover different emotions and how to express them...', emoji: '🌈' },
 ]);
 
 // Dynamic data fetched from API

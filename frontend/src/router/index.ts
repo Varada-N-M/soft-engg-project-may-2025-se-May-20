@@ -28,6 +28,7 @@ import LinkedChildren from '../pages/parent/LinkedChildren.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
 import TeacherDashboard from "../pages/teacher/Dashboard.vue";
+import RegisterTeacher from "../pages/teacher/RegisterTeacher.vue";
 import NotFound from "../pages/NotFound.vue";
 
 const routes = [
@@ -69,6 +70,7 @@ const routes = [
 
 
     // BEGIN TEACHER SECTION
+    {path: '/teacher/register', component: RegisterTeacher},
     {path: '/teacher/login', component: LoginTeacher},
     {path: '/teacher/dashboard', component: TeacherDashboard},
     {path: '/teacher/home', component: TeacherDashboard},

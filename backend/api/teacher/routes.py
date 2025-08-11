@@ -7,7 +7,16 @@ from models import *
 from utils import *
 
 
-
+class SchoolListResource(Resource):
+    @jwt_required()  
+    def get(self):
+        schools = School.query.all()
+        return [
+            {
+                "id": s.school_id,
+                "name": s.name
+            } for s in schools
+        ], 200
 class AddStudent(Resource):
     @jwt_required()
     def post(self):

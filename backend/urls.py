@@ -19,7 +19,7 @@ from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
                                 TeacherLessonUpdateDetail,
                                 TeacherLessonUpdates, TeacherProfile,
                                 UnlinkStudentFromTeacher,PrincipalTeacher,
-                                PrincipalTeacherManagement)
+                                PrincipalTeacherManagement, GetSchools)
 
 api = Api()
 
@@ -33,6 +33,7 @@ api.add_resource(SignupTeacher, '/api/teacher/register')
 api.add_resource(SignupAdmin, '/api/admin/register')
 
 api.add_resource(CreateSchool, '/api/admin/add-school')
+api.add_resource(GetSchools, '/api/schools')
 
 api.add_resource(ForgotPassword, '/api/auth/forgot-password')
 api.add_resource(ResetPassword, '/api/auth/reset-password')

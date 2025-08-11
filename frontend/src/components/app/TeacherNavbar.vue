@@ -45,57 +45,10 @@
               👥 Manage Students
             </router-link>
 
-            <router-link
-                to="/teacher/reports"
-                class="text-gray-700 hover:text-green-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-green-50"
-                :class="{ 'text-green-600 bg-green-50': $route.path === '/teacher/reports' }"
-            >
-              📈 Reports
-            </router-link>
           </div>
 
           <!-- User Actions -->
           <div class="flex items-center space-x-4">
-            <!-- Notifications -->
-            <div class="relative">
-              <button
-                  @click="showNotifications = !showNotifications"
-                  class="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors relative"
-              >
-                <BellIcon class="w-5 h-5" />
-                <span v-if="notificationCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {{ notificationCount }}
-                </span>
-              </button>
-
-              <!-- Notifications Dropdown -->
-              <div
-                  v-if="showNotifications"
-                  class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
-                  @click.stop
-              >
-                <div class="px-4 py-2 border-b border-gray-100">
-                  <h3 class="font-semibold text-gray-800">Notifications</h3>
-                </div>
-                <div class="max-h-64 overflow-y-auto">
-                  <div v-for="notification in notifications" :key="notification.id" class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-b-0">
-                    <div class="flex items-start space-x-3">
-                      <div class="text-2xl">{{ notification.emoji }}</div>
-                      <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-800">{{ notification.title }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ notification.message }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ notification.time }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="px-4 py-2 border-t border-gray-100">
-                  <button class="text-sm text-green-600 hover:text-green-800 font-medium">
-                    View all notifications
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <!-- User Profile Dropdown -->
             <div class="relative">
@@ -135,23 +88,7 @@
                     My Profile
                   </router-link>
 
-                  <router-link
-                      to="/teacher/settings"
-                      class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
-                      @click="showUserMenu = false"
-                  >
-                    <SettingsIcon class="w-4 h-4 mr-3" />
-                    Settings
-                  </router-link>
 
-                  <router-link
-                      to="/teacher/help"
-                      class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
-                      @click="showUserMenu = false"
-                  >
-                    <HelpCircleIcon class="w-4 h-4 mr-3" />
-                    Help & Support
-                  </router-link>
                 </div>
 
                 <div class="border-t border-gray-100 py-1">
@@ -214,14 +151,6 @@
             👥 Manage Students
           </router-link>
 
-          <router-link
-              to="/teacher/reports"
-              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
-              :class="{ 'text-green-600 bg-green-50': $route.path === '/teacher/reports' }"
-              @click="showMobileMenu = false"
-          >
-            📈 Reports
-          </router-link>
         </div>
 
         <!-- Mobile User Section -->
@@ -285,6 +214,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from '@/plugins/axios.js'
 import {
   BellIcon,
   ChevronDownIcon,
@@ -303,12 +233,16 @@ const showMobileMenu = ref(false)
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const notificationCount = ref(2)
+const isLoadingUser = ref(true)
 
-// Mock user data - replace with actual user data from your auth system
+// Dynamic user data loaded from API
 const currentUser = ref({
-  name: 'Ms. Sarah Johnson',
-  email: 'sarah.johnson@school.edu',
-  teacher_id: 'T001',
+  name: '',
+  email: '',
+  teacher_id: '',
+  first_name: '',
+  last_name: '',
+  subject: '',
   avatar: null
 })
 
@@ -332,11 +266,43 @@ const notifications = ref([
 
 // Computed properties
 const userInitials = computed(() => {
+  if (!currentUser.value.name) return 'T'
   const names = currentUser.value.name.split(' ')
   return names.map(name => name.charAt(0)).join('').toUpperCase()
 })
 
 // Methods
+const fetchTeacherProfile = async () => {
+  try {
+    const response = await axios.get('/api/teacher/profile')
+    const teacherData = response.data
+    
+    // Update currentUser with fetched data
+    currentUser.value = {
+      name: `${teacherData.first_name} ${teacherData.last_name}`,
+      email: teacherData.email,
+      teacher_id: teacherData.teacher_id,
+      first_name: teacherData.first_name,
+      last_name: teacherData.last_name,
+      subject: teacherData.subject,
+      avatar: null
+    }
+  } catch (error) {
+    console.error('Failed to fetch teacher profile:', error)
+    // Fallback to default values if fetch fails
+    currentUser.value = {
+      name: 'Teacher',
+      email: 'teacher@school.edu',
+      teacher_id: 'N/A',
+      first_name: 'Teacher',
+      last_name: '',
+      subject: '',
+      avatar: null
+    }
+  } finally {
+    isLoadingUser.value = false
+  }
+}
 const closeAllDropdowns = () => {
   showNotifications.value = false
   showUserMenu.value = false
@@ -362,6 +328,7 @@ const handleClickOutside = (event) => {
 // Lifecycle hooks
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  fetchTeacherProfile()
 })
 
 onUnmounted(() => {

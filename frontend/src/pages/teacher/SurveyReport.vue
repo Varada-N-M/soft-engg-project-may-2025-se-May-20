@@ -1,6 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
-    <div class="max-w-7xl mx-auto">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <!-- Navbar -->
+    <TeacherNavbar />
+    
+    <div class="max-w-7xl mx-auto p-4">
       <!-- Header -->
       <div class="bg-white rounded-3xl shadow-xl p-6 mb-8 border-l-8 border-blue-500">
         <div class="flex items-center justify-between flex-wrap gap-4">
@@ -283,6 +286,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
+import TeacherNavbar from '@/components/app/TeacherNavbar.vue'
 
 const showAllResponses = ref(false)
 const sortBy = ref('name')

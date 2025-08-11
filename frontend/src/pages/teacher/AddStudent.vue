@@ -1,7 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300 flex items-center justify-center p-4">
-    <FloatingDecorativeElements />
-    <div class="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
+  <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
+    <!-- Navbar -->
+    <TeacherNavbar />
+    
+    <div class="flex items-center justify-center p-4 pt-8">
+      <FloatingDecorativeElements />
+      <div class="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
       <div class="text-center">
         <h2 class="text-3xl font-bold text-gray-800">Add Student</h2>
         <p class="mt-2 text-gray-600">Enter the student's email to add them to your class.</p>
@@ -48,7 +52,8 @@
         </div>
       </form>
       <div class="text-center mt-4">
-        <router-link to="/teacher/lesson-updates" class="text-sm text-gray-600 hover:text-blue-500 transition-colors">Back to Lesson Updates</router-link>
+        <router-link to="/teacher/dashboard" class="text-sm text-gray-600 hover:text-blue-500 transition-colors">Back to Dashboard</router-link>
+      </div>
       </div>
     </div>
   </div>
@@ -57,7 +62,8 @@
 <script setup>
 import { ref } from 'vue';
 import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
-import axios from 'axios';
+import TeacherNavbar from '@/components/app/TeacherNavbar.vue';
+import axios from '@/plugins/axios.js';
 
 const studentEmail = ref('');
 const isLoading = ref(false);
@@ -75,25 +81,9 @@ const addStudent = async () => {
   message.value = '';
 
   try {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      message.value = 'You must be logged in to add a student';
-      messageClass.value = 'bg-red-100 text-red-700';
-      isLoading.value = false;
-      return;
-    }
-
-    const response = await axios.post(
-      '/api/teacher/add-student',
-      { student_email: studentEmail.value },
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    const response = await axios.post('/api/teacher/add-student', { 
+      student_email: studentEmail.value 
+    });
 
     if (response.status === 201) {
       message.value = 'Student added successfully!';

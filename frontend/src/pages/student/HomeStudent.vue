@@ -16,7 +16,6 @@
       </nav>
 
       <router-link to="/student/profile"
-        @click="logout"
         class="mt-30 flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium justify-center"
       >
         Profile
@@ -220,7 +219,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { clearAuthData } from '@/utils/auth';
 
 // Import smaller, reusable components (assuming they are created)
 import StatCard from './StatCard.vue';
@@ -228,11 +229,20 @@ import ActivityCard from './ActivityCard.vue';
 import LearningStoryCard from './LearningStoryCard.vue';
 import LessonUpdateCard from './LessonUpdateCard.vue';
 
+// Router instance
+const router = useRouter();
+
 const habits = ref([])
 const studentProfile = ref(null);
 const isLoading = ref(true);
 const xpPoints = ref(0);
 const error = ref(null);
+
+// Logout function
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
 
 const navLinks = ref([
   { name: 'Home', path: '/student/home', icon: '🏠' },

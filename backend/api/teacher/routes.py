@@ -651,3 +651,26 @@ class PrincipalTeacherManagement(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error": str(e)}, 500
+
+
+class GetSchools(Resource):
+    def get(self):
+        """
+        Get all available schools for registration.
+        Public endpoint - no authentication required.
+        """
+        try:
+            schools = School.query.all()
+            schools_list = []
+            for school in schools:
+                schools_list.append({
+                    "school_id": school.school_id,
+                    "name": school.name,
+                    "address": school.address,
+                    "phone_number": school.phone_number
+                })
+
+            return {"schools": schools_list}, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500

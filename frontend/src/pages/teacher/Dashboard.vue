@@ -82,7 +82,7 @@
         </div>
 
         <!-- Add Students -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/add-student')">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/students')">
           <div class="flex items-center justify-between mb-4">
             <div class="text-5xl group-hover:scale-110 transition-transform duration-300">👥</div>
             <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
@@ -92,108 +92,17 @@
           <h3 class="text-xl font-bold text-gray-800 mb-2">Manage Students</h3>
           <p class="text-gray-600 mb-4">Add new students to your classes and manage your student roster.</p>
           <div class="flex items-center text-green-600 font-semibold group-hover:text-green-700">
-            <span>Add Students</span>
+            <span>Manage Students</span>
             <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </div>
         </div>
 
-        <!-- Survey Reports -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/survey-report')">
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📊</div>
-            <div class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">
-              Reports
-            </div>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Survey Reports</h3>
-          <p class="text-gray-600 mb-4">View and analyze student survey responses and feedback.</p>
-          <div class="flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
-            <span>View Reports</span>
-            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Class Performance -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer opacity-60">
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📈</div>
-            <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
-              Coming Soon
-            </div>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Class Performance</h3>
-          <p class="text-gray-600 mb-4">Track student progress and class performance metrics.</p>
-          <div class="flex items-center text-orange-600 font-semibold">
-            <span>Coming Soon</span>
-          </div>
-        </div>
-
-        <!-- Teaching Resources -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer opacity-60">
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📚</div>
-            <div class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-              Coming Soon
-            </div>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Teaching Resources</h3>
-          <p class="text-gray-600 mb-4">Access curriculum guides, teaching materials, and resources.</p>
-          <div class="flex items-center text-red-600 font-semibold">
-            <span>Coming Soon</span>
-          </div>
-        </div>
-
-        <!-- Communication Hub -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer opacity-60">
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-5xl group-hover:scale-110 transition-transform duration-300">💬</div>
-            <div class="bg-teal-100 text-teal-600 px-3 py-1 rounded-full text-sm font-semibold">
-              Coming Soon
-            </div>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Communication Hub</h3>
-          <p class="text-gray-600 mb-4">Message parents and collaborate with other teachers.</p>
-          <div class="flex items-center text-teal-600 font-semibold">
-            <span>Coming Soon</span>
-          </div>
-        </div>
       </div>
 
-      <!-- Recent Activity -->
-      <div v-if="recentLessons.length > 0" class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
-        <h3 class="text-xl font-bold text-gray-800 mb-6">Recent Lesson Updates</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div
-            v-for="lesson in recentLessons.slice(0, 6)"
-            :key="lesson.id"
-            class="bg-gray-50 rounded-2xl p-4 border border-gray-200"
-          >
-            <div class="flex items-center mb-2 flex-wrap gap-2">
-              <span class="inline-block px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">{{ lesson.subject }}</span>
-              <span class="inline-block px-2 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">Class {{ lesson.class }}</span>
-            </div>
-            <h4 class="font-bold text-gray-800 text-sm mb-2">{{ lesson.lesson }}</h4>
-            <p class="text-xs text-gray-600">{{ lesson.day }}</p>
-          </div>
-        </div>
-      </div>
 
       <!-- Empty State -->
-      <div v-else class="bg-white/90 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-white/20 text-center">
-        <div class="text-6xl mb-4">🎯</div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Ready to get started?</h3>
-        <p class="text-gray-600 mb-6">Create your first lesson update to begin engaging with your students.</p>
-        <button
-          @click="navigateTo('/teacher/lesson-updates')"
-          class="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-600 hover:to-green-600 transition-colors font-semibold"
-        >
-          Create Lesson Update
-        </button>
-      </div>
     </main>
 
     <!-- Floating decorative elements -->
@@ -209,7 +118,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import axios from '@/plugins/axios'
 import TeacherNavbar from '@/components/app/TeacherNavbar.vue'
 
 const router = useRouter()
@@ -245,11 +154,6 @@ const stats = computed(() => ({
   }).length
 }))
 
-const recentLessons = computed(() => {
-  return lessons.value
-    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 6)
-})
 
 // Fetch teacher data
 const fetchTeacherData = async () => {
@@ -257,9 +161,14 @@ const fetchTeacherData = async () => {
     loading.value = true
     error.value = ''
     
-    // Fetch lessons
-    const lessonsResponse = await axios.get('/api/teacher/lesson-updates')
+    // Fetch lessons and students in parallel
+    const [lessonsResponse, studentsResponse] = await Promise.all([
+      axios.get('/api/teacher/lesson-updates'),
+      axios.get('/api/teacher/linked-students')
+    ])
+    
     lessons.value = lessonsResponse.data.lessons || []
+    students.value = studentsResponse.data.students || []
     
     // Set teacher name from localStorage or token if available
     const storedName = localStorage.getItem('teacherName')

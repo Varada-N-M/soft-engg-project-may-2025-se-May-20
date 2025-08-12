@@ -434,7 +434,7 @@ class Habits(Resource):
             habit_completion = HabitCompletion.query.filter_by(
                 child_id=child.child_id,
                 habit_id=habit_id
-            ).all()
+            ).first()
 
             if not habit:
                 return {'error': 'Habit not found or access denied'}, 404

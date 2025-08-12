@@ -1,7 +1,5 @@
 <script setup lang="ts">
 
-import AuthNavbar from "@/components/app/AuthNavbar.vue";
-import GuestNavbar from "@/components/app/GuestNavbar.vue";
 </script>
 
 <template>

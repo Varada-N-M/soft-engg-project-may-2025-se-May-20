@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gradient-to-br  from-green-400 via-blue-400 to-purple-300">
+  <div class="bg-gradient-to-br from-blue-400 via-purple-400 to-teal-300">
     <GuestNavbar/>
     <div
         class="min-h-screen  flex items-center justify-center p-4">
@@ -11,15 +11,15 @@
         <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
           <!-- Decorative top wave -->
           <div
-              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-t-3xl"></div>
+              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-3xl"></div>
 
           <!-- App logo and title -->
           <div class="relative z-10 text-center  pt-4">
             <div
-                class="w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <StarIcon class="w-10 h-10 text-white"/>
+                class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+              <GraduationCapIcon class="w-10 h-10 text-white"/>
             </div>
-            <p class="text-gray-600 text-sm">Join the Fun! Create Your Student Account</p>
+            <p class="text-gray-600 text-sm">Join Our Teaching Community - Create Your Teacher Account</p>
           </div>
 
           <!-- Response Alert -->
@@ -77,7 +77,7 @@
                   id="email"
                   v-model="formData.email"
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder="your.email@school.edu"
                   :class="getInputClasses('email')"
                   required
               />
@@ -85,83 +85,63 @@
               <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
             </div>
 
-            <!-- Date of Birth and Gender -->
+            <!-- Subject and School -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="dob" class="block text-sm font-semibold text-gray-700 mb-2">
-                  🎂 Date of Birth *
-                </label>
-                <Input
-                    id="dob"
-                    v-model="formData.dob"
-                    type="date"
-                    :class="getInputClasses('dob')"
-                    required
-                />
-                <p v-if="errors.dob" class="text-xs text-red-500 mt-1">{{ errors.dob }}</p>
-              </div>
-
-              <div>
-                <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👫 Gender *
+                <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">
+                  📚 Subject *
                 </label>
                 <Select
-                    id="gender"
-                    v-model="formData.gender"
-                    class="w-full relative px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800"
-                    :class="getInputClasses('gender')"
+                    id="subject"
+                    v-model="formData.subject"
+                    :class="getInputClasses('subject')"
                     required
                 >
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select your gender"></SelectValue>
+                    <SelectValue placeholder="Select your subject"></SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-
-                    <SelectItem value="Male">👦 Male</SelectItem>
-                    <SelectItem value="Female">👧 Female</SelectItem>
+                    <SelectItem value="Math">🔢 Mathematics</SelectItem>
+                    <SelectItem value="English">📖 English</SelectItem>
+                    <SelectItem value="Science">🔬 Science</SelectItem>
+                    <SelectItem value="Social Studies">🌍 Social Studies</SelectItem>
+                    <SelectItem value="Computers">💻 Computer Science</SelectItem>
+                    <SelectItem value="Art">🎨 Art</SelectItem>
+                    <SelectItem value="Music">🎵 Music</SelectItem>
+                    <SelectItem value="Physical Education">⚽ Physical Education</SelectItem>
                   </SelectContent>
                 </Select>
-                <p v-if="errors.gender" class="text-xs text-red-500 mt-1">{{ errors.gender }}</p>
+                <p v-if="errors.subject" class="text-xs text-red-500 mt-1">{{ errors.subject }}</p>
               </div>
-            </div>
 
-            <!-- Class and School -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="class" class="block text-sm font-semibold text-gray-700 mb-2">
-                  📚 Class/Grade *
+                <label for="school_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                  🏫 School *
                 </label>
                 <Select
-                    id="class"
-                    v-model="formData.class"
-                    :class="getInputClasses('class')"
+                    id="school_id"
+                    v-model="formData.school_id"
+                    :class="getInputClasses('school_id')"
                     required
                 >
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select your class"></SelectValue>
+                    <SelectValue placeholder="Select your school"></SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem v-for="grade in grades" :key="grade.value" :value="grade.value">
-                      {{ grade.label }}
+                    <SelectItem v-if="isLoadingSchools" disabled value="loading">Loading schools...</SelectItem>
+                    <SelectItem v-else-if="schools.length === 0" disabled value="no-schools">No schools available
+                    </SelectItem>
+                    <SelectItem
+                        v-else
+                        v-for="school in schools"
+                        :key="school.school_id"
+                        :value="school.school_id.toString()"
+                    >
+                      {{ school.name }}
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <p v-if="errors.class" class="text-xs text-red-500 mt-1">{{ errors.class }}</p>
-              </div>
-
-              <div>
-                <label for="schoolName" class="block text-sm font-semibold text-gray-700 mb-2">
-                  🏫 School Name *
-                </label>
-                <Input
-                    id="schoolName"
-                    v-model="formData.school_name"
-                    type="text"
-                    placeholder="Your school name"
-                    :class="getInputClasses('school_name')"
-                    required
-                />
-                <p v-if="errors.school_name" class="text-xs text-red-500 mt-1">{{ errors.school_name }}</p>
+                <p v-if="errors.school_id" class="text-xs text-red-500 mt-1">{{ errors.school_id }}</p>
               </div>
             </div>
 
@@ -206,43 +186,42 @@
               </div>
             </div>
 
-            <!-- Fun info section -->
-            <div class="bg-gradient-to-r from-yellow-50 to-green-50 rounded-xl p-4 border border-yellow-200">
+            <!-- Teacher info section -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
               <h4 class="font-semibold text-gray-800 mb-2 flex items-center justify-center">
-                🌟 What You'll Get:
+                🌟 As a Teacher, You'll Be Able To:
               </h4>
               <div class="grid grid-cols-2 gap-2 text-xs text-gray-700">
                 <div class="flex items-center">
-                  <span class="text-green-500 mr-1">✓</span>
-                  Fun learning games
+                  <span class="text-blue-500 mr-1">✓</span>
+                  Manage lesson updates
                 </div>
                 <div class="flex items-center">
-                  <span class="text-green-500 mr-1">✓</span>
-                  Cool badges & rewards
+                  <span class="text-blue-500 mr-1">✓</span>
+                  Track student progress
                 </div>
                 <div class="flex items-center">
-                  <span class="text-green-500 mr-1">✓</span>
-                  Track your progress
+                  <span class="text-blue-500 mr-1">✓</span>
+                  Add and manage students
                 </div>
                 <div class="flex items-center">
-                  <span class="text-green-500 mr-1">✓</span>
-                  Compete with friends
+                  <span class="text-blue-500 mr-1">✓</span>
+                  View survey reports
                 </div>
               </div>
             </div>
-
 
             <!-- Submit Button -->
             <Button
                 type="submit"
                 :disabled="isLoading || !isFormValid"
-                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-4 px-4 rounded-xl hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
+                class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-4 rounded-xl hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
             >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              🎉 Create My Account!
+              🎓 Create Teacher Account!
             </span>
               <span v-else class="flex items-center justify-center">
-              <Loader class="animate-spin"/>
+              <Loader class="animate-spin mr-2"/>
               Creating Account...
             </span>
             </Button>
@@ -253,24 +232,24 @@
             <p class="text-sm text-gray-600">
               Already have an account?
               <router-link
-                  to="/student/login"
-                  class="font-semibold text-green-600 hover:text-green-800 transition-colors"
+                  to="/teacher/login"
+                  class="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Sign in here
               </router-link>
             </p>
           </div>
 
-          <sign-in-links active-link="student"/>
+          <sign-in-links active-link="teacher"/>
 
-          <emoji-bounce-animation :emojis="['🎮','📚','🏆','⭐']"/>
+          <emoji-bounce-animation :emojis="['🎓','📚','👨‍🏫','⭐']"/>
 
         </Card>
 
         <!-- Footer text -->
         <div class="text-center mt-6">
           <p class="text-white text-sm opacity-80">
-            Ready to start your amazing learning adventure? 🚀
+            Ready to inspire and educate young minds? 🌟
           </p>
         </div>
       </div>
@@ -280,9 +259,9 @@
 </template>
 
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
-import {StarIcon, EyeIcon, EyeOffIcon, Loader, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
+import {GraduationCapIcon, EyeIcon, EyeOffIcon, Loader, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
 import axios from '@/plugins/axios.js'
 import {Input} from "@/components/ui/input/index.js";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select/index.js";
@@ -302,34 +281,16 @@ const formData = ref({
   password: '',
   first_name: '',
   last_name: '',
-  dob: '',
-  class: '',
-  school_name: '',
-  gender: '',
-  agreeToTerms: false,
-  parentConsent: false
+  subject: '',
+  school_id: ''
 })
 
 const showPassword = ref(false)
 const isLoading = ref(false)
 const response = ref(null)
 const errors = ref({})
-
-// Grade options for students
-const grades = [
-  {value: 1, label: '1st Grade 📝'},
-  {value: 2, label: '2nd Grade 📖'},
-  {value: 3, label: '3rd Grade 📚'},
-  {value: 4, label: '4th Grade 🔢'},
-  {value: 5, label: '5th Grade 🧮'},
-  {value: 6, label: '6th Grade 🔬'},
-  {value: 7, label: '7th Grade 🌟'},
-  {value: 8, label: '8th Grade 🎯'},
-  {value: 9, label: '9th Grade 🚀'},
-  {value: 10, label: '10th Grade 💫'},
-  {value: 11, label: '11th Grade 🎓'},
-  {value: 12, label: '12th Grade 🏆'}
-]
+const schools = ref([])
+const isLoadingSchools = ref(false)
 
 // Password strength calculation
 const passwordStrength = computed(() => {
@@ -360,10 +321,10 @@ const isFormValid = computed(() => {
   return formData.value.first_name &&
       formData.value.last_name &&
       formData.value.email &&
-      formData.value.dob &&
-      formData.value.class &&
-      formData.value.school_name &&
-      formData.value.gender &&
+      formData.value.subject &&
+      formData.value.school_id &&
+      formData.value.school_id !== 'loading' &&
+      formData.value.school_id !== 'no-schools' &&
       formData.value.password &&
       passwordStrength.value >= 2 &&
       Object.keys(errors.value).length === 0
@@ -387,17 +348,15 @@ const getPasswordStrengthColor = (index) => {
 }
 
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-green-400'
+  const baseClasses = 'focus:border-blue-400'
   const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
   return `${baseClasses} ${errorClasses}`
 }
 
-
 const handleSubmit = async () => {
-
-
   isLoading.value = true
   response.value = null
+  errors.value = {}
 
   try {
     const apiData = {
@@ -405,35 +364,39 @@ const handleSubmit = async () => {
       password: formData.value.password,
       first_name: formData.value.first_name,
       last_name: formData.value.last_name,
-      dob: formData.value.dob,
-      class: parseInt(formData.value.class),
-      school_name: formData.value.school_name,
-      gender: formData.value.gender
+      subject: formData.value.subject,
+      school_id: parseInt(formData.value.school_id)
     }
 
-    const apiResponse = await axios.post('/api/child/register', apiData)
+    const apiResponse = await axios.post('/api/teacher/register', apiData)
 
     if (apiResponse.data) {
       response.value = {
         success: true,
-        message: 'Account created successfully! Welcome to CoolKids! 🎉',
+        message: 'Teacher account created successfully! Welcome to CoolKids! 🎉',
         data: apiResponse.data
       }
 
+      // Store tokens and user info
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
       localStorage.setItem('user_email', apiResponse.data.user_email)
-      localStorage.setItem('user_type', 'student')
+      localStorage.setItem('user_type', 'teacher')
 
-      // Redirect to login after success
+      // Redirect to teacher dashboard
       setTimeout(() => {
-        router.push('/student/home')
-      }, 500)
+        router.push('/teacher/dashboard')
+      }, 1000)
     }
   } catch (error) {
     let errorMessage = 'Registration failed. Please try again.'
     if (error.response) {
       errorMessage = error.response.data.error
+
+      // Handle specific field errors if they exist
+      if (error.response.data.details) {
+        errors.value = error.response.data.details
+      }
     } else if (error.request) {
       errorMessage = 'Network error. Please check your connection and try again.'
     }
@@ -446,6 +409,21 @@ const handleSubmit = async () => {
   }
 }
 
+// Fetch schools from API
+const fetchSchools = async () => {
+  isLoadingSchools.value = true
+  try {
+    // Use axios without authentication for public endpoint
+    const apiResponse = await axios.get('/api/schools')
+    schools.value = apiResponse.data.schools || []
+  } catch (error) {
+    console.error('Failed to fetch schools:', error)
+    schools.value = []
+  } finally {
+    isLoadingSchools.value = false
+  }
+}
+
 // Clear errors when user starts typing
 watch(formData, (newData, oldData) => {
   Object.keys(newData).forEach(key => {
@@ -454,9 +432,12 @@ watch(formData, (newData, oldData) => {
     }
   })
 }, {deep: true})
+
+// Load schools on component mount
+onMounted(() => {
+  fetchSchools()
+})
 </script>
 
 <style scoped>
-
-
 </style>

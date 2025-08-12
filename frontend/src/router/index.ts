@@ -1,4 +1,5 @@
 import {createWebHistory, createRouter} from 'vue-router'
+import { isAuthenticated, getUserType, getHomeRoute, isPublicRoute, isAuthorizedRoute, clearAuthData } from '../utils/auth'
 
 import LandingPage from '../pages/LandingPage.vue'
 import LoginStudent from '../pages/student/LoginStudent.vue';
@@ -20,6 +21,7 @@ import TodoList from "../pages/student/MyTodos.vue";
 import LifeLessons from "../pages/student/LifeLessons.vue";
 import StudentProfile from "../pages/student/StudentProfile.vue";
 import LoginTeacher from '../pages/teacher/LoginTeacher.vue';
+import RegisterTeacher from '../pages/teacher/RegisterTeacher.vue';
 import SurveyReport from "../pages/teacher/SurveyReport.vue";
 import TeacherLessonUpdates from "../pages/teacher/LessonUpdates.vue";
 import AddStudent from "../pages/teacher/AddStudent.vue";
@@ -29,6 +31,8 @@ import LinkedChildren from '../pages/parent/LinkedChildren.vue';
 import AddTeacher from "../pages/organisation/AddTeacher.vue";
 import TeachersList from "../pages/organisation/TeachersList.vue";
 import TeacherDashboard from "../pages/teacher/Dashboard.vue";
+import TeacherProfile from "../pages/teacher/TeacherProfile.vue";
+import TeacherStudents from "../pages/teacher/TeacherStudents.vue";
 import NotFound from "../pages/NotFound.vue";
 
 const routes = [
@@ -72,8 +76,11 @@ const routes = [
 
     // BEGIN TEACHER SECTION
     {path: '/teacher/login', component: LoginTeacher},
+    {path: '/teacher/register', component: RegisterTeacher},
     {path: '/teacher/dashboard', component: TeacherDashboard},
     {path: '/teacher/home', component: TeacherDashboard},
+    {path: '/teacher/profile', component: TeacherProfile},
+    {path: '/teacher/students', component: TeacherStudents},
     {path: '/teacher/survey-report', component: SurveyReport},
     {path: '/teacher/lesson-updates', component: TeacherLessonUpdates},
     {path: '/teacher/add-student', component: AddStudent},
@@ -86,6 +93,49 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+// Navigation Guards
+router.beforeEach((to, _from, next) => {
+    const authenticated = isAuthenticated()
+    const userType = getUserType()
+    const toPath = to.path
+
+    // If user is not authenticated
+    if (!authenticated) {
+        // Allow access to public routes (login, register, landing)
+        if (isPublicRoute(toPath)) {
+            next()
+        } else {
+            // Redirect to landing page for protected routes
+            next('/')
+        }
+        return
+    }
+
+    // If user is authenticated
+    if (authenticated && userType) {
+        // If trying to access login/register pages, redirect to user's home
+        if (toPath.includes('/login') || toPath.includes('/register')) {
+            const homeRoute = getHomeRoute(userType)
+            next(homeRoute)
+            return
+        }
+
+        // Check if user is authorized for the route
+        if (isAuthorizedRoute(toPath, userType)) {
+            next()
+        } else {
+            // Redirect to user's appropriate home page
+            const homeRoute = getHomeRoute(userType)
+            next(homeRoute)
+        }
+        return
+    }
+
+    // Fallback - clear invalid auth data and redirect to landing
+    clearAuthData()
+    next('/')
 })
 
 export default router;

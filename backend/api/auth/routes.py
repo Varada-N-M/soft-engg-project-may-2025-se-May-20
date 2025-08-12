@@ -473,6 +473,7 @@ class ForgotPassword(Resource):
             if user:
                 send_reset_email(user)
                 return {'message': 'If the email exists, a reset link has been sent.'}, 200
+            return {'message': 'If the email exists, a reset link has been sent.'}, 200
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
 

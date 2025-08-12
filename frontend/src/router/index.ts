@@ -8,6 +8,7 @@ import RegisterOrganisation from '../pages/organisation/RegisterOrganisation.vue
 import RegisterParent from '../pages/parent/RegisterParent.vue';
 import LoginParent from "../pages/parent/LoginParent.vue";
 import ParentHome from "../pages/parent/ParentHome.vue";
+import ParentLessonUpdates from "../pages/parent/ParentLessonUpdates.vue";
 import LoginOrganisation from "../pages/organisation/LoginOrganisation.vue";
 import HomeOrganisation from "../pages/organisation/HomeOrganisation.vue";
 import HomeStudent from "../pages/student/HomeStudent.vue";
@@ -69,6 +70,7 @@ const routes = [
     {path: '/parent/register', component: RegisterParent},
     {path: '/parent/login', component: LoginParent},
     {path: '/parent/home', component: ParentHome},
+    {path: '/parent/lesson-updates', component: ParentLessonUpdates},
     {path: '/parent/link-child', component: LinkChild},
     {path: '/parent/children', component: LinkedChildren},
     // END PARENT SECTION

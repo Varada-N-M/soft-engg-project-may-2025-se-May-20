@@ -361,9 +361,22 @@ class SignupTeacher(Resource):
     def post(self):
         try:
             data = request.get_json()
+            
+            # Check if this is a principal registration (has school creation data)
+            is_principal_registration = data.get('role') == 'principal' or (
+                data.get('school_name') and not data.get('school_id')
+            )
 
-            # Required fields for teacher
-            required_fields = ['email', 'password', 'first_name', 'last_name', 'subject', 'school_id']
+            # Required fields for teacher/principal
+            required_fields = ['email', 'password', 'first_name', 'last_name', 'subject']
+            
+            # For normal teachers, school_id is required
+            # For principals, school creation data is required
+            if is_principal_registration:
+                required_fields.extend(['school_name'])
+            else:
+                required_fields.extend(['school_id'])
+                
             for field in required_fields:
                 if not data.get(field):
                     return {'error': f'{field} is required'}, 400
@@ -373,7 +386,6 @@ class SignupTeacher(Resource):
             first_name = data['first_name'].strip()
             last_name = data['last_name'].strip()
             subject = data['subject']
-            school_id = data['school_id']
 
             # Validate email and password
             if not validate_email(email):
@@ -385,15 +397,10 @@ class SignupTeacher(Resource):
             if Users.query.filter_by(email=email).first():
                 return {'error': 'User with this email already exists'}, 409
 
-            # Determine role based on whether any teachers already exist
-            role = UserRole.TEACHER
-            if not Teacher.query.first():
-                role = UserRole.PRINCIPAL
-
-            # Check if school exists
-            if not School.query.get(school_id):
-                return {'error': 'School not found'}, 404
-
+            # Determine role - override automatic assignment if explicitly set
+            role = UserRole.PRINCIPAL if is_principal_registration else UserRole.TEACHER
+            
+            # Create user first
             hashed_password = generate_password_hash(password)
             new_user = Users(
                 email=email,
@@ -405,7 +412,29 @@ class SignupTeacher(Resource):
             db.session.add(new_user)
             db.session.flush()  # Get user_id
 
-            # Create Teacher
+            # For principals, create school after user creation
+            if is_principal_registration:
+                school_name = data['school_name'].strip()
+                school_address = data.get('school_address', 'To be provided').strip()
+                school_phone = data.get('school_phone', 'To be provided').strip()
+                
+                # Create the school with the user_id
+                new_school = School(
+                    name=school_name,
+                    address=school_address,
+                    phone_number=school_phone,
+                    created_by=new_user.user_id
+                )
+                db.session.add(new_school)
+                db.session.flush()  # Get school_id
+                school_id = new_school.school_id
+            else:
+                # For teachers, validate existing school
+                school_id = data['school_id']
+                if not School.query.get(school_id):
+                    return {'error': 'School not found'}, 404
+
+            # Create Teacher record
             new_teacher = Teacher(
                 user_id=new_user.user_id,
                 subject=subject,
@@ -418,12 +447,14 @@ class SignupTeacher(Resource):
             access_token = create_access_token(identity=str(new_user.user_id))
             refresh_token = create_refresh_token(identity=str(new_user.user_id))
 
+            account_type = 'Principal' if role == UserRole.PRINCIPAL else 'Teacher'
             return {
-                'message': 'Teacher registered successfully',
+                'message': f'{account_type} registered successfully',
                 'user_email': new_user.email,
                 'role': new_user.role_type.value,
                 'access_token': access_token,
-                'refresh_token': refresh_token
+                'refresh_token': refresh_token,
+                'school_id': school_id
             }, 201
 
         except Exception as e:

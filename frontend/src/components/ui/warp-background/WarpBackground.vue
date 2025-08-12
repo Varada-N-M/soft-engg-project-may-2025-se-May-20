@@ -85,7 +85,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  perspective: 100,
+  perspective: 40,
   beamsPerSide: 3,
   beamSize: 5,
   beamDelayMax: 3,

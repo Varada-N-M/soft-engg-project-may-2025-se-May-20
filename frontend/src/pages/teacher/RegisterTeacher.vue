@@ -33,6 +33,32 @@
             </div>
           </div>
 
+          <!-- Role Toggle -->
+          <div class="mb-6">
+            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-full p-1">
+              <button
+                  type="button"
+                  @click="formData.role = 'teacher'"
+                  :class="formData.role === 'teacher' 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-gray-600 hover:text-blue-600'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+              >
+                👨‍🏫 Teacher
+              </button>
+              <button
+                  type="button"
+                  @click="formData.role = 'principal'"
+                  :class="formData.role === 'principal' 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-gray-600 hover:text-blue-600'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+              >
+                👑 Principal
+              </button>
+            </div>
+          </div>
+
           <!-- Registration form -->
           <form @submit.prevent="handleSubmit" class="space-y-5">
             <!-- Name Fields -->
@@ -115,10 +141,13 @@
               </div>
 
               <div>
-                <label for="school_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="school" class="block text-sm font-semibold text-gray-700 mb-2">
                   🏫 School *
                 </label>
+                
+                <!-- Teacher: Select from existing schools -->
                 <Select
+                    v-if="formData.role === 'teacher'"
                     id="school_id"
                     v-model="formData.school_id"
                     :class="getInputClasses('school_id')"
@@ -141,7 +170,37 @@
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                
+                <!-- Principal: Enter new school name -->
+                <div v-else class="space-y-2">
+                  <Input
+                      id="school_name"
+                      v-model="formData.school_name"
+                      type="text"
+                      placeholder="Enter your school name"
+                      :class="getInputClasses('school_name')"
+                      required
+                  />
+                  <Input
+                      id="school_address"
+                      v-model="formData.school_address"
+                      type="text"
+                      placeholder="School address (optional)"
+                      :class="getInputClasses('school_address')"
+                  />
+                  <Input
+                      id="school_phone"
+                      v-model="formData.school_phone"
+                      type="tel"
+                      placeholder="School phone number (optional)"
+                      :class="getInputClasses('school_phone')"
+                  />
+                </div>
+                
+                <p v-if="formData.role === 'teacher'" class="text-xs text-gray-500 mt-1">Select the school you work at</p>
+                <p v-else class="text-xs text-gray-500 mt-1">Enter the name of your school to create it</p>
                 <p v-if="errors.school_id" class="text-xs text-red-500 mt-1">{{ errors.school_id }}</p>
+                <p v-if="errors.school_name" class="text-xs text-red-500 mt-1">{{ errors.school_name }}</p>
               </div>
             </div>
 
@@ -186,10 +245,10 @@
               </div>
             </div>
 
-            <!-- Teacher info section -->
+            <!-- Role info section -->
             <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
               <h4 class="font-semibold text-gray-800 mb-2 flex items-center justify-center">
-                🌟 As a Teacher, You'll Be Able To:
+                🌟 As a {{ formData.role === 'principal' ? 'Principal' : 'Teacher' }}, You'll Be Able To:
               </h4>
               <div class="grid grid-cols-2 gap-2 text-xs text-gray-700">
                 <div class="flex items-center">
@@ -203,6 +262,10 @@
                 <div class="flex items-center">
                   <span class="text-blue-500 mr-1">✓</span>
                   Add and manage students
+                </div>
+                <div v-if="formData.role === 'principal'" class="flex items-center">
+                  <span class="text-blue-500 mr-1">✓</span>
+                  Manage teachers
                 </div>
                 <div class="flex items-center">
                   <span class="text-blue-500 mr-1">✓</span>
@@ -282,7 +345,11 @@ const formData = ref({
   first_name: '',
   last_name: '',
   subject: '',
-  school_id: ''
+  school_id: '',
+  school_name: '',
+  school_address: '',
+  school_phone: '',
+  role: 'teacher'
 })
 
 const showPassword = ref(false)
@@ -318,16 +385,22 @@ const passwordStrengthTextColor = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return formData.value.first_name &&
+  const baseValid = formData.value.first_name &&
       formData.value.last_name &&
       formData.value.email &&
       formData.value.subject &&
-      formData.value.school_id &&
-      formData.value.school_id !== 'loading' &&
-      formData.value.school_id !== 'no-schools' &&
       formData.value.password &&
       passwordStrength.value >= 2 &&
       Object.keys(errors.value).length === 0
+  
+  if (formData.value.role === 'teacher') {
+    return baseValid &&
+        formData.value.school_id &&
+        formData.value.school_id !== 'loading' &&
+        formData.value.school_id !== 'no-schools'
+  } else {
+    return baseValid && formData.value.school_name
+  }
 })
 
 const alertClasses = computed(() => {
@@ -359,21 +432,42 @@ const handleSubmit = async () => {
   errors.value = {}
 
   try {
-    const apiData = {
-      email: formData.value.email,
-      password: formData.value.password,
-      first_name: formData.value.first_name,
-      last_name: formData.value.last_name,
-      subject: formData.value.subject,
-      school_id: parseInt(formData.value.school_id)
+    let apiData
+    
+    if (formData.value.role === 'principal') {
+      // For principals, send school data with registration
+      apiData = {
+        email: formData.value.email,
+        password: formData.value.password,
+        first_name: formData.value.first_name,
+        last_name: formData.value.last_name,
+        subject: formData.value.subject,
+        role: 'principal',
+        school_name: formData.value.school_name,
+        school_address: formData.value.school_address,
+        school_phone: formData.value.school_phone
+      }
+    } else {
+      // For teachers, register with existing school
+      apiData = {
+        email: formData.value.email,
+        password: formData.value.password,
+        first_name: formData.value.first_name,
+        last_name: formData.value.last_name,
+        subject: formData.value.subject,
+        school_id: parseInt(formData.value.school_id),
+        role: 'teacher'
+      }
     }
 
+    // Single API call for both teachers and principals
     const apiResponse = await axios.post('/api/teacher/register', apiData)
 
     if (apiResponse.data) {
+      const accountType = formData.value.role === 'principal' ? 'Principal' : 'Teacher'
       response.value = {
         success: true,
-        message: 'Teacher account created successfully! Welcome to CoolKids! 🎉',
+        message: `${accountType} account created successfully! Welcome to EduMaster! 🎉`,
         data: apiResponse.data
       }
 
@@ -381,7 +475,7 @@ const handleSubmit = async () => {
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
       localStorage.setItem('user_email', apiResponse.data.user_email)
-      localStorage.setItem('user_type', 'teacher')
+      localStorage.setItem('user_type', formData.value.role)
 
       // Redirect to teacher dashboard
       setTimeout(() => {
@@ -391,7 +485,7 @@ const handleSubmit = async () => {
   } catch (error) {
     let errorMessage = 'Registration failed. Please try again.'
     if (error.response) {
-      errorMessage = error.response.data.error
+      errorMessage = error.response.data.error || error.response.data.message
 
       // Handle specific field errors if they exist
       if (error.response.data.details) {

@@ -22,7 +22,6 @@
 
 <script setup>
 import { defineProps } from 'vue';
-// import { formatDate, getSubjectClass, getSubjectBgClass, getSubjectEmoji } from '@/utils/helpers'; // Assuming you move these functions
 
 defineProps({
   lesson: Object,

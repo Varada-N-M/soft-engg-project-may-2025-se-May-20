@@ -41,17 +41,17 @@ import LifeLessonCard from './LifeLessonCard.vue'; // Make sure this path is cor
 const lifeLessons = ref([
   {
     id: 1,
-    title: 'The Power of Positive Thinking',
-    description: 'Learn how reframing your thoughts can change your life.',
-    youtubeLink: 'https://www.youtube.com/watch?v=kR-Bq-w0l5U', // Example link
+    title: 'Manage & Save Money',
+    description: 'Learn how to manage & save money',
+    youtubeLink: 'https://youtu.be/hYbRu_MXI80?feature=shared',
     completed: false,
     completionDate: null,
   },
   {
     id: 2,
-    title: 'Building Healthy Habits',
-    description: 'Discover simple strategies to create lasting positive routines.',
-    youtubeLink: 'https://www.youtube.com/watch?v=hBfH7g-W8w8', // Example link
+    title: 'Manage stress & emotions',
+    description: 'Learn how to manage stress & emotions',
+    youtubeLink: 'https://youtu.be/Vs-MyQgfH3A?feature=shared', 
     completed: false,
     completionDate: null,
   },
@@ -59,7 +59,7 @@ const lifeLessons = ref([
     id: 3,
     title: 'Effective Communication Skills',
     description: 'Improve your ability to express yourself clearly and listen actively.',
-    youtubeLink: 'https://www.youtube.com/watch?v=F3P0l8-V34c', // Example link
+    youtubeLink: 'https://youtu.be/BW82k7lwI_U?feature=shared', // Example link
     completed: false,
     completionDate: null,
   },
@@ -67,23 +67,15 @@ const lifeLessons = ref([
     id: 4,
     title: 'Understanding Emotional Intelligence',
     description: 'Develop awareness of your own and others\' emotions.',
-    youtubeLink: 'https://www.youtube.com/watch?v=YQy_mC2qWlY', // Example link
+    youtubeLink: 'https://youtu.be/jfbnKI9Zjb0?feature=shared', // Example link
     completed: false,
     completionDate: null,
   },
   {
     id: 5,
-    title: 'Financial Literacy Basics',
-    description: 'A beginner\'s guide to managing your money wisely.',
-    youtubeLink: 'https://www.youtube.com/watch?v=0kF5lV_qB90', // Example link
-    completed: false,
-    completionDate: null,
-  },
-  {
-    id: 6,
     title: 'The Art of Problem Solving',
     description: 'Strategies for breaking down complex problems and finding solutions.',
-    youtubeLink: 'https://www.youtube.com/watch?v=cpD6bWzP6G8', // Example link
+    youtubeLink: 'https://youtu.be/6_LX9mo0Thw?feature=shared', // Example link
     completed: false,
     completionDate: null,
   },

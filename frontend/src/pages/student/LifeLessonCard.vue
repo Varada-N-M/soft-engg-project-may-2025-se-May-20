@@ -1,16 +1,9 @@
 <!-- LifeLessonCard.vue -->
 <template>
-  <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 flex flex-col transform hover:scale-102 transition-all duration-300 ease-in-out">
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 flex flex-col transform hover:scale-101 transition-all duration-300 ease-in-out">
     <div class="p-5 flex-grow">
       <h3 class="text-xl font-bold text-gray-900 mb-2">{{ lesson.title }}</h3>
       <p class="text-gray-700 text-sm mb-4 flex-grow">{{ lesson.description }}</p>
-      
-      <div v-if="lesson.completed" class="flex items-center text-green-600 font-semibold mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Completed! ({{ lesson.completionDate }})</span>
-      </div>
     </div>
     <div class="p-5 bg-gray-50 border-t border-gray-200 flex flex-col space-y-3">
       <a
@@ -31,7 +24,7 @@
         class="w-full px-4 py-2 rounded-xl shadow-md transition-colors duration-200 text-sm font-medium"
         :class="{
           'bg-green-600 text-white hover:bg-green-700': !lesson.completed,
-          'bg-gray-300 text-gray-600 cursor-not-allowed': lesson.completed
+          'bg-green-600 text-white cursor-not-allowed': lesson.completed
         }"
       >
         {{ lesson.completed ? 'Lesson Completed!' : 'Mark as Complete' }}

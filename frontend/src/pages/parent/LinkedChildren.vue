@@ -212,7 +212,7 @@ const unlinkChild = async (child) => {
   }
 
   try {
-    await api.put(`/api/parent/link-child/${child.child_id}`);
+    await api.put(`/api/parent/unlink-child/${child.child_id}`);
 
     // Remove child from local list
     linkedChildren.value = linkedChildren.value.filter(c => c.child_id !== child.child_id);

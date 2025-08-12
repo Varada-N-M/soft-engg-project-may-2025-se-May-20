@@ -220,12 +220,8 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
 import { defineProps,ref, onMounted, computed } from 'vue';
-=======
-import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
->>>>>>> eb576f9ed44d0cdf552e494367edcd40c558cbe2
 import axios from 'axios';
 import { clearAuthData } from '@/utils/auth';
 
@@ -244,15 +240,13 @@ const isLoading = ref(true);
 const xpPoints = ref(0);
 const error = ref(null);
 
-<<<<<<< HEAD
 const isComplete = ref(false);
-=======
+
 // Logout function
 const logout = () => {
   clearAuthData();
   router.push('/');
 };
->>>>>>> eb576f9ed44d0cdf552e494367edcd40c558cbe2
 
 const navLinks = ref([
   { name: 'Home', path: '/student/home', icon: '🏠' },

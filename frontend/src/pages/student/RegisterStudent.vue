@@ -428,7 +428,7 @@ const handleSubmit = async () => {
       // Redirect to login after success
       setTimeout(() => {
         router.push('/student/home')
-      }, 500)
+      }, 100)
     }
   } catch (error) {
     let errorMessage = 'Registration failed. Please try again.'

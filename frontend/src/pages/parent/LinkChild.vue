@@ -1,12 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex page-font">
+  <div class="min-h-screen bg-gray-100 page-font">
     <!-- Parent Navbar -->
     <ParentNavbar page-title="Link Child" />
 
     <!-- Main Content -->
-    <div class="flex-1 lg:ml-64">
-      <!-- Mobile Header Spacing -->
-      <div class="h-16 lg:h-0"></div>
+    <div class="pt-16">
 
       <div class="p-6">
         <div class="max-w-2xl mx-auto">
@@ -107,6 +105,7 @@
 import { ref, computed } from 'vue';
 import ParentNavbar from "@/components/partials/ParentNavbar.vue";
 import {Button} from "@/components/ui/button/index.js";
+import api from "@/plugins/axios.js";
 
 const childKey = ref('');
 const isLinking = ref(false);
@@ -132,10 +131,9 @@ const linkChild = async () => {
   message.value = null;
 
   try {
-    // TODO: Replace with actual API call
-    // const response = await axios.post('/api/parent/link-child', {
-    //   child_key: childKey.value.trim()
-    // });
+    const response = await api.post('/api/parent/link-child', {
+      child_key: childKey.value.trim()
+    });
 
     // Simulate API call for now
     await new Promise(resolve => setTimeout(resolve, 2000));

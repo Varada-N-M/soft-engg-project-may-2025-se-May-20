@@ -1,15 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex page-font">
+  <div class="min-h-screen bg-gray-100 page-font">
     <!-- Parent Navbar -->
     <ParentNavbar page-title="Lesson Updates" />
 
     <!-- Main Content -->
-    <div class="flex-1 lg:ml-64">
-      <!-- Mobile Header Spacing -->
-      <div class="h-16 lg:h-0"></div>
+    <div>
 
       <!-- Page Content -->
-      <div class="p-6">
+      <div class="p-6 ">
         <!-- Header with Back Button -->
         <div class="bg-white rounded-[20px] p-6 mb-6 shadow">
           <div class="flex items-center gap-4 mb-4">

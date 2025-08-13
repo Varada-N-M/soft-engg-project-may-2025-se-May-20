@@ -5,7 +5,7 @@ from api.auth import jwt
 from config import config
 from models import db
 from urls import api
-
+from api.auth.reset import mail
 
 def create_app(config_name='default', testing=False):
     app = Flask(__name__)
@@ -27,6 +27,7 @@ def create_app(config_name='default', testing=False):
     db.init_app(app)
     jwt.init_app(app)
     api.init_app(app)
+    mail.init_app(app)
     Migrate(app, db)
 
     # Create tables on startup (optional)

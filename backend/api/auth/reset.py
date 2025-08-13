@@ -2,6 +2,9 @@ from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
 from config import config
 
+
+mail = Mail()
+
 SECRET_KEY = config['default'].JWT_SECRET_KEY
 FRONTEND_URL = config['default'].FRONTEND_URL
 
@@ -17,11 +20,16 @@ def confirm_reset_token(token, expiration=3600):
         return None
     return email
 
-### Need to implement email sending functionality ###
 def send_reset_email(user):
+    """
+    Send a password reset email to the user.
+    """
     token = generate_reset_token(user.email)
     reset_url = f"{FRONTEND_URL}/api/auth/reset-password?token={token}"
-    # msg = Message("Reset Your Password", recipients=[user.email])
-    # msg.body = f"Click to reset your password: {reset_url}"
-    print(f"Reset URL: {reset_url}")
-    return reset_url
+    try:
+        msg = Message("Reset Your Password", recipients=[user.email])
+        msg.body = f"Click to reset your password: {reset_url}"
+        msg.html = f'<p>Click to reset your password: <a href="{reset_url}">Reset Password</a></p>'
+        mail.send(msg)
+    except Exception as e:
+        print(f"Error sending reset email: {e}")

@@ -41,7 +41,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import api from '@/plugins/axios.ts'
 import GuestNavbar from '@/components/app/GuestNavbar.vue'
 import Logo from '@/components/partials/Logo.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,7 +61,7 @@ const submitForm = async () => {
   success.value = false
 
   try {
-    await axios.post('http://127.0.0.1:5000/api/auth/forgot-password', {
+    await api.post('/api/auth/forgot-password', {
       email: email.value
     })
     success.value = true

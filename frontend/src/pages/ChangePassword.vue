@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import api from '@/plugins/axios.ts'
 import GuestNavbar from '@/components/app/GuestNavbar.vue'
 import Logo from '@/components/partials/Logo.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -96,7 +96,7 @@ const submitForm = async () => {
   success.value = false
 
   try {
-    await axios.post(`http://127.0.0.1:5000/api/auth/reset-password?token=${token.value}`, {
+    await api.post(`/api/auth/reset-password?token=${token.value}`, {
       new_password: newPassword.value
     })
     success.value = true

@@ -66,11 +66,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/plugins/axios';
+import { onMounted, ref } from 'vue';
 
 // --- Reactive Data ---
-const profile = ref(null);
+const profile = ref({});
 const isLoading = ref(true);
 const error = ref(null);
 
@@ -87,7 +87,7 @@ const fetchUserProfile = async () => {
   }
 
   try {
-    const response = await axios.get('/api/student/profile', {
+    const response = await api.get('/api/child/profile', {
       headers: { Authorization: `Bearer ${token}` },
     });
     profile.value = response.data.profile;

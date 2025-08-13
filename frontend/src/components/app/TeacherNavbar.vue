@@ -45,6 +45,36 @@
               👥 Manage Students
             </router-link>
 
+            <!-- Progress Dropdown -->
+            <div class="relative">
+              <button
+                  @click="showProgressMenu = !showProgressMenu"
+                  class="flex items-center space-x-1 text-gray-700 hover:text-green-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-green-50"
+                  :class="{ 'text-green-600 bg-green-50': $route.path.includes('/teacher/student-progress') || $route.path.includes('/teacher/class-analytics') }"
+              >
+                <span>📈 Progress</span>
+                <ChevronDownIcon class="w-4 h-4" />
+              </button>
+
+              <!-- Progress Menu Dropdown -->
+              <div
+                  v-if="showProgressMenu"
+                  class="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                  @click.stop
+              >
+                <router-link
+                    to="/teacher/class-analytics"
+                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
+                    @click="showProgressMenu = false"
+                >
+                  📊 Class Analytics
+                </router-link>
+                <div class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100 mt-1">
+                  Individual student progress available from student list
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- User Actions -->
@@ -151,6 +181,15 @@
             👥 Manage Students
           </router-link>
 
+          <router-link
+              to="/teacher/class-analytics"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+              :class="{ 'text-green-600 bg-green-50': $route.path === '/teacher/class-analytics' }"
+              @click="showMobileMenu = false"
+          >
+            📈 Class Analytics
+          </router-link>
+
         </div>
 
         <!-- Mobile User Section -->
@@ -204,7 +243,7 @@
 
     <!-- Click outside to close dropdowns -->
     <div
-        v-if="showNotifications || showUserMenu"
+        v-if="showNotifications || showUserMenu || showProgressMenu"
         class="fixed inset-0 z-40"
         @click="closeAllDropdowns"
     ></div>
@@ -232,6 +271,7 @@ const router = useRouter()
 const showMobileMenu = ref(false)
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
+const showProgressMenu = ref(false)
 const notificationCount = ref(2)
 const isLoadingUser = ref(true)
 
@@ -306,6 +346,7 @@ const fetchTeacherProfile = async () => {
 const closeAllDropdowns = () => {
   showNotifications.value = false
   showUserMenu.value = false
+  showProgressMenu.value = false
 }
 
 const handleLogout = () => {

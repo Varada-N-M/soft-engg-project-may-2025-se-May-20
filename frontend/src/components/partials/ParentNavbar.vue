@@ -1,239 +1,327 @@
 <template>
-  <div>
-    <!-- Desktop Sidebar -->
-    <div class="w-64 bg-white shadow-lg hidden lg:block fixed h-full">
-      <div class="p-6">
-        <!-- Logo -->
-        <div class="flex items-center gap-3 mb-8">
-          <div class="bg-blue-500 p-2 rounded-2xl">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-lg font-bold text-gray-800">Parent Portal</h2>
-            <p class="text-xs text-gray-500">CoolKids Learning</p>
-          </div>
+  <header class="bg-white border-b-2 border-gray-200 sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo and Brand -->
+        <div class="flex items-center space-x-4">
+          <router-link to="/parent/home" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <span class="text-white text-lg font-bold">👨‍👩‍👧‍👦</span>
+            </div>
+            <div class="hidden sm:block">
+              <h1 class="text-2xl font-black font-fancy text-gray-800">
+                CoolKids
+              </h1>
+              <p class="text-xs text-gray-500 -mt-1">Parent Portal</p>
+            </div>
+          </router-link>
         </div>
 
-        <!-- Navigation -->
-        <nav class="space-y-2">
-          <router-link 
-            to="/parent/home"
-            :class="isActive('/parent/home') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v2H8V5z"></path>
-            </svg>
-            Dashboard
-          </router-link>
-
-          <router-link 
-            to="/parent/children"
-            :class="isActive('/parent/children') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            My Children
-          </router-link>
-
-          <router-link 
-            to="/parent/lesson-updates"
-            :class="isActive('/parent/lesson-updates') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-            </svg>
-            Lesson Updates
-          </router-link>
-
-          <router-link 
-            to="/parent/link-child"
-            :class="isActive('/parent/link-child') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-            </svg>
-            Link Child
-          </router-link>
-
-          <div class="border-t border-gray-200 my-4"></div>
-
-          <!-- User Profile Section -->
-          <div class="pt-4">
-            <div class="flex items-center gap-3 px-4 py-3 rounded-[15px] bg-gray-50">
-              <div class="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">Parent Account</p>
-                <p class="text-xs text-gray-500">{{ userEmail }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Logout Button -->
-          <button 
-            @click="logout"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-            Logout
-          </button>
-        </nav>
-      </div>
-    </div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div v-if="sidebarOpen" class="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden" @click="sidebarOpen = false">
-      <div class="w-64 bg-white h-full shadow-xl" @click.stop>
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-3">
-              <div class="bg-blue-500 p-2 rounded-2xl">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-gray-800">Parent Portal</h2>
-                <p class="text-xs text-gray-500">CoolKids Learning</p>
-              </div>
-            </div>
-            <button @click="sidebarOpen = false" class="p-2 hover:bg-gray-100 rounded-[15px]">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <nav class="space-y-2">
-            <router-link 
-              to="/parent/home"
-              @click="sidebarOpen = false"
-              :class="isActive('/parent/home') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <!-- Main Navigation Links -->
+          <div class="flex items-center space-x-6">
+            <router-link
+                to="/parent/home"
+                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"
+                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/home' || $route.path === '/parent/home' }"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v2H8V5z"></path>
-              </svg>
-              Dashboard
+              📊 Dashboard
             </router-link>
 
-            <router-link 
-              to="/parent/children"
-              @click="sidebarOpen = false"
-              :class="isActive('/parent/children') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
+            <router-link
+                to="/parent/children"
+                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"
+                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/children' }"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-              My Children
+              👥 My Children
             </router-link>
 
-            <router-link 
-              to="/parent/link-child"
-              @click="sidebarOpen = false"
-              :class="isActive('/parent/link-child') ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left transition-colors"
+            <router-link
+                to="/parent/lesson-updates"
+                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"
+                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/lesson-updates' }"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-              </svg>
-              Link Child
+              📚 Lesson Updates
             </router-link>
 
-            <div class="border-t border-gray-200 my-4"></div>
+            <router-link
+                to="/parent/link-child"
+                class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"
+                :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/link-child' }"
+            >
+              🔗 Link Child
+            </router-link>
 
-            <!-- User Profile Section -->
-            <div class="pt-4">
-              <div class="flex items-center gap-3 px-4 py-3 rounded-[15px] bg-gray-50">
-                <div class="bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center">
-                  <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
+            <!-- Progress Dropdown -->
+            <div class="relative" v-if="hasLinkedChildren">
+              <button
+                  @click="showProgressMenu = !showProgressMenu"
+                  class="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-blue-50"
+                  :class="{ 'text-blue-600 bg-blue-50': $route.path.includes('/parent/child-progress') || $route.path.includes('/parent/achievements') }"
+              >
+                <span>📈 Progress</span>
+                <ChevronDownIcon class="w-4 h-4" />
+              </button>
+
+              <!-- Progress Menu Dropdown -->
+              <div
+                  v-if="showProgressMenu"
+                  class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                  @click.stop
+              >
+                <div v-for="child in linkedChildren" :key="child.child_id" class="border-b border-gray-100 last:border-b-0">
+                  <div class="px-4 py-2 text-xs font-medium text-gray-500 bg-gray-50">
+                    {{ child.first_name }} {{ child.last_name }}
+                  </div>
+                  <router-link
+                      :to="`/parent/child-progress/${child.child_id}`"
+                      class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      @click="showProgressMenu = false"
+                  >
+                    📊 Progress Details
+                  </router-link>
+                  <router-link
+                      :to="`/parent/achievements/${child.child_id}`"
+                      class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                      @click="showProgressMenu = false"
+                  >
+                    🏆 Achievements
+                  </router-link>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-800 truncate">Parent Account</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Actions -->
+          <div class="flex items-center space-x-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+              <button
+                  @click="showUserMenu = !showUserMenu"
+                  class="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">{{ userInitials }}</span>
+                </div>
+                <ChevronDownIcon class="w-4 h-4 text-gray-500" />
+              </button>
+
+              <!-- User Menu Dropdown -->
+              <div
+                  v-if="showUserMenu"
+                  class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                  @click.stop
+              >
+                <div class="px-4 py-3 border-b border-gray-100">
+                  <p class="text-sm font-medium text-gray-800">Parent Account</p>
                   <p class="text-xs text-gray-500">{{ userEmail }}</p>
                 </div>
+
+                <div class="border-t border-gray-100 py-1">
+                  <button
+                      @click="handleLogout"
+                      class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <LogOutIcon class="w-4 h-4 mr-3" />
+                    Sign Out
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Logout Button -->
-            <button 
-              @click="logout"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-[15px] text-left text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-              </svg>
-              Logout
-            </button>
-          </nav>
+        <!-- Mobile menu button -->
+        <div class="md:hidden">
+          <button
+              @click="showMobileMenu = !showMobileMenu"
+              class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <MenuIcon v-if="!showMobileMenu" class="w-6 h-6" />
+            <XIcon v-else class="w-6 h-6" />
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Mobile Header -->
-    <div class="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between fixed top-0 left-0 right-0 z-40">
-      <button @click="sidebarOpen = true" class="p-2">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-      <h1 class="text-lg font-semibold">{{ pageTitle }}</h1>
-      <div class="w-10"></div>
-    </div>
-  </div>
+      <!-- Mobile Navigation Menu -->
+      <div
+          v-if="showMobileMenu"
+          class="md:hidden border-t border-gray-200 bg-white"
+      >
+        <div class="px-2 pt-2 pb-3 space-y-1">
+          <!-- Mobile Navigation Links -->
+          <router-link
+              to="/parent/home"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/home' || $route.path === '/parent/home' }"
+              @click="showMobileMenu = false"
+          >
+            📊 Dashboard
+          </router-link>
+
+          <router-link
+              to="/parent/children"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/children' }"
+              @click="showMobileMenu = false"
+          >
+            👥 My Children
+          </router-link>
+
+          <router-link
+              to="/parent/lesson-updates"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/lesson-updates' }"
+              @click="showMobileMenu = false"
+          >
+            📚 Lesson Updates
+          </router-link>
+
+          <router-link
+              to="/parent/link-child"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/parent/link-child' }"
+              @click="showMobileMenu = false"
+          >
+            🔗 Link Child
+          </router-link>
+
+          <!-- Mobile Progress Section -->
+          <div v-if="hasLinkedChildren" class="space-y-1">
+            <div class="px-3 py-2 text-xs font-medium text-gray-400 uppercase tracking-wide">
+              Progress & Analytics
+            </div>
+            <div v-for="child in linkedChildren" :key="child.child_id" class="ml-4 space-y-1">
+              <div class="px-3 py-1 text-xs font-medium text-gray-600">
+                {{ child.first_name }} {{ child.last_name }}
+              </div>
+              <router-link
+                  :to="`/parent/child-progress/${child.child_id}`"
+                  class="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  @click="showMobileMenu = false"
+              >
+                📊 Progress Details
+              </router-link>
+              <router-link
+                  :to="`/parent/achievements/${child.child_id}`"
+                  class="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  @click="showMobileMenu = false"
+              >
+                🏆 Achievements
+              </router-link>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile User Section -->
+        <div class="border-t border-gray-200 pt-4 pb-3">
+          <div class="flex items-center px-5">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <span class="text-white font-bold">{{ userInitials }}</span>
+            </div>
+            <div class="ml-3">
+              <div class="text-base font-medium text-gray-800">Parent Account</div>
+              <div class="text-sm text-gray-500">{{ userEmail }}</div>
+            </div>
+          </div>
+
+          <div class="mt-3 space-y-1 px-2">
+            <button
+                @click="handleLogout"
+                class="block w-full text-left px-3 py-2 rounded-lg text-base font-medium text-red-600 hover:bg-red-50"
+            >
+              🚪 Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Click outside to close dropdowns -->
+    <div
+        v-if="showUserMenu || showProgressMenu"
+        class="fixed inset-0 z-40"
+        @click="closeAllDropdowns"
+    ></div>
+  </header>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from '@/plugins/axios.ts'
+import {
+  ChevronDownIcon,
+  MenuIcon,
+  XIcon,
+  LogOutIcon
+} from 'lucide-vue-next'
 
-const route = useRoute()
 const router = useRouter()
 
-// Props
-defineProps<{
-  pageTitle?: string
-}>()
-
-// State
-const sidebarOpen = ref(false)
+// Reactive state
+const showMobileMenu = ref(false)
+const showUserMenu = ref(false)
+const showProgressMenu = ref(false)
 const userEmail = ref('')
+const linkedChildren = ref([])
 
 // Computed
-const isActive = (path: string) => {
-  return route.path === path
-}
+const hasLinkedChildren = computed(() => {
+  return linkedChildren.value.length > 0
+})
+
+const userInitials = computed(() => {
+  if (!userEmail.value) return 'P'
+  const names = userEmail.value.split('@')[0].split('.')
+  return names.map(name => name.charAt(0)).join('').toUpperCase().slice(0, 2)
+})
 
 // Methods
-const logout = () => {
+const closeAllDropdowns = () => {
+  showUserMenu.value = false
+  showProgressMenu.value = false
+}
+
+const handleLogout = () => {
   localStorage.clear()
   router.push('/parent/login')
+  closeAllDropdowns()
+  showMobileMenu.value = false
+}
+
+const fetchLinkedChildren = async () => {
+  try {
+    const response = await axios.get('/api/parent/linked-children')
+    linkedChildren.value = response.data.linked_children || []
+  } catch (error) {
+    console.error('Error fetching linked children:', error)
+    linkedChildren.value = []
+  }
+}
+
+// Close dropdowns when clicking outside
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.relative')) {
+    closeAllDropdowns()
+  }
 }
 
 // Lifecycle
 onMounted(() => {
   userEmail.value = localStorage.getItem('user_email') || 'parent@example.com'
+  fetchLinkedChildren()
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
 <style scoped>
+/* Smooth transitions */
 .transition-colors {
   transition-property: color, background-color, border-color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

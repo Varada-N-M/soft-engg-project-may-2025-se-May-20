@@ -1,129 +1,79 @@
 <template>
-  <div class="reset-password">
-    <h1>Reset Password</h1>
-    <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input 
-          type="email" 
-          id="email" 
-          v-model="email" 
-          :disabled="loading"
-          required 
-        />
-      </div>
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-      <div v-if="success" class="success-message">
-        Password reset email sent! Check your inbox.
-      </div>
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Sending...' : 'Send Reset Email' }}
-      </button>
-    </form>
+  <div>
+    <GuestNavbar />
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card class="w-full max-w-md">
+        <CardHeader class="space-y-1 text-center">
+          <Logo class="text-3xl mb-2" />
+          <CardTitle class="text-2xl font-bold">Reset Password</CardTitle>
+          <CardDescription>
+            Enter your email address and we'll send you a link to reset your password
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form @submit.prevent="submitForm" class="space-y-4">
+            <div class="space-y-2">
+              <Label for="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                v-model="email"
+                :disabled="loading"
+                placeholder="Enter your email address"
+                required
+              />
+            </div>
+            <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+              {{ error }}
+            </div>
+            <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+              Password reset email sent! Check your inbox.
+            </div>
+            <Button type="submit" :disabled="loading" class="w-full">
+              {{ loading ? 'Sending...' : 'Send Reset Email' }}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import axios from 'axios';
+<script setup>
+import { ref } from 'vue'
+import axios from 'axios'
+import GuestNavbar from '@/components/app/GuestNavbar.vue'
+import Logo from '@/components/partials/Logo.vue'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
-export default {
-  setup() {
-    const email = ref('');
-    const loading = ref(false);
-    const error = ref('');
-    const success = ref(false);
+// Reactive state
+const email = ref('')
+const loading = ref(false)
+const error = ref('')
+const success = ref(false)
 
-    const submitForm = async () => {
-      loading.value = true;
-      error.value = '';
-      success.value = false;
+const submitForm = async () => {
+  loading.value = true
+  error.value = ''
+  success.value = false
 
-      try {
-        await axios.post('http://127.0.0.1:5000/api/auth/forgot-password', {
-          email: email.value
-        });
-        success.value = true;
-        email.value = '';
-      } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to send reset email';
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    return {
-      email,
-      loading,
-      error,
-      success,
-      submitForm
-    };
+  try {
+    await axios.post('http://127.0.0.1:5000/api/auth/forgot-password', {
+      email: email.value
+    })
+    success.value = true
+    email.value = ''
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to send reset email'
+  } finally {
+    loading.value = false
   }
-};
+}
 </script>
 
 <style scoped>
-.reset-password {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #dc3545;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: #f8d7da;
-  border-radius: 4px;
-}
-
-.success-message {
-  color: #155724;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: #d4edda;
-  border-radius: 4px;
-}
+/* Custom styles if needed */
 </style>

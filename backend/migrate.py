@@ -1,4 +1,4 @@
-from models import db, Users, Teacher, Child, Parent, School, LessonUpdates, TeacherChild, ParentChild, UserRole
+from models import db, Users, Teacher, Child, Parent, School, LessonUpdates, TeacherChild, ParentChild, UserRole, CommonSkill
 from config import Config
 from flask import Flask
 from werkzeug.security import generate_password_hash
@@ -223,6 +223,22 @@ def create_seed_data():
         )
         db.session.add(lesson)
     
+    # seed common skill data
+    common_skills = [
+        {"skill_name": "Time Management", "video_url": "https://www.youtube.com/watch?v=DWvJk9bNDWo", "skill_xp": 50},
+        {"skill_name": "Self Awareness", "video_url": "https://www.youtube.com/watch?v=OGVt0sgRXPM", "skill_xp": 50},
+        {"skill_name": "Anger Management", "video_url": "https://www.youtube.com/watch?v=lxxpDF45TPA", "skill_xp": 50},
+        {"skill_name": "Financial Literacy", "video_url": "https://www.youtube.com/watch?v=aRcXutXvfmM", "skill_xp": 50}
+        ]
+
+    for skill_data in common_skills:
+        skill = CommonSkill(
+            skill_name=skill_data["skill_name"],
+            video_url=skill_data["video_url"],
+            skill_xp=skill_data["skill_xp"]
+        )
+        db.session.add(skill)
+
     # Commit all data
     db.session.commit()
     print("✅ Database seeding completed successfully!")

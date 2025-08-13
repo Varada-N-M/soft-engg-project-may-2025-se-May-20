@@ -804,11 +804,12 @@ class Skills(Resource):
     @jwt_required()
     def get(self):
         """
-        Get all skills for the logged-in child user.
+        Get all skills for the logged-in child user, including completed skills.
         """
         try:
             current_user_id = get_jwt_identity()
             user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
+
             if not user:
                 return {'error': 'Only active child users can view skills'}, 403
 
@@ -820,7 +821,10 @@ class Skills(Resource):
             common_skills = CommonSkill.query.all()
             if not common_skills:
                 return {'message': 'No skills found'}, 200
+
             skills = []
+            completed_skills = []
+
             for skill in common_skills:
                 skill_data = {
                     'id': skill.id,
@@ -828,20 +832,32 @@ class Skills(Resource):
                     'video_url': skill.video_url,
                     'skill_xp': skill.skill_xp,
                     'created_at': skill.created_at.isoformat(),
-                    'is_learned': None
-                }
+                    'is_learned': False
+                    }
                 
                 # Check if the child has learned this skill
-                child_skill = SkillCompleted.query.filter_by(child_id=child.child_id, skill_id=skill.id).first()
+                child_skill = SkillCompleted.query.filter_by(
+                    child_id=child.child_id, 
+                    skill_id=skill.id
+                ).first()
+
                 if child_skill:
                     skill_data['is_learned'] = child_skill.is_learned
-                    skill_data['completion_date'] = child_skill.completion_date.isoformat() if child_skill.completion_date else None
-                
+                    skill_data['completion_date'] = (
+                        child_skill.completion_date.isoformat() 
+                        if child_skill.completion_date else None
+                    )
+
+                    if child_skill.is_learned:
+                        completed_skills.append(skill_data)
+
                 skills.append(skill_data)
-            return {'skills': skills}, 200
+
+            return {'skills': skills, 'completed_skills': completed_skills}, 200
         
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
+
     
     @jwt_required()
     def post(self):

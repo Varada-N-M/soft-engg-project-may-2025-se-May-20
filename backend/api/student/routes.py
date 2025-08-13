@@ -829,6 +829,7 @@ class Skills(Resource):
                 skill_data = {
                     'id': skill.id,
                     'skill_name': skill.skill_name,
+                    'skill_type': skill.skill_type,
                     'video_url': skill.video_url,
                     'skill_xp': skill.skill_xp,
                     'created_at': skill.created_at.isoformat(),

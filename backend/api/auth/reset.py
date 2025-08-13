@@ -25,7 +25,7 @@ def send_reset_email(user):
     Send a password reset email to the user.
     """
     token = generate_reset_token(user.email)
-    reset_url = f"{FRONTEND_URL}/api/auth/reset-password?token={token}"
+    reset_url = f"{FRONTEND_URL}/user/password/change?token={token}"
     try:
         msg = Message("Reset Your Password", recipients=[user.email])
         msg.body = f"Click to reset your password: {reset_url}"

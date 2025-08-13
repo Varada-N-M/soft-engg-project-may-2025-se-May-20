@@ -65,7 +65,9 @@ export function isPublicRoute(routePath: string): boolean {
     '/parent/login',
     '/parent/register',
     '/org/login',
-    '/org/register'
+    '/org/register',
+    '/user/password/change',
+    '/user/password/reset'
   ]
   
   return publicRoutes.includes(routePath)

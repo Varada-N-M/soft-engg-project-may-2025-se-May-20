@@ -20,7 +20,7 @@
       <div v-if="isLoggedIn" class="flex justify-center mb-8">
         <button
           @click="openCreateModal"
-          class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center"
+          class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-101 transition-all duration-200 flex items-center"
         >
           <span class="text-xl mr-2">➕</span>
           New Journal Entry
@@ -54,7 +54,7 @@
           v-for="entry in journalEntries"
           :key="entry.id"
           @click="openEditModal(entry)"
-          class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-105 cursor-pointer flex flex-col justify-between"
+          class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-102 cursor-pointer flex flex-col justify-between"
         >
           <div>
             <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>

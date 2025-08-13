@@ -975,6 +975,7 @@ class CompleteSkill(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
+            print(current_user_id)
             user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.CHILD).first()
 
             if not user:

@@ -38,23 +38,16 @@
                 Hello, {{ studentProfile.first_name }}! 👋
               </h1>
               <h1 class="text-4xl font-bold text-gray-900 mb-2" v-else>
-                Welcome!
+                Welcome Back.
               </h1>
               <p class="text-gray-600 text-lg">
-                Your adventure awaits. Let's make today a great day to learn!
+                Your adventure awaits. Let's make today a great day!
               </p>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard icon="✨" label="Total XP" :value="xpPoints" />
-          <StatCard icon="🏅" label="Badges Earned" :value="badgeCount" :loading="isBadgeCountLoading" />
-          <StatCard icon="🎯" label="Total Habits" :value="habits.length" />
-          <StatCard icon="✅" label="Activities Completed" :value="completedSkillsCount" :loading="isCompletedSkillsLoading" unit="this week" />
-        </div>
-
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+        <!-- <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
               🎯 Today's Habits
@@ -83,7 +76,7 @@
               @toggle="toggleHabit(habit.habit_id)"
             />
           </div>
-        </div>
+        </div> -->
 
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -116,14 +109,14 @@
 
           <div class="bg-white rounded-3xl p-8 shadow-md">
             <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-6">
-              🤖 Your AI Learning Buddy
+              🤖 Learn with AI
             </h2>
             <div class="p-6 rounded-2xl">
               <div class="flex items-center gap-3 mb-4">
                 <div class="text-lg text-gray-700 font-medium">Meet Rohit!</div>
               </div>
               <p class="text-gray-800 mb-4 leading-relaxed">
-                "Hi! I'm here to chat, answer questions, and help you practice new things. How are you feeling today?"
+                "Hi! I'm here to talk, teach and help you improve your Communication Skills!"
               </p>
               <router-link
                 to="/student/ai-companion"
@@ -151,14 +144,13 @@
                     Watch Lesson
                   </button>
                   </a>
-                  <button 
-                    @click="markAsComplete" 
-                    :class="{ 'bg-green-600 hover:bg-green-700': !isComplete, 'bg-green-500': isComplete }"
-                    class="inline-flex items-center justify-center px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium"
-                    :disabled="isComplete"
-                  >
-                    <span v-if="!isComplete">Mark as Complete</span>
-                    <span v-else>Lesson Completed!</span>
+                  <button
+                  @click="markSkillAsComplete(currentLifeSkill.id)"
+                  :class="{ 'bg-green-600 hover:bg-green-700': !isComplete, 'bg-green-500': isComplete }"
+                  class="inline-flex items-center justify-center px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium"
+                  :disabled="isComplete">
+                  <span v-if="!isComplete">Mark as Complete</span>
+                  <span v-else>Lesson Completed!</span>
                   </button>
                 </div>
               </div>
@@ -354,13 +346,23 @@ const fetchUserProfile = async () => {
   }
 };
 
+const markSkillAsComplete = async (skillId) => { // Removed ': number' from here
+  try {
+    await axios.post(`/api/child/skills/${skillId}/complete`); 
+    isComplete.value = true
+    console.log(`Weekly skill with ID ${skillId} marked as complete`)
+  } catch (err) {
+    console.error('Error marking skill as complete:', err)
+  }
+}
+
 const todaysGratitude = ref('');
 
 const currentLifeSkill = ref({
+  id: 1,
   title: 'Making a Simple Sandwich',
   description: 'Learn to prepare your own healthy lunch! This week we\'ll practice making sandwich safely.',
-  emoji: '🥪',
-  progress: 65,
+  emoji: '🥪'
 });
 
 const learningStories = ref([

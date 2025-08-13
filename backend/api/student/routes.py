@@ -341,6 +341,7 @@ class Habits(Resource):
                         'habit_id': habit.id,
                         'name': habit.name,
                         'description': habit.description,
+                        'habit_xp': habit.habit_xp,
                         'category': habit.category,
                         'created_at': habit.created_at.isoformat(),
                         # 'completion_date': habit.completion_date.isoformat() if habit.completion_date else None

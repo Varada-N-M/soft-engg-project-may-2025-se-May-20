@@ -543,10 +543,14 @@ class CompleteHabit(Resource):
                 habit_id=habit.id,
                 is_done=True,
                 completion_date=date.today()
+                
             )
             db.session.add(habit_completion)
+
+            child.xp_points += habit.habit_xp            
             db.session.commit()
-            return {'message': 'Habit done successfully'}, 200
+            return {'message': 'Habit done successfully', 'new_xp': child.xp_points}, 200
+
         
         except Exception as e:
             db.session.rollback()
@@ -1014,6 +1018,7 @@ class CompleteSkill(Resource):
                 skill_id=skill.id
             ).first()
             
+            
             if existing_skill and existing_skill.is_learned:
                 return {'error': 'Skill already marked as learned'}, 400
 
@@ -1031,8 +1036,10 @@ class CompleteSkill(Resource):
                 )
                 db.session.add(new_skill_completion)
 
+            child.xp_points += skill.skill_xp
+
             db.session.commit()
-            return {'message': 'Skill marked as learned successfully'}, 200
+            return {'message': 'Skill marked as learned successfully', 'xp_points': child.xp_points}, 200
         
         except Exception as e:
             db.session.rollback()
@@ -1669,9 +1676,16 @@ class StoryStarter(Resource):
 PREDEFINED_BADGES = [
     {"xp": 0,   "name": "Newbie",     "emoji": "👶", "description": "Awarded for starting your journey."},
     {"xp": 10,  "name": "Beginner",   "emoji": "🎉", "description": "Awarded for reaching 10 XP total."},
+    {"xp": 50,  "name": "Adventurer", "emoji": "🚀", "description": "Awarded for reaching 50 XP total."},
     {"xp": 100, "name": "Excellency", "emoji": "🥇", "description": "Awarded for reaching 100 XP total."},
+    {"xp": 150, "name": "Master",     "emoji": "👑", "description": "Awarded for reaching 150 XP total."},
     {"xp": 250, "name": "Achiever",   "emoji": "🏆", "description": "Awarded for reaching 250 XP total."},
+    {"xp": 350, "name": "Champion",   "emoji": "🏅", "description": "Awarded for reaching 350 XP total."},
     {"xp": 500, "name": "Super Star", "emoji": "🌟", "description": "Awarded for reaching 500 XP total."},
+    {"xp": 750, "name": "Legend",     "emoji": "🦸", "description": "Awarded for reaching 750 XP total."},
+    {"xp": 1000, "name": "Hero",      "emoji": "🦸‍♂️", "description": "Awarded for reaching 1000 XP total."},
+    {"xp": 1500, "name": "Genius",    "emoji": "🧠", "description": "Awarded for reaching 1500 XP total."},
+    {"xp": 2000, "name": "Prodigy",   "emoji": "🌈", "description": "Awarded for reaching 2000 XP total."}
 ]
 
 class StudentEarnedBadgesAPI(Resource):
@@ -1695,7 +1709,8 @@ class StudentEarnedBadgesAPI(Resource):
             badges = Badge.query.filter_by(child_id=child.child_id, is_earned=True).all()
 
             result = []
-            total_xp = sum(b.badge_xp for b in badges)
+            total_xp = child.xp_points  
+
 
             # Store DB badges in the result list
             for b in badges:

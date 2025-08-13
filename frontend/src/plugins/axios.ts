@@ -60,7 +60,9 @@ api.interceptors.response.use(
     async error => {
         const originalRequest = error.config
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && 
+            !originalRequest.url?.includes('/api/login') && 
+            !originalRequest.url?.includes('/api/teacher/register')) {
             // Avoid multiple retries
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
@@ -94,10 +96,15 @@ api.interceptors.response.use(
                 return api(originalRequest)
             } catch (refreshError) {
                 processQueue(refreshError, null)
-                // optionally, logout
+                // Clear all auth data
                 localStorage.removeItem('access_token')
                 localStorage.removeItem('refresh_token')
-                // window.location.href = '/login'
+                localStorage.removeItem('user_email')
+                localStorage.removeItem('user_type')
+                // Redirect to landing page - router will handle the rest
+                if (typeof window !== 'undefined') {
+                    window.location.href = '/'
+                }
                 return Promise.reject(refreshError)
             } finally {
                 isRefreshing = false

@@ -19,7 +19,7 @@ class AddStudent(Resource):
             current_user_id = get_jwt_identity()
             teacher_user = Users.query.filter_by(user_id=current_user_id).first()
             
-            if not teacher_user or teacher_user.role_type != UserRole.TEACHER:
+            if not teacher_user or teacher_user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {"message": "Unauthorized access"}, 401
 
             data = request.get_json()
@@ -69,7 +69,7 @@ class RemoveStudent(Resource):
             current_user_id = get_jwt_identity()
             teacher_user = Users.query.filter_by(user_id=current_user_id).first()
             
-            if not teacher_user or teacher_user.role_type != UserRole.TEACHER:
+            if not teacher_user or teacher_user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {"message": "Unauthorized access"}, 401
 
             teacher = Teacher.query.filter_by(user_id=teacher_user.user_id).first()
@@ -100,10 +100,10 @@ class TeacherLessonUpdates(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            if not user:
-                return {'error': 'Only active teacher users can view lesson updates'}, 403
 
             teacher = Teacher.query.filter_by(user_id=user.user_id).first()
             if not teacher:
@@ -135,10 +135,10 @@ class TeacherLessonUpdates(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            if not user:
-                return {'error': 'Only active teacher users can create lesson updates'}, 403
 
             teacher = Teacher.query.filter_by(user_id=user.user_id).first()
             if not teacher:
@@ -206,10 +206,10 @@ class TeacherLessonUpdateDetail(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            if not user:
-                return {'error': 'Only active teacher users can view lesson updates'}, 403
 
             teacher = Teacher.query.filter_by(user_id=user.user_id).first()
             if not teacher:
@@ -239,7 +239,9 @@ class TeacherLessonUpdateDetail(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can update lesson updates'}, 403
@@ -308,7 +310,9 @@ class TeacherLessonUpdateDetail(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can delete lesson updates'}, 403
@@ -335,7 +339,7 @@ class CreateSchool(Resource):
     @jwt_required()
     def post(self):
         """
-        Create a new school for the organization.
+        Create a new school. Only accessible by principal.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -377,7 +381,9 @@ class LinkStudentToTeacher(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can link students'}, 403
@@ -427,7 +433,9 @@ class UnlinkStudentFromTeacher(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can unlink students'}, 403
@@ -460,7 +468,9 @@ class TeacherProfile(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can view their profile'}, 403
@@ -493,7 +503,9 @@ class GetLinkedStudents(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.TEACHER).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
 
             if not user:
                 return {'error': 'Only active teacher users can view linked students'}, 403
@@ -650,4 +662,27 @@ class PrincipalTeacherManagement(Resource):
 
         except Exception as e:
             db.session.rollback()
+            return {"error": str(e)}, 500
+
+
+class GetSchools(Resource):
+    def get(self):
+        """
+        Get all available schools for registration.
+        Public endpoint - no authentication required.
+        """
+        try:
+            schools = School.query.all()
+            schools_list = []
+            for school in schools:
+                schools_list.append({
+                    "school_id": school.school_id,
+                    "name": school.name,
+                    "address": school.address,
+                    "phone_number": school.phone_number
+                })
+
+            return {"schools": schools_list}, 200
+
+        except Exception as e:
             return {"error": str(e)}, 500

@@ -1,6 +1,8 @@
 <template>
+  <div class="bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-300">
+    <GuestNavbar/>
   <div
-      class="min-h-screen bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-300 flex items-center justify-center p-4">
+      class="min-h-screen  flex items-center justify-center p-4">
     <!-- Floating decorative elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div class="absolute top-20 left-10 w-16 h-16 bg-yellow-300 rounded-full opacity-60 animate-bounce"></div>
@@ -20,12 +22,11 @@
             class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-3xl"></div>
 
         <!-- App logo and title -->
-        <div class="relative z-10 text-center mb-8 pt-4">
+        <div class="relative z-10 text-center  pt-4">
           <div
               class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
             <HeartIcon class="w-10 h-10 text-white"/>
           </div>
-          <h1 class="text-3xl font-bold font-fancy text-gray-800 mb-2">CoolKids</h1>
           <p class="text-gray-600 text-sm">Parent Login - Welcome back!</p>
         </div>
 
@@ -137,6 +138,8 @@
       </div>
     </div>
   </div>
+  </div>
+
 </template>
 
 <script setup>
@@ -147,6 +150,7 @@ import axios from '@/plugins/axios.js'
 import SignInLinks from "@/components/partials/SignInLinks.vue";
 import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import {Card} from "@/components/ui/card/index.js";
+import GuestNavbar from "@/components/app/GuestNavbar.vue";
 
 // Router
 const router = useRouter()
@@ -217,6 +221,7 @@ const handleLogin = async () => {
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
       localStorage.setItem('user_email', apiResponse.data.user)
+      localStorage.setItem('user_type', 'parent')
 
 
       response.value = {

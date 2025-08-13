@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
+  <div class="min-h-screen ">
     <!-- Navbar -->
     <TeacherNavbar />
 
@@ -50,7 +50,7 @@
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Date Filter -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Date</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Created Date</label>
               <input
                 v-model="filters.date"
                 type="date"
@@ -186,7 +186,11 @@
               <span class="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">Class {{ lesson.class }}</span>
             </div>
             <h3 class="font-bold text-gray-800 mb-2 text-lg">{{ lesson.lesson }}</h3>
-            <p class="text-sm text-gray-600 mb-3">{{ lesson.activity }}</p>
+            <p class="text-sm text-gray-600 mb-2">{{ lesson.activity }}</p>
+            <div class="flex items-center text-xs text-gray-500 mt-2">
+              <span class="mr-1">📅</span>
+              <span>Created: {{ formatDate(lesson.created_at) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -440,22 +444,16 @@ const uniqueClasses = computed(() => {
   return Array.from(set).sort((a, b) => a - b)
 })
 
-// Helper function to get day of week from date
-const getDayOfWeek = (dateString: string): string => {
-  const date = new Date(dateString)
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  return days[date.getDay()]
-}
 
 // Filter lessons based on current filters
 const filteredLessons = computed(() => {
   if (!allLessons.value || allLessons.value.length === 0) return []
   
   return allLessons.value.filter((lesson: any) => {
-    // Date filter
+    // Date filter - filter by created_at date
     if (filters.value.date) {
-      const filterDay = getDayOfWeek(filters.value.date)
-      if (lesson.day !== filterDay) return false
+      const lessonDate = new Date(lesson.created_at).toISOString().split('T')[0]
+      if (lessonDate !== filters.value.date) return false
     }
     
     // Subject filter
@@ -550,7 +548,7 @@ const addLesson = async () => {
       loading.value = true
       error.value = ''
       
-      const response = await api.post('/api/teacher/lesson-updates', {
+      await api.post('/api/teacher/lesson-updates', {
         day: newLesson.value.day,
         subject: newLesson.value.subject,
         lesson: newLesson.value.lesson,
@@ -558,9 +556,8 @@ const addLesson = async () => {
         class_: newLesson.value.class_
       })
       
-      // Add the new lesson to both arrays
-      lessons.value.unshift(response.data.lesson)
-      allLessons.value.unshift(response.data.lesson)
+      // Refresh lessons from API instead of manually adding
+      await fetchLessons()
       
       // Reset form
       newLesson.value = {
@@ -612,8 +609,15 @@ const updateLesson = async () => {
         class_: editingLesson.value.class_
       })
       
-      // Update the lesson in the list
-      lessons.value[editingIndex.value] = response.data.lesson
+      // Update the lesson in both arrays
+      const updatedLesson = response.data.lesson
+      lessons.value[editingIndex.value] = updatedLesson
+      
+      // Also update in allLessons array
+      const allLessonsIndex = allLessons.value.findIndex(l => l.id === updatedLesson.id)
+      if (allLessonsIndex !== -1) {
+        allLessons.value[allLessonsIndex] = updatedLesson
+      }
       
       // Reset form and close modal
       editingLesson.value = {
@@ -633,6 +637,21 @@ const updateLesson = async () => {
     } finally {
       loading.value = false
     }
+  }
+}
+
+// Format date helper function
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  } catch (e) {
+    return 'Invalid Date'
   }
 }
 </script>

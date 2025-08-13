@@ -22,7 +22,6 @@
           >
             Writing Analyzer
           </button>
-        
           <button 
             class="tab" 
             :class="{active: activeTab === 'grammar'}" 
@@ -220,6 +219,7 @@
           </div>
         </div>
 
+
         <!-- Grammar Check Tab -->
         <div v-show="activeTab === 'grammar'" class="tab-content">
           <div class="form-group">
@@ -239,6 +239,7 @@
           >
             <span v-if="loading" class="spinner"></span>
             {{ loading ? 'Checking...' : 'Check Grammar' }}
+
           </button>
 
           <div v-if="grammarResults" class="results">
@@ -365,7 +366,7 @@ export default {
       this.sentenceResults = null
       
       try {
-        const response = await api.post('api/child/improve-sentence', {
+        const response = await api.post('/api/child/improve-sentence', {
           sentence: this.sentenceInput
         })
         

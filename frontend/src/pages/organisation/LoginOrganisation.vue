@@ -206,7 +206,8 @@ const handleLogin = async () => {
       // Store tokens in localStorage
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
-      localStorage.setItem('role', apiResponse.data.role)
+      localStorage.setItem('user_email', apiResponse.data.user)
+      localStorage.setItem('user_type', 'organization')
 
 
       response.value = {

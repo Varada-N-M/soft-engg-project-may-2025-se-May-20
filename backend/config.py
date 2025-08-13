@@ -23,6 +23,16 @@ class Config:
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
     GEMINI_MODEL = "gemini-2.0-flash"
 
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+
+    MAIL_USERNAME = 'hari.backup0007@gmail.com'
+    MAIL_PASSWORD = 'zncn koyo ntek amjj'
+
+    MAIL_DEFAULT_SENDER = ('CoolKids', 'hari.backup0007@gmail.com')
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

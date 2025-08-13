@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen flex">
-    <aside class="w-64 bg-white bg-opacity-90 backdrop-blur-sm p-6 fixed left-0 top-0 h-screen overflow-y-auto z-50 shadow-lg flex flex-col">
+    <aside class="w-64  bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-gray-900 mt-6">My Dashboard</h2>
+        <h2 class="text-3xl font-extrabold text-gray-900">My Dashboard</h2>
       </div>
       <nav class="space-y-3">
         <router-link
@@ -16,7 +16,6 @@
       </nav>
 
       <router-link to="/student/profile"
-        @click="logout"
         class="mt-30 flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium justify-center"
       >
         Profile
@@ -31,7 +30,7 @@
     </aside>
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
-      <div class="max-w-7xl mx-auto">
+      <div class="max-w-7xl ml-3">
         <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
           <div class="flex items-center justify-between">
             <div>
@@ -119,11 +118,8 @@
             <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-6">
               🤖 Your AI Learning Buddy
             </h2>
-            <div class="bg-indigo-50 p-6 rounded-2xl">
+            <div class="p-6 rounded-2xl">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg">
-                  <span class="text-white text-xl">🤖</span>
-                </div>
                 <div class="text-lg text-gray-700 font-medium">Meet Rohit!</div>
               </div>
               <p class="text-gray-800 mb-4 leading-relaxed">
@@ -147,17 +143,22 @@
             <div class="flex items-start gap-5">
               <div class="text-5xl">{{ currentLifeSkill.emoji }}</div>
               <div class="flex-1">
-                <h3 class="font-bold text-gray-900 text-xl mb-2">{{ currentLifeSkill.title }}</h3>
+                <h5 class="font-bold text-gray-900 text-lg mb-2">{{ currentLifeSkill.title }}</h5>
                 <p class="text-gray-700 mb-4">{{ currentLifeSkill.description }}</p>
                 <div class="flex items-center gap-4">
-                  <div class="flex items-center gap-3 w-full">
-                    <div class="w-full bg-gray-200 rounded-full h-3 flex-1">
-                      <div class="bg-teal-500 h-3 rounded-full" :style="`width: ${currentLifeSkill.progress}%`"></div>
-                    </div>
-                    <span class="text-sm text-gray-600 font-medium">{{ currentLifeSkill.progress }}%</span>
-                  </div>
-                  <button class="bg-teal-500 text-white font-semibold px-6 py-2 rounded-xl hover:bg-teal-600 transition-colors">
-                    Continue
+                  <a href="https://www.youtube.com/watch?v=byZlWHEZWSM">
+                  <button class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-colors duration-200 text-sm font-medium cursor-pointer">
+                    Watch Lesson
+                  </button>
+                  </a>
+                  <button 
+                    @click="markAsComplete" 
+                    :class="{ 'bg-green-600 hover:bg-green-700': !isComplete, 'bg-green-500': isComplete }"
+                    class="inline-flex items-center justify-center px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium"
+                    :disabled="isComplete"
+                  >
+                    <span v-if="!isComplete">Mark as Complete</span>
+                    <span v-else>Lesson Completed!</span>
                   </button>
                 </div>
               </div>
@@ -170,7 +171,7 @@
             <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
               📖 Life Lessons
             </h2>
-            <router-link to="/student/stories" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
+            <router-link to="/student/life-lessons" class="text-blue-600 hover:text-blue-800 font-semibold">View All</router-link>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LearningStoryCard
@@ -219,8 +220,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { defineProps,ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { clearAuthData } from '@/utils/auth';
 
 // Import smaller, reusable components (assuming they are created)
 import StatCard from './StatCard.vue';
@@ -228,17 +231,28 @@ import ActivityCard from './ActivityCard.vue';
 import LearningStoryCard from './LearningStoryCard.vue';
 import LessonUpdateCard from './LessonUpdateCard.vue';
 
+// Router instance
+const router = useRouter();
+
 const habits = ref([])
 const studentProfile = ref(null);
 const isLoading = ref(true);
 const xpPoints = ref(0);
 const error = ref(null);
 
+const isComplete = ref(false);
+
+// Logout function
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
+
 const navLinks = ref([
   { name: 'Home', path: '/student/home', icon: '🏠' },
   { name: 'Habits', path: '/student/habit', icon: '🎯' },
   { name: 'Badges', path: '/student/badges', icon: '🏅' },
-  { name: 'Life Lessons', path: '/student/stories', icon: '📖' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
   { name: 'Journal', path: '/student/journal', icon: '✍️' },
   { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
   // { name: 'Activities', path: '/student/daily-activities', icon: '📅' },
@@ -255,6 +269,10 @@ const categoryToEmojiMap = {
   sports: '🏃',
   creative: '🎨',
   other: '🎯',
+};
+
+const markAsComplete = () => {
+  isComplete.value = true;
 };
 
 const getEmojiForCategory = (category) => {
@@ -340,14 +358,14 @@ const todaysGratitude = ref('');
 
 const currentLifeSkill = ref({
   title: 'Making a Simple Sandwich',
-  description: 'Learn to prepare your own healthy lunch! This week we\'ll practice making different types of sandwiches safely.',
+  description: 'Learn to prepare your own healthy lunch! This week we\'ll practice making sandwich safely.',
   emoji: '🥪',
   progress: 65,
 });
 
 const learningStories = ref([
-  { id: 1, title: 'Emma\'s Piggy Bank Adventure', description: 'Learn about saving money with Emma...', topic: 'Money Management', emoji: '🐷' },
-  { id: 2, title: 'The Feelings Rainbow', description: 'Discover different emotions and how to express them...', topic: 'Emotional Intelligence', emoji: '🌈' },
+  { id: 1, title: 'Manage & Save Money', description: 'Learn how to manage & save money',  link:"https://youtu.be/hYbRu_MXI80?feature=shared" },
+  { id: 2, title: 'Manage stress & emotions', description: 'Learn how to manage stress & emotions', link: "https://youtu.be/Vs-MyQgfH3A?feature=shared" },
 ]);
 
 // Dynamic data fetched from API

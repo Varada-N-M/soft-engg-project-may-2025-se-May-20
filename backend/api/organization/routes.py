@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from models import *
 from sqlalchemy import func
+from datetime import datetime, timedelta
 
 class OrganizationStats(Resource):
     @jwt_required()
@@ -12,65 +13,112 @@ class OrganizationStats(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id).first()
 
-            if not user or user.role_type != UserRole.ORGANIZATION:
-                return {"message": "Unauthorized access"}, 401
+            # Optional: Check if current user is an organization admin/principal
+            user = Users.query.filter(
+                Users.user_id == current_user_id,
+                Users.is_active == True,
+                Users.role_type.in_([UserRole.ADMIN, UserRole.PRINCIPAL, UserRole.ORGANIZATION])
+            ).first()
+            if not user:
+                return {"error": "Unauthorized"}, 403
 
-            organization = Organization.query.filter_by(created_by=user.user_id).first()
-            if not organization:
-                return {"message": "Organization not found"}, 404
+            # ---------- Stats ----------
+            total_children = db.session.query(func.count(Child.child_id)).scalar()
+            avg_engagement = 78  # Placeholder, can be calculated from activity logs
+            skills_completed = db.session.query(func.count(SkillCompleted.id)).filter(SkillCompleted.is_learned == True).scalar()
+            wellbeing_score = 8.4  # Placeholder – can be an aggregate from some scoring table
 
-            # Get all schools created by the organization's creator
-            schools = School.query.filter_by(created_by=user.user_id).all()
-            school_ids = [school.school_id for school in schools]
+            # ---------- Development Data ----------
+            # Example: group skills by category from CommonSkill if categories exist
+            development_data = [
+                {"skill": "Time Management", "progress": 85, "target": 90},
+                {"skill": "Emotional Regulation", "progress": 72, "target": 80},
+                {"skill": "Communication", "progress": 88, "target": 85},
+                {"skill": "Financial Literacy", "progress": 65, "target": 75},
+                {"skill": "Health & Hygiene", "progress": 92, "target": 90},
+                {"skill": "Problem Solving", "progress": 78, "target": 85},
+            ]
 
-            # Get all teachers in those schools
-            teachers = Teacher.query.filter(Teacher.school_id.in_(school_ids)).all()
-            teacher_ids = [teacher.teacher_id for teacher in teachers]
-
-            # Get all students linked to those teachers
-            student_links = TeacherChild.query.filter(TeacherChild.teacher_id.in_(teacher_ids)).all()
-            student_ids = [link.child_id for link in student_links]
-
-            # Get all students
-            students = Child.query.filter(Child.child_id.in_(student_ids)).all()
-
-            # Anonymized student data
-            anonymized_students = []
-            for student in students:
-                anonymized_students.append({
-                    "student_id": student.child_id,
-                    "xp_points": student.xp_points,
-                    "streak": student.streak,
-                    "habits_completed": HabitCompletion.query.filter_by(child_id=student.child_id, is_done=True).count(),
-                    "badges_earned": Badge.query.filter_by(child_id=student.child_id, is_earned=True).count(),
-                    "skills_learned": Skill.query.filter_by(child_id=student.child_id, is_learned=True).count(),
+            # ---------- Engagement Data ----------
+            today = datetime.utcnow().date()
+            engagement_data = []
+            for i in range(7):
+                date = today - timedelta(days=i)
+                engagement_data.append({
+                    "date": date.isoformat(),
+                    "engagement": 65 + i,  # dummy trend
+                    "completions": 45 + i
                 })
+            engagement_data.reverse()
 
-            # School performance
-            school_performance = []
-            for school in schools:
-                school_teachers = Teacher.query.filter_by(school_id=school.school_id).all()
-                school_teacher_ids = [teacher.teacher_id for teacher in school_teachers]
-                school_student_links = TeacherChild.query.filter(TeacherChild.teacher_id.in_(school_teacher_ids)).all()
-                school_student_ids = [link.child_id for link in school_student_links]
-                school_students = Child.query.filter(Child.child_id.in_(school_student_ids)).all()
+            # ---------- Safety Data ----------
+            safety_data = {
+                "emergencyKnowledge": 78,
+                "firstAidBasics": 65,
+                "contactInformation": 92,
+                "safetyProtocols": 71
+            }
 
-                total_xp = 0
-                for student in school_students:
-                    total_xp += student.xp_points
+            # ---------- Age Distribution ----------
+            age_distribution = []
+            now = datetime.utcnow().date()
+            children = Child.query.all()
+            age_groups = {"8-9": 0, "10-11": 0, "12-13": 0, "14": 0}
 
-                school_performance.append({
-                    "school_id": school.school_id,
-                    "school_name": school.name,
-                    "number_of_students": len(school_students),
-                    "average_xp_per_student": total_xp / len(school_students) if school_students else 0,
+            for c in children:
+                if c.dob:
+                    age = (now - c.dob).days // 365
+                    if 8 <= age <= 9:
+                        age_groups["8-9"] += 1
+                    elif 10 <= age <= 11:
+                        age_groups["10-11"] += 1
+                    elif 12 <= age <= 13:
+                        age_groups["12-13"] += 1
+                    elif age == 14:
+                        age_groups["14"] += 1
+
+            total_count = sum(age_groups.values()) or 1
+            age_distribution = [
+                {"age": k, "count": v, "percentage": round((v / total_count) * 100, 1)}
+                for k, v in age_groups.items()
+            ]
+
+            # ---------- Risk Data ----------
+            risk_data = {
+                "lowRisk": 892,
+                "mediumRisk": 287,
+                "highRisk": 68,
+                "criticalRisk": 12
+            }
+
+            # ---------- Child Reports ----------
+            child_reports = []
+            for c in Child.query.limit(10).all():
+                child_reports.append({
+                    "id": f"C{c.child_id:03d}",
+                    "name": f"{c.user.first_name} {c.user.last_name}" if c.user else "Unknown",
+                    "age": (now - c.dob).days // 365 if c.dob else None,
+                    "engagement": 80,  # placeholder
+                    "skillsCompleted": len(c.skills),
+                    "wellbeingScore": 8.0,  # placeholder
+                    "lastActive": (now - timedelta(days=1)).isoformat(),
+                    "riskLevel": "Low"
                 })
 
             return {
-                "anonymized_student_data": anonymized_students,
-                "school_performance": school_performance,
+                "stats": {
+                    "totalChildren": total_children,
+                    "avgEngagement": avg_engagement,
+                    "skillsCompleted": skills_completed,
+                    "wellbeingScore": wellbeing_score
+                },
+                "developmentData": development_data,
+                "engagementData": engagement_data,
+                "safetyData": safety_data,
+                "ageData": age_distribution,
+                "riskData": risk_data,
+                "childReports": child_reports
             }, 200
 
         except Exception as e:

@@ -40,6 +40,7 @@ export function getHomeRoute(userType: string): string {
     case 'student':
       return '/student/home'
     case 'teacher':
+    case 'principal':
       return '/teacher/dashboard'
     case 'parent':
       return '/parent/home'
@@ -64,7 +65,9 @@ export function isPublicRoute(routePath: string): boolean {
     '/parent/login',
     '/parent/register',
     '/org/login',
-    '/org/register'
+    '/org/register',
+    '/user/password/change',
+    '/user/password/reset'
   ]
   
   return publicRoutes.includes(routePath)
@@ -82,6 +85,7 @@ export function isAuthorizedRoute(routePath: string, userType: string): boolean 
     case 'student':
       return routePath.startsWith('/student/')
     case 'teacher':
+    case 'principal':
       return routePath.startsWith('/teacher/')
     case 'parent':
       return routePath.startsWith('/parent/')

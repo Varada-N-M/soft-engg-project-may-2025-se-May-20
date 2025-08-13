@@ -1,8 +1,8 @@
-from models import db, Users, Teacher, Child, Parent, School, LessonUpdates, TeacherChild, ParentChild, UserRole
+from models import db, Users, Teacher, Child, Parent, School, LessonUpdates, TeacherChild, ParentChild, UserRole, CommonSkill, SkillCompleted
 from config import Config
 from flask import Flask
 from werkzeug.security import generate_password_hash
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 import os
 
 app = Flask(__name__)
@@ -223,6 +223,42 @@ def create_seed_data():
         )
         db.session.add(lesson)
     
+    # seed common skill data
+    common_skills = [
+        {"skill_name": "Time Management", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=DWvJk9bNDWo", "skill_xp": 50},
+        {"skill_name": "Self Awareness", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=OGVt0sgRXPM", "skill_xp": 50},
+        {"skill_name": "Anger Management", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=lxxpDF45TPA", "skill_xp": 50},
+        {"skill_name": "Financial Literacy", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=aRcXutXvfmM", "skill_xp": 50},
+
+        {"skill_name": "Making a Simple Sandwich", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=byZlWHEZWSM", "skill_xp": 50},
+        {"skill_name": "Cleaning Up After Cooking", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=_huP1lCMnlQ", "skill_xp": 50},
+    ]
+
+    for skill_data in common_skills:
+        skill = CommonSkill(
+            skill_name=skill_data["skill_name"],
+            skill_type=skill_data["skill_type"],
+            video_url=skill_data["video_url"],
+            skill_xp=skill_data["skill_xp"]
+        )
+        db.session.add(skill)
+    
+    # make two skill completed
+    skill1 = SkillCompleted(
+        child_id=2,
+        skill_id=1,
+        is_learned=True,
+        completion_date=datetime.now(timezone.utc)
+    )
+    skill2 = SkillCompleted(
+        child_id=2,
+        skill_id=2,
+        is_learned=True,
+        completion_date=datetime.now(timezone.utc)
+    )
+    db.session.add(skill1)
+    db.session.add(skill2)
+
     # Commit all data
     db.session.commit()
     print("✅ Database seeding completed successfully!")

@@ -282,7 +282,7 @@ const createHabit = async () => {
 const updateHabit = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    await api.put(`/api/habit/${editingHabit.value.id}`, {
+    await api.put(`/api/child/habit/${editingHabit.value.id}`, {
       habit_name: habitForm.value.name,
       habit_description: habitForm.value.description,
       habit_category: habitForm.value.category,

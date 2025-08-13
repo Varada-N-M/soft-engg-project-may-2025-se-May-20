@@ -33,6 +33,32 @@
             </div>
           </div>
 
+          <!-- Role Toggle -->
+          <div class="mb-6">
+            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-full p-1">
+              <button
+                  type="button"
+                  @click="formData.role = 'teacher'"
+                  :class="formData.role === 'teacher' 
+                    ? 'bg-indigo-600 text-white shadow-sm' 
+                    : 'text-gray-600 hover:text-indigo-600'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+              >
+                👨‍🏫 Teacher
+              </button>
+              <button
+                  type="button"
+                  @click="formData.role = 'principal'"
+                  :class="formData.role === 'principal' 
+                    ? 'bg-indigo-600 text-white shadow-sm' 
+                    : 'text-gray-600 hover:text-indigo-600'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+              >
+                👑 Principal
+              </button>
+            </div>
+          </div>
+
           <!-- Login form -->
           <form @submit.prevent="handleLogin" class="space-y-6">
             <div class="space-y-4">
@@ -149,6 +175,7 @@ const router = useRouter()
 const formData = ref({
   email: '',
   password: '',
+  role: 'teacher',
   rememberMe: false
 })
 
@@ -202,7 +229,7 @@ const handleLogin = async () => {
     const loginData = {
       email: formData.value.email,
       password: formData.value.password,
-      role_type: 'teacher'
+      role_type: formData.value.role === 'principal' ? 'principal' : 'teacher'
     }
 
     const apiResponse = await axios.post('/api/login', loginData)
@@ -212,7 +239,7 @@ const handleLogin = async () => {
       localStorage.setItem('access_token', apiResponse.data.access_token)
       localStorage.setItem('refresh_token', apiResponse.data.refresh_token)
       localStorage.setItem('user_email', apiResponse.data.user)
-      localStorage.setItem('user_type', 'teacher')
+      localStorage.setItem('user_type', formData.value.role)
 
       response.value = {
         success: true,

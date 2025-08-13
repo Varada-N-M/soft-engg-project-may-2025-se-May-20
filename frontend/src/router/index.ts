@@ -35,9 +35,16 @@ import TeacherDashboard from "../pages/teacher/Dashboard.vue";
 import TeacherProfile from "../pages/teacher/TeacherProfile.vue";
 import TeacherStudents from "../pages/teacher/TeacherStudents.vue";
 import NotFound from "../pages/NotFound.vue";
+import ChangePassword from '../pages/ChangePassword.vue';
+import ResetPassword from '../pages/ResetPassword.vue';
 
 const routes = [
     {path: '/', component: LandingPage},
+
+    // BEGIN PASSWORD RECOVERY
+    {path: '/user/password/change', component: ChangePassword},
+    {path: '/user/password/reset', component: ResetPassword},
+    // END PASSWORD RECOVERY
 
     // BEGIN STUDENT SECTION
     {path: '/student/login', component: LoginStudent},

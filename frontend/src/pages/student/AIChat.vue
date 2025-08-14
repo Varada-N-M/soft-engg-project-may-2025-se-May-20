@@ -3,7 +3,7 @@
     <div class="container">
       <div class="header">
         <h1>✨ Communication Helper</h1>
-        <p>Improve your writing and speaking skills with AI-powered suggestions</p>
+        <p>Improve your writing skills with AI-powered suggestions</p>
       </div>
 
       <div class="main-content">
@@ -58,35 +58,13 @@
               <div class="improved-text" v-html="formatAIResponse(sentenceResults.ai_improvement)"></div>
             </div>
 
-            <div v-if="sentenceResults.issues && sentenceResults.issues.length > 0" class="result-section">
-              <h3>⚠️ Issues Found</h3>
-              <ul class="issues-list">
-                <li v-for="issue in sentenceResults.issues" :key="issue">{{ issue }}</li>
-              </ul>
+            <div v-if="sentenceResults.encouragement" class="success">
+              ✨ {{ sentenceResults.encouragement }}
             </div>
 
-            <div v-if="sentenceResults.suggestions && sentenceResults.suggestions.length > 0" class="result-section">
-              <h3>💡 Suggestions</h3>
-              <ul class="tips-list">
-                <li v-for="suggestion in sentenceResults.suggestions" :key="suggestion">{{ suggestion }}</li>
-              </ul>
-            </div>
-
-            <div v-if="sentenceResults.speaking_tips && sentenceResults.speaking_tips.length > 0" class="result-section">
-              <h3>🎤 Speaking Tips</h3>
-              <ul class="tips-list">
-                <li v-for="tip in sentenceResults.speaking_tips" :key="tip">{{ tip }}</li>
-              </ul>
-            </div>
-
-            <div class="result-section">
-              <h3>📊 Analysis</h3>
-              <div class="stats">
-                <div class="stat-item">
-                  <div class="stat-number">{{ sentenceResults.word_count || 0 }}</div>
-                  <div class="stat-label">Words</div>
-                </div>
-              </div>
+            <div v-if="sentenceResults.fun_fact" class="result-section">
+              <h3>🧠 Fun Fact</h3>
+              <div class="improved-text">{{ sentenceResults.fun_fact }}</div>
             </div>
           </div>
         </div>
@@ -96,10 +74,9 @@
           <div class="form-group">
             <label for="writing-type">Writing Type:</label>
             <select id="writing-type" v-model="writingType" class="form-control">
-              <option value="general">General</option>
               <option value="story">Story</option>
               <option value="essay">Essay</option>
-              <option value="speech">Speech</option>
+              <option value="general">General</option>
             </select>
           </div>
           <div class="form-group">
@@ -122,103 +99,12 @@
           </button>
 
           <div v-if="writingResults" class="results">
-            <div class="stats">
-              <div class="stat-item">
-                <div class="stat-number">{{ writingResults.analysis?.word_count || 0 }}</div>
-                <div class="stat-label">Words</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">{{ writingResults.analysis?.sentence_count || 0 }}</div>
-                <div class="stat-label">Sentences</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">{{ Math.round(writingResults.analysis?.avg_sentence_length || 0) }}</div>
-                <div class="stat-label">Avg Words/Sentence</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">{{ writingResults.readability_score || 'N/A' }}</div>
-                <div class="stat-label">Readability</div>
-              </div>
-            </div>
-
             <div class="result-section">
               <h3>🤖 AI Feedback</h3>
               <div class="improved-text" v-html="formatAIResponse(writingResults.ai_feedback)"></div>
             </div>
-
-            <div v-if="writingResults.analysis?.issues && writingResults.analysis.issues.length > 0" class="result-section">
-              <h3>⚠️ Issues to Address</h3>
-              <ul class="issues-list">
-                <li v-for="issue in writingResults.analysis.issues.slice(0, 5)" :key="issue">{{ issue }}</li>
-              </ul>
-            </div>
-
-            <div v-if="writingResults.analysis?.suggestions && writingResults.analysis.suggestions.length > 0" class="result-section">
-              <h3>💡 Suggestions</h3>
-              <ul class="tips-list">
-                <li v-for="suggestion in writingResults.analysis.suggestions.slice(0, 5)" :key="suggestion">{{ suggestion }}</li>
-              </ul>
-            </div>
-
-            <div v-if="writingResults.speaking_tips && writingResults.speaking_tips.length > 0" class="result-section">
-              <h3>🎤 Speaking Tips</h3>
-              <ul class="tips-list">
-                <li v-for="tip in writingResults.speaking_tips.slice(0, 4)" :key="tip">{{ tip }}</li>
-              </ul>
-            </div>
           </div>
         </div>
-
-        <!-- Speaking Practice Tab -->
-        <div v-show="activeTab === 'speaking'" class="tab-content">
-          <div class="select-group">
-            <div class="form-group">
-              <label for="skill-level">Skill Level:</label>
-              <select id="skill-level" v-model="skillLevel" class="form-control">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="focus-area">Focus Area:</label>
-              <select id="focus-area" v-model="focusArea" class="form-control">
-                <option value="general">General</option>
-                <option value="pronunciation">Pronunciation</option>
-                <option value="fluency">Fluency</option>
-                <option value="presentation">Presentation</option>
-                <option value="conversation">Conversation</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn" @click="getSpeakingPractice" :disabled="loading">
-            <span v-if="loading" class="spinner"></span>
-            {{ loading ? 'Loading...' : 'Get Speaking Exercises' }}
-          </button>
-
-          <div v-if="speakingResults" class="results">
-            <div class="result-section">
-              <h3>🎯 Your Focus: {{ speakingResults.focus_area }}</h3>
-              <p><strong>Level:</strong> {{ speakingResults.level }} | <strong>Duration:</strong> {{ speakingResults.practice_duration }}</p>
-            </div>
-
-            <div v-if="speakingResults.exercises && speakingResults.exercises.length > 0" class="result-section">
-              <h3>🏃‍♂️ Practice Exercises</h3>
-              <div v-for="(exercise, index) in speakingResults.exercises" :key="index" class="exercise-card">
-                <div class="exercise-title">Exercise {{ index + 1 }}</div>
-                <div>{{ exercise }}</div>
-              </div>
-            </div>
-
-            <div v-if="speakingResults.tips && speakingResults.tips.length > 0" class="result-section">
-              <h3>💡 Speaking Tips</h3>
-              <ul class="tips-list">
-                <li v-for="tip in speakingResults.tips" :key="tip">{{ tip }}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
 
         <!-- Grammar Check Tab -->
         <div v-show="activeTab === 'grammar'" class="tab-content">
@@ -239,7 +125,6 @@
           >
             <span v-if="loading" class="spinner"></span>
             {{ loading ? 'Checking...' : 'Check Grammar' }}
-
           </button>
 
           <div v-if="grammarResults" class="results">
@@ -250,30 +135,31 @@
             </div>
 
             <!-- Show grammar status -->
-            <div v-if="grammarResults.is_correct" class="success">
-              ✅ Great! No major grammar issues found.
+            <div v-if="grammarResults.is_perfect" class="success">
+              ✅ {{ grammarResults.overall_feedback }}
             </div>
             
-            <!-- Show grammar issues if any -->
-            <div v-if="grammarResults.issues && grammarResults.issues.length > 0" class="result-section">
-              <h3>⚠️ Grammar Issues</h3>
-              <ul class="issues-list">
-                <li v-for="issue in grammarResults.issues" :key="issue">{{ issue }}</li>
-              </ul>
-            </div>
-
-            <!-- Show corrections if any -->
-            <div v-if="grammarResults.corrections && grammarResults.corrections.length > 0" class="result-section">
-              <h3>✏️ Suggested Corrections</h3>
-              <div v-for="correction in grammarResults.corrections" :key="correction" class="improved-text">
-                {{ correction }}
+            <!-- Show grammar score -->
+            <!-- <div v-if="grammarResults.grammar_score" class="result-section">
+              <h3>📊 Grammar Score</h3>
+              <div class="grammar-score">
+                <div class="score-number">{{ grammarResults.grammar_score }}/100</div>
+                <div class="score-feedback">{{ grammarResults.overall_feedback }}</div>
               </div>
+            </div> -->
+
+            <!-- Show AI feedback -->
+            <div v-if="grammarResults.ai_feedback" class="result-section">
+              <h3>🤖 AI Grammar Helper</h3>
+              <div class="improved-text" v-html="formatAIResponse(grammarResults.ai_feedback)"></div>
             </div>
 
-            <!-- Show any other feedback -->
-            <div v-if="grammarResults.feedback" class="result-section">
-              <h3>💭 Feedback</h3>
-              <div class="improved-text">{{ grammarResults.feedback }}</div>
+            <!-- Show fun grammar tips -->
+            <div v-if="grammarResults.fun_grammar_tips && grammarResults.fun_grammar_tips.length > 0" class="result-section">
+              <h3>💡 Fun Grammar Tips</h3>
+              <ul class="tips-list">
+                <li v-for="tip in grammarResults.fun_grammar_tips.slice(0, 3)" :key="tip">{{ tip }}</li>
+              </ul>
             </div>
 
             <!-- Vocabulary Suggestions Button -->
@@ -288,19 +174,20 @@
               </button>
             </div>
 
-            <!-- Vocabulary Results - Fixed to use grammarResults -->
+            <!-- Vocabulary Results -->
             <div v-if="grammarResults && grammarResults.vocabulary_suggestions && grammarResults.vocabulary_suggestions.length > 0" class="result-section">
               <h3>📚 Vocabulary Enhancements</h3>
               <div v-for="suggestion in grammarResults.vocabulary_suggestions" :key="suggestion.original" class="vocab-suggestion">
                 <strong>"{{ suggestion.original }}"</strong> could be replaced with:
                 <div class="vocab-alternatives">
-                  <span v-for="alt in suggestion.alternatives" :key="alt" class="vocab-alt">
-                    {{ alt }}
+                  <span v-for="(alt, index) in suggestion.alternatives" :key="alt" class="vocab-alt">
+                    {{ alt }}<span v-if="index < suggestion.alternatives.length - 1">, </span>
                   </span>
+
                 </div>
               </div>
-              <div class="success" v-if="grammarResults.tip">
-                💡 {{ grammarResults.tip }}
+              <div class="success" v-if="grammarResults.vocab_tip">
+                💡 {{ grammarResults.vocab_tip }}
               </div>
             </div>
             
@@ -337,18 +224,12 @@ export default {
       
       // Writing Analyzer
       writingInput: '',
-      writingType: 'general',
+      writingType: 'story',
       writingResults: null,
-      
-      // Speaking Practice
-      skillLevel: 'intermediate',
-      focusArea: 'general',
-      speakingResults: null,
       
       // Grammar Check
       grammarInput: '',
       grammarResults: null
-      // Removed vocabResults since we're merging into grammarResults
     }
   },
   
@@ -403,27 +284,6 @@ export default {
       }
     },
     
-    async getSpeakingPractice() {
-      this.loading = true
-      this.error = null
-      this.speakingResults = null
-      
-      try {
-        const response = await api.post('/api/story-starter', {
-          level: this.skillLevel,
-          focus: this.focusArea
-        })
-        
-        this.speakingResults = response.data
-        console.log('Speaking results:', this.speakingResults)
-      } catch (err) {
-        console.error('Error getting speaking exercises:', err)
-        this.error = err.response?.data?.error || 'An error occurred while getting speaking exercises.'
-      } finally {
-        this.loading = false
-      }
-    },
-    
     async checkGrammar() {
       if (!this.grammarInput.trim()) return
       
@@ -447,7 +307,6 @@ export default {
       }
     },
     
-    // Fixed getVocabSuggestions method
     async getVocabSuggestions() {
       if (!this.grammarInput.trim()) return
       
@@ -459,12 +318,14 @@ export default {
           text: this.grammarInput
         })
         
-        // Fix: Merge vocabulary data into existing grammarResults
+        // Merge vocabulary data into existing grammarResults
         if (this.grammarResults) {
           this.grammarResults = {
             ...this.grammarResults,
             vocabulary_suggestions: response.data.vocabulary_suggestions,
-            tip: response.data.tip
+            vocab_tip: response.data.tip,
+            vocab_encouragement: response.data.encouragement,
+            vocab_fun_fact: response.data.fun_fact
           }
         } else {
           // If no grammar results exist, create them
@@ -644,6 +505,33 @@ export default {
   white-space: pre-wrap;
 }
 
+.grammar-score {
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.score-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.score-feedback {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
 .issues-list, .tips-list {
   list-style: none;
   padding: 0;
@@ -660,32 +548,6 @@ export default {
 
 .tips-list li {
   border-left-color: #17a2b8;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin: 20px 0;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #667eea;
-}
-
-.stat-label {
-  color: #6c757d;
-  margin-top: 5px;
 }
 
 .spinner {
@@ -722,28 +584,6 @@ export default {
   margin: 10px 0;
 }
 
-.exercise-card {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  margin: 15px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  border-left: 4px solid #28a745;
-}
-
-.exercise-title {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 10px;
-}
-
-.select-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
 .vocab-suggestion {
   background: white;
   border-radius: 10px;
@@ -755,15 +595,6 @@ export default {
 
 .vocab-alternatives {
   margin-top: 8px;
-}
-
-.vocab-alt {
-  background: #e3f2fd;
-  padding: 4px 8px;
-  margin: 2px;
-  border-radius: 15px;
-  display: inline-block;
-  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
@@ -784,16 +615,8 @@ export default {
     padding: 20px;
   }
   
-  .select-group {
-    grid-template-columns: 1fr;
-  }
-  
   .header h1 {
     font-size: 2rem;
-  }
-
-  .stats {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
 }
 </style>

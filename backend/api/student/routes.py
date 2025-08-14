@@ -1629,7 +1629,7 @@ class VocabularySuggestions(Resource):
             
             # Get vocabulary suggestions
             suggestions = communication_helper.get_vocabulary_suggestions(text)
-            
+            print(f"Vocabulary suggestions: {suggestions}")
             return {
                 "text": text,
                 "vocabulary_suggestions": suggestions[:5],

@@ -239,6 +239,7 @@ import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue
 import {Input} from "@/components/ui/input/index.js";
 import {Card} from "@/components/ui/card/index.js";
 import GuestNavbar from "@/components/app/GuestNavbar.vue";
+import {useRouter} from "vue-router";
 
 // Reactive data
 const formData = ref({
@@ -339,7 +340,7 @@ const validateForm = () => {
   errors.value = newErrors
   return Object.keys(newErrors).length === 0
 }
-
+const router = useRouter()
 const handleSubmit = async () => {
   if (!validateForm()) return
 
@@ -372,6 +373,13 @@ const handleSubmit = async () => {
       phone_number: ''
     }
     errors.value = {}
+    localStorage.setItem('access_token', result.access_token)
+    localStorage.setItem('refresh_token', result.refresh_token)
+    localStorage.setItem('user_email', result.user_email)
+    localStorage.setItem('user_type', 'parent')
+    setTimeout(() => {
+      router.push('/parent/home')
+    }, 100)
   } catch (error) {
     let msg = 'Network error. Please check your connection and try again.'
     if (error.response) {

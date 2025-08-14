@@ -81,6 +81,15 @@
               </div>
             </div>
 
+            <!-- Forgot password link -->
+            <div class="flex justify-end">
+              <router-link 
+                to="/user/password/reset" 
+                class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                Forgot your password?
+              </router-link>
+            </div>
 
             <!-- Login button -->
             <button

@@ -28,16 +28,31 @@ class LinkChildToParent(Resource):
             child = Child.query.filter_by(unique_key=child_key).first()
             if not child:
                 return {'message': 'Child not found'}, 404
-            if child.is_linked:
-                return {'message': 'Child is already linked to a parent'}, 400
             
+            # Check if child is already linked to this parent
+            existing_link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, 
+                child_id=child.child_id
+            ).first()
+            if existing_link:
+                return {'message': 'Child is already linked to your account'}, 400
+            
+            # Check if child is actually linked to any parent (check the actual relationships)
+            any_existing_link = ParentChild.query.filter_by(child_id=child.child_id).first()
+            if any_existing_link:
+                return {'message': 'Child is already linked to another parent'}, 400
+            
+            # Create the link
             link = ParentChild(
                 parent_id=parent.parent_id,
                 child_id=child.child_id,
                 linked_at=datetime.utcnow()
             )
             db.session.add(link)
-            child.is_linked = True  # Update child's linked status
+            
+            # Ensure the is_linked flag is set correctly
+            child.is_linked = True
+            
             db.session.commit()
             return {'message': 'Child linked successfully'}, 201
         
@@ -282,3 +297,284 @@ class ParentChildrenLessonUpdates(Resource):
             return {
                 'message': 'An error occurred while retrieving lesson updates', 
                 'error': str(e)}, 500
+
+
+class ChildHabitsAPI(Resource):
+    @jwt_required()
+    def get(self, child_id):
+        """
+        Get detailed habits data for a specific child.
+        Only accessible by the child's linked parent.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'error': 'Parent not found'}, 404
+
+            # Verify parent is linked to the child
+            link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, child_id=child_id
+            ).first()
+            if not link:
+                return {'error': 'Child is not linked to this parent'}, 404
+
+            habits = Habit.query.filter_by(child_id=child_id).all()
+            habits_data = []
+            
+            for habit in habits:
+                # Get completion history (last 30 days)
+                completions = HabitCompletion.query.filter(
+                    HabitCompletion.habit_id == habit.habit_id,
+                    HabitCompletion.completion_date >= (datetime.now() - timedelta(days=30))
+                ).order_by(HabitCompletion.completion_date.desc()).all()
+                
+                completion_history = []
+                for completion in completions:
+                    completion_history.append({
+                        'completion_date': completion.completion_date.date().isoformat(),
+                        'is_done': completion.is_done
+                    })
+                
+                habits_data.append({
+                    'habit_id': habit.habit_id,
+                    'name': habit.name,
+                    'description': habit.description,
+                    'category': habit.category,
+                    'habit_xp': habit.habit_xp,
+                    'completion_history': completion_history,
+                    'total_completions': len([c for c in completion_history if c['is_done']])
+                })
+
+            return {'habits': habits_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ChildSkillsAPI(Resource):
+    @jwt_required()
+    def get(self, child_id):
+        """
+        Get detailed skills data for a specific child.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'error': 'Parent not found'}, 404
+
+            # Verify parent is linked to the child
+            link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, child_id=child_id
+            ).first()
+            if not link:
+                return {'error': 'Child is not linked to this parent'}, 404
+
+            # Get all skills with completion status
+            skills = db.session.query(CommonSkill, SkillCompleted).outerjoin(
+                SkillCompleted, (CommonSkill.id == SkillCompleted.skill_id) & 
+                (SkillCompleted.child_id == child_id)
+            ).all()
+            
+            # Since skill_type column doesn't exist, group all skills under 'general'
+            skills_by_type = {'general': []}
+            for skill, completion in skills:
+                skills_by_type['general'].append({
+                    'skill_id': skill.id,
+                    'skill_name': skill.skill_name,
+                    'skill_xp': skill.skill_xp,
+                    'video_url': skill.video_url,
+                    'is_completed': completion.is_learned if completion else False,
+                    'completion_date': completion.completion_date.isoformat() if completion and completion.completion_date else None
+                })
+
+            return {'skills_by_type': skills_by_type}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ChildBadgesAPI(Resource):
+    @jwt_required()
+    def get(self, child_id):
+        """
+        Get badges earned by a specific child.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'error': 'Parent not found'}, 404
+
+            # Verify parent is linked to the child
+            link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, child_id=child_id
+            ).first()
+            if not link:
+                return {'error': 'Child is not linked to this parent'}, 404
+
+            # Get child information
+            child = Child.query.get(child_id)
+            if not child:
+                return {'error': 'Child not found'}, 404
+            
+            child_user = Users.query.get(child.user_id)
+            if not child_user:
+                return {'error': 'Child user information not found'}, 404
+
+            badges = Badge.query.filter_by(child_id=child_id, is_earned=True).order_by(
+                Badge.earned_at.desc()
+            ).all()
+            
+            badges_data = []
+            for badge in badges:
+                badges_data.append({
+                    'badge_id': badge.badge_id,
+                    'badge_name': badge.badge,
+                    'description': f"Earned {badge.badge} at level {badge.level}",
+                    'badge_type': 'achievement',
+                    'icon': '🏆',
+                    'level': badge.level,
+                    'badge_xp': badge.badge_xp,
+                    'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+                })
+
+            # Include child information in response
+            child_data = {
+                'child_id': child.child_id,
+                'name': f"{child_user.first_name} {child_user.last_name}",
+                'xp_points': child.xp_points or 0,
+                'streak': child.streak or 0
+            }
+
+            return {
+                'child': child_data,
+                'badges': badges_data
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ChildTodosAPI(Resource):
+    @jwt_required()
+    def get(self, child_id):
+        """
+        Get todos for a specific child.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'error': 'Parent not found'}, 404
+
+            # Verify parent is linked to the child
+            link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, child_id=child_id
+            ).first()
+            if not link:
+                return {'error': 'Child is not linked to this parent'}, 404
+
+            todos = ToDoList.query.filter_by(child_id=child_id).order_by(
+                ToDoList.created_at.desc()
+            ).all()
+            
+            todos_data = []
+            for todo in todos:
+                todos_data.append({
+                    'todo_id': todo.todo_id,
+                    'to_do': todo.to_do,
+                    'description': todo.description,
+                    'is_done': todo.is_done,
+                    'is_daily': todo.is_daily,
+                    'created_at': todo.created_at.isoformat(),
+                    'updated_at': todo.updated_at.isoformat() if todo.updated_at else None
+                })
+
+            return {'todos': todos_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ChildWeeklyReportAPI(Resource):
+    @jwt_required()
+    def get(self, child_id):
+        """
+        Get weekly progress report for a specific child.
+        """
+        try:
+            user_id = get_jwt_identity()
+            parent = Parent.query.filter_by(user_id=user_id).first()
+            if not parent:
+                return {'error': 'Parent not found'}, 404
+
+            # Verify parent is linked to the child
+            link = ParentChild.query.filter_by(
+                parent_id=parent.parent_id, child_id=child_id
+            ).first()
+            if not link:
+                return {'error': 'Child is not linked to this parent'}, 404
+
+            child = Child.query.get(child_id)
+            if not child:
+                return {'error': 'Child not found'}, 404
+
+            # Calculate week dates
+            today = date.today()
+            week_start = today - timedelta(days=today.weekday())
+            week_end = week_start + timedelta(days=6)
+
+            # Get weekly stats
+            habits_completed_this_week = HabitCompletion.query.filter(
+                HabitCompletion.habit_id.in_(
+                    [h.habit_id for h in Habit.query.filter_by(child_id=child_id).all()]
+                ),
+                HabitCompletion.completion_date >= week_start,
+                HabitCompletion.completion_date <= week_end,
+                HabitCompletion.is_done == True
+            ).count()
+
+            skills_completed_this_week = SkillCompleted.query.filter(
+                SkillCompleted.child_id == child_id,
+                SkillCompleted.completion_date >= week_start,
+                SkillCompleted.completion_date <= week_end,
+                SkillCompleted.is_learned == True
+            ).count()
+
+            badges_earned_this_week = Badge.query.filter(
+                Badge.child_id == child_id,
+                Badge.earned_at >= week_start,
+                Badge.earned_at <= week_end,
+                Badge.is_earned == True
+            ).count()
+
+            todos_completed_this_week = ToDoList.query.filter(
+                ToDoList.child_id == child_id,
+                ToDoList.completion_date >= week_start,
+                ToDoList.completion_date <= week_end,
+                ToDoList.is_done == True
+            ).count()
+
+            return {
+                'child_info': {
+                    'child_id': child.child_id,
+                    'name': f"{child.user.first_name} {child.user.last_name}",
+                    'xp_points': child.xp_points,
+                    'streak': child.streak
+                },
+                'week_period': {
+                    'start_date': week_start.isoformat(),
+                    'end_date': week_end.isoformat()
+                },
+                'weekly_stats': {
+                    'habits_completed': habits_completed_this_week,
+                    'skills_completed': skills_completed_this_week,
+                    'badges_earned': badges_earned_this_week,
+                    'todos_completed': todos_completed_this_week
+                }
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

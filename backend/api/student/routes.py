@@ -547,7 +547,11 @@ class CompleteHabit(Resource):
             )
             db.session.add(habit_completion)
 
-            child.xp_points += habit.habit_xp            
+            child.xp_points += habit.habit_xp
+            db.session.flush()
+            # Update child's badges
+            update_milestone_badges(child_id=child.child_id)
+
             db.session.commit()
             return {'message': 'Habit done successfully', 'new_xp': child.xp_points}, 200
 
@@ -1038,6 +1042,9 @@ class CompleteSkill(Resource):
                 db.session.add(new_skill_completion)
 
             child.xp_points += skill.skill_xp
+            db.session.flush()
+            # Update child's badges
+            update_milestone_badges(child_id=child.child_id)
 
             db.session.commit()
             return {'message': 'Skill marked as learned successfully', 'xp_points': child.xp_points}, 200
@@ -1689,6 +1696,50 @@ PREDEFINED_BADGES = [
     {"xp": 2000, "name": "Prodigy",   "emoji": "🌈", "description": "Awarded for reaching 2000 XP total."}
 ]
 
+def update_milestone_badges(child_id):
+    """
+    Check and award milestone badges for a child based on their XP.
+    Can be called after XP is updated anywhere in the code.
+    """
+    child = Child.query.filter_by(child_id=child_id).first()
+    if not child:
+        return {'error': 'Child not found'}
+
+    total_xp = child.xp_points
+    awarded_badges = []
+
+    for milestone in PREDEFINED_BADGES:
+        if total_xp >= milestone['xp']:
+            existing = Badge.query.filter_by(
+                child_id=child.child_id,
+                badge=milestone['name']
+            ).first()
+
+            if not existing:
+                # Create new milestone badge
+                new_badge = Badge(
+                    child_id=child.child_id,
+                    badge=milestone['name'],
+                    level=milestone['description'],
+                    is_earned=True,
+                    badge_xp=milestone['xp'],
+                    earned_at=datetime.now(timezone.utc)
+                )
+                db.session.add(new_badge)
+                awarded_badges.append({
+                    'id': new_badge.id,
+                    'name': milestone['name'],
+                    'description': milestone['description'],
+                    'emoji': milestone['emoji'],
+                    'earned': True,
+                    'earnedDate': new_badge.earned_at.isoformat(),
+                    'xpReward': milestone['xp']
+                })
+
+    db.session.commit()
+    return awarded_badges
+
+
 class StudentEarnedBadgesAPI(Resource):
     @jwt_required()
     def get(self):
@@ -1706,71 +1757,24 @@ class StudentEarnedBadgesAPI(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
 
-            # Fetch earned badges
+            # Call badge updater here
+            new_awards = update_milestone_badges(child.child_id)
+
+            # Fetch all earned badges (DB + any newly awarded)
             badges = Badge.query.filter_by(child_id=child.child_id, is_earned=True).all()
+            result = [{
+                'id': b.id,
+                'name': b.badge,
+                'description': b.level or '',
+                'emoji': next((m['emoji'] for m in PREDEFINED_BADGES if m['name'] == b.badge), '🏅'),
+                'earned': True,
+                'earnedDate': b.earned_at.isoformat() if b.earned_at else None,
+                'xpReward': b.badge_xp
+            } for b in badges]
 
-            result = []
-            total_xp = child.xp_points  
-
-
-            # Store DB badges in the result list
-            for b in badges:
-                result.append({
-                    'id': b.id,
-                    'name': b.badge,
-                    'description': b.level or '',
-                    'emoji': '🏅',
-                    'earned': True,
-                    'earnedDate': b.earned_at.isoformat() if b.earned_at else None,
-                    'xpReward': b.badge_xp
-                })
-
-            # Check and insert milestone badges if needed
-            for milestone in PREDEFINED_BADGES:
-                if total_xp >= milestone['xp']:
-                    # See if this badge exists in DB
-                    existing = Badge.query.filter_by(
-                        child_id=child.child_id,
-                        badge=milestone['name']  # match by name
-                    ).first()
-
-                    if not existing:
-                        # Create badge record
-                        new_badge = Badge(
-                            child_id=child.child_id,
-                            badge=milestone['name'],
-                            level=milestone['description'],
-                            is_earned=True,
-                            badge_xp=milestone['xp'],
-                            earned_at=datetime.now(timezone.utc)
-                        )
-                        db.session.add(new_badge)
-                        db.session.commit()
-
-                        # Add to result list
-                        result.append({
-                            'id': new_badge.id,
-                            'name': new_badge.badge,
-                            'description': new_badge.level,
-                            'emoji': milestone['emoji'],
-                            'earned': True,
-                            'earnedDate': new_badge.earned_at.isoformat(),
-                            'xpReward': new_badge.badge_xp
-                        })
-                    else:
-                        # Add existing milestone badge to result
-                        result.append({
-                            'id': existing.id,
-                            'name': existing.badge,
-                            'description': existing.level,
-                            'emoji': milestone['emoji'],
-                            'earned': existing.is_earned,
-                            'earnedDate': existing.earned_at.isoformat() if existing.earned_at else None,
-                            'xpReward': existing.badge_xp
-                        })
-
-            return {'badges': result, 'total_xp': total_xp}, 200
+            return {'badges': result, 'total_xp': child.xp_points}, 200
 
         except Exception as e:
             db.session.rollback()
             return {'error': 'Internal server error', 'details': str(e)}, 500
+

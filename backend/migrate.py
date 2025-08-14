@@ -230,8 +230,10 @@ def create_seed_data():
         {"skill_name": "Anger Management", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=lxxpDF45TPA", "skill_xp": 50},
         {"skill_name": "Financial Literacy", "skill_type": "regular", "video_url": "https://www.youtube.com/watch?v=aRcXutXvfmM", "skill_xp": 50},
 
-        {"skill_name": "Making a Simple Sandwich", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=byZlWHEZWSM", "skill_xp": 50},
-        {"skill_name": "Cleaning Up After Cooking", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=_huP1lCMnlQ", "skill_xp": 50},
+        {"skill_name": "Making a Simple Sandwich", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=byZlWHEZWSM", "skill_xp": 100},
+        {"skill_name": "Cleaning Up After Cooking", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=_huP1lCMnlQ", "skill_xp": 100},
+        {"skill_name": "Grow a Plant from Kitchen Scraps", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=dlp_MgVJCYc", "skill_xp": 100},
+        {"skill_name": "Code Your First Simple Game with Scratch", "skill_type": "weekly", "video_url": "https://www.youtube.com/watch?v=1jHvXakt1qw", "skill_xp": 100},
     ]
 
     for skill_data in common_skills:

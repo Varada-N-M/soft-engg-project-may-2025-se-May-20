@@ -364,7 +364,7 @@ const handleSubmit = async () => {
 
     response.value = {
       success: true,
-      message: result.message || 'Parent account created successfully! Welcome to CooKids! 🎉',
+      message: result.message || 'Parent account created successfully! Welcome to GrowWise! 🎉',
       data: result
     }
     // Optionally, store tokens here: result.access_token, result.refresh_token

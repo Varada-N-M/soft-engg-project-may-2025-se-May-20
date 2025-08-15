@@ -18,7 +18,7 @@
             <BuildingIcon class="w-10 h-10 text-white"/>
           </div>
           <h1 class="text-3xl font-bold text-gray-800 mb-2">Register Your Organization</h1>
-          <p class="text-gray-600 text-sm">Join CoolKids and start creating amazing learning experiences for kids!</p>
+          <p class="text-gray-600 text-sm">Join GrowWise and start creating amazing learning experiences for kids!</p>
         </div>
 
         <!-- Response Alert -->
@@ -243,7 +243,7 @@ const handleSubmit = async () => {
     const {data: result} = await api.post('/api/organization/register', apiData)
     response.value = {
       success: true,
-      message: result.message || 'Organization registered successfully! Welcome to CoolKids! 🎉',
+      message: result.message || 'Organization registered successfully! Welcome to GrowWise! 🎉',
       data: result
     }
 

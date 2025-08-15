@@ -416,7 +416,7 @@ const handleSubmit = async () => {
     if (apiResponse.data) {
       response.value = {
         success: true,
-        message: 'Account created successfully! Welcome to CoolKids! 🎉',
+        message: 'Account created successfully! Welcome to GrowWise! 🎉',
         data: apiResponse.data
       }
 

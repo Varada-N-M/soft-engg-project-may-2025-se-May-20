@@ -17,7 +17,7 @@
               class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
             <BuildingIcon class="w-10 h-10 text-white"/>
           </div>
-          <h1 class="text-3xl font-bold text-gray-800 mb-2 font-fancy">CoolKids</h1>
+          <h1 class="text-3xl font-bold text-gray-800 mb-2 font-fancy">GrowWise</h1>
           <p class="text-gray-600 text-sm">Organization Login - Admin Access</p>
         </div>
 

@@ -603,7 +603,7 @@ export default {
 </script>
 
 <style scoped>
-/* Base Container - Matching CoolKids gradient */
+/* Base Container - Matching GrowWise gradient */
 .todo-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -628,7 +628,7 @@ export default {
   z-index: -1;
 }
 
-/* Fun Header - CoolKids colors */
+/* Fun Header - GrowWise colors */
 .header {
   background: linear-gradient(45deg, #00d4aa, #00b4d8, #0077b6, #7209b7, #a663cc, #feca57);
   background-size: 400% 400%;
@@ -715,7 +715,7 @@ export default {
 .stat-pending { background: linear-gradient(135deg, #0077b6 0%, #7209b7 100%); }
 .stat-daily { background: linear-gradient(135deg, #00b4d8 0%, #a663cc 100%); }
 
-/* Fun Form Card - CoolKids purple gradient */
+/* Fun Form Card - GrowWise purple gradient */
 .todo-form-card {
   background: linear-gradient(135deg, #7209b7 0%, #a663cc 100%);
   border-radius: 30px;
@@ -842,7 +842,7 @@ export default {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Enhanced Buttons - CoolKids colors */
+/* Enhanced Buttons - GrowWise colors */
 .btn {
   padding: 15px 30px;
   border: none;
@@ -932,7 +932,7 @@ export default {
   font-size: 20px;
 }
 
-/* Enhanced Filters - CoolKids teal gradient */
+/* Enhanced Filters - GrowWise teal gradient */
 .filters {
   display: flex;
   gap: 25px;
@@ -983,7 +983,7 @@ export default {
   align-items: center;
 }
 
-/* Enhanced Bulk Actions - CoolKids gradient */
+/* Enhanced Bulk Actions - GrowWise gradient */
 .bulk-actions {
   display: flex;
   align-items: center;
@@ -1040,7 +1040,7 @@ export default {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Enhanced Messages - CoolKids colors */
+/* Enhanced Messages - GrowWise colors */
 .error-message, .success-message {
   padding: 25px 30px;
   border-radius: 25px;
@@ -1113,7 +1113,7 @@ export default {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Enhanced Todo List - CoolKids colors */
+/* Enhanced Todo List - GrowWise colors */
 .todo-list {
   display: flex;
   flex-direction: column;
@@ -1251,7 +1251,7 @@ export default {
   min-width: 90px;
 }
 
-/* Enhanced Modal - CoolKids purple */
+/* Enhanced Modal - GrowWise purple */
 .modal-overlay {
   position: fixed;
   top: 0;

@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 class="font-fancy text-4xl font-bold text-gray-800 mb-2">
-              CoolKids Survey Report
+              GrowWise Survey Report
             </h1>
             <p class="text-lg text-gray-600">
               📊 Class Survey Results & Analytics Dashboard
@@ -20,12 +20,6 @@
               <div class="text-3xl font-bold text-blue-600">{{ totalResponses }}</div>
               <div class="text-sm text-gray-500">Total Responses</div>
             </div>
-            <button
-              @click="exportData"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg"
-            >
-              📥 Export Data
-            </button>
           </div>
         </div>
       </div>
@@ -597,16 +591,6 @@ const getColorClass = (color: string) => {
   return colorMap[color] || 'bg-gray-500'
 }
 
-const exportData = () => {
-  const dataStr = JSON.stringify(surveyResponses, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(dataBlob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'coolkids-survey-results.json'
-  link.click()
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <style scoped>

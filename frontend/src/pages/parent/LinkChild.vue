@@ -79,7 +79,7 @@
             <div class="space-y-2 text-blue-800">
               <p class="flex items-start gap-2">
                 <span class="font-semibold">1.</span>
-                Ask your child to log into their CoolKids account
+                Ask your child to log into their GrowWise account
               </p>
               <p class="flex items-start gap-2">
                 <span class="font-semibold">2.</span>

@@ -115,7 +115,7 @@
           "Every mistake is a learning opportunity!" ✨
         </p>
         <p class="text-sm mt-2 opacity-75">
-          - CoolKids Learning Platform
+          - GrowWise Learning Platform
         </p>
       </div>
     </div>

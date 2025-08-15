@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="font-fancy text-6xl font-bold text-white mb-2 drop-shadow-lg">
-          CoolKids
+          GrowWise
         </h1>
         <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl">
           <h2 class="text-3xl font-bold text-gray-800 mb-2">🌟 Fun Survey Time! 🌟</h2>

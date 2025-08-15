@@ -194,14 +194,7 @@
             <div class="text-sm text-gray-500">Create lesson plans</div>
           </router-link>
 
-          <button
-              @click="exportData"
-              class="action-card text-left"
-          >
-            <div class="text-2xl mb-2">📊</div>
-            <div class="font-medium">Export Data</div>
-            <div class="text-sm text-gray-500">Download class report</div>
-          </button>
+
         </div>
       </div>
     </div>
@@ -256,10 +249,7 @@ const viewStudentProgress = (studentId) => {
   router.push(`/teacher/student-progress/${studentId}`)
 }
 
-const exportData = () => {
-  // TODO: Implement data export functionality
-  alert('Export functionality coming soon!')
-}
+
 
 onMounted(() => {
   fetchAnalytics()

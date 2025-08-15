@@ -2,7 +2,7 @@ You are a front-end expert capable of building a modern, attractive, and engagin
 
 ### Project info:
 
-**App name**: "CoolKids"
+**App name**: "GrowWise"
 **Axios**: `src/plugins/axios.ts`
 **Router**: `src/router/index.ts`
 **Vue folders**: `src/components` and `src/pages`

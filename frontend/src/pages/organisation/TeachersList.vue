@@ -40,10 +40,6 @@
               </div>
             </div>
             <div class="flex items-center space-x-4">
-              <Button variant="outline" @click="exportTeachers">
-                <Download class="w-4 h-4 mr-2"/>
-                Export
-              </Button>
               <Button @click="$router.push('/org/add-teacher')" class="bg-green-600 hover:bg-green-700">
                 <UserPlus class="w-4 h-4 mr-2"/>
                 Add Teacher
@@ -700,10 +696,7 @@ const confirmDelete = () => {
   teacherToDelete.value = null
 }
 
-const exportTeachers = () => {
-  console.log('Export teachers')
-  // Implement export functionality
-}
+
 
 onMounted(() => {
   console.log('Teachers list mounted')

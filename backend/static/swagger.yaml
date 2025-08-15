@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: CoolKids API
-  description: API documentation for the CoolKids application, which includes user authentication, child-parent linking, student habits, gratitude entries, and organization statistics.
+  title: GrowWise API
+  description: API documentation for the GrowWise application, which includes user authentication, child-parent linking, student habits, gratitude entries, and organization statistics.
   version: "1.0"
 tags:
   - name: Auth

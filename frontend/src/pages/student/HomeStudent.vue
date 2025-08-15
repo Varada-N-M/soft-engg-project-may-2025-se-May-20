@@ -190,16 +190,16 @@
         <button
           @click="markWeeklySkillAsLearned(weeklySkill)"
           :class="{
-            'bg-green-600 hover:bg-green-700': !isComplete,
-            'bg-green-500 cursor-default': isComplete,
-            'opacity-70': isLoading
+            'bg-green-600 hover:bg-green-700': !weeklySkillCompletionState.isComplete,
+            'bg-green-500 cursor-default': weeklySkillCompletionState.isComplete,
+            'opacity-70': weeklySkillCompletionState.isLoading
           }"
           class="self-start mt-auto px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium flex items-center gap-2"
-          :disabled="isComplete || isLoading"
+          :disabled="weeklySkillCompletionState.isComplete || weeklySkillCompletionState.isLoading"
         >
-          <span v-if="!isComplete && !isLoading">Mark as Complete</span>
-          <span v-if="isLoading">Lesson Completed!</span>
-          <span v-if="isComplete">Lesson Completed!</span>
+          <span v-if="!weeklySkillCompletionState.isComplete && !weeklySkillCompletionState.isLoading">Mark as Complete</span>
+          <span v-if="weeklySkillCompletionState.isLoading">Completing...</span>
+          <span v-if="weeklySkillCompletionState.isComplete">Lesson Completed!</span>
         </button>
       </div>
     </div>
@@ -224,30 +224,37 @@
       >
         <h3 class="text-lg font-semibold text-gray-900 mb-4">
           {{ lesson.skill_name }}
-          {{ lesson.id }}
         </h3>
         <div class="flex gap-3">
           <!-- Watch Lesson button that opens video URL -->
           <button 
             @click="watchLesson(lesson.video_url)"
-            class="bg-blue-600 text-white px-4 py-2 rounded-[15px] hover:bg-blue-600 transition-colors cursor-pointer"
+            class="bg-blue-600 text-white px-4 py-2 rounded-[15px] hover:bg-blue-700 transition-colors cursor-pointer"
           >
             Watch Lesson
           </button>
-        <button
-          @click="markWeeklySkillAsLearned(weeklySkill)"
-          :class="{
-            'bg-green-600 hover:bg-green-700': !isComplete,
-            'bg-green-500 cursor-default': isComplete,
-            'opacity-70': isLoading
-          }"
-          class="self-start mt-auto px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium flex items-center gap-2"
-          :disabled="isComplete || isLoading"
-        >
-          <span v-if="!isComplete && !isLoading">Mark as Complete</span>
-          <span v-if="isLoading">Lesson Completed!</span>
-          <span v-if="isComplete">Lesson Completed!</span>
-        </button>
+          
+          <!-- Fixed: Use lesson-specific completion state and pass correct lesson ID -->
+          <button
+            @click="markLifeLessonAsLearned(lesson.id)"
+            :class="{
+              'bg-green-600 hover:bg-green-700': !lessonCompletionState[lesson.id]?.isComplete,
+              'bg-green-500 cursor-default': lessonCompletionState[lesson.id]?.isComplete,
+              'opacity-70': lessonCompletionState[lesson.id]?.isLoading
+            }"
+            class="px-4 py-2 text-white rounded-xl shadow transition-colors duration-200 text-sm font-medium flex items-center gap-2"
+            :disabled="lessonCompletionState[lesson.id]?.isComplete || lessonCompletionState[lesson.id]?.isLoading"
+          >
+            <span v-if="!lessonCompletionState[lesson.id]?.isComplete && !lessonCompletionState[lesson.id]?.isLoading">
+              Mark as Complete
+            </span>
+            <span v-if="lessonCompletionState[lesson.id]?.isLoading">
+              Completing...
+            </span>
+            <span v-if="lessonCompletionState[lesson.id]?.isComplete">
+              Lesson Completed!
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -258,16 +265,11 @@
 </template>
 
 <script setup>
-import { defineProps,ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
 import { clearAuthData } from '@/utils/auth';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 // Import smaller, reusable components (assuming they are created)
-import StatCard from './StatCard.vue';
-import ActivityCard from './ActivityCard.vue';
-import LearningStoryCard from './LearningStoryCard.vue';
-import LessonUpdateCard from './LessonUpdateCard.vue';
 import api from '@/plugins/axios.ts';
 
 // Router instance
@@ -318,7 +320,7 @@ const getEmojiForCategory = (category) => {
 const fetchHabits = async () => {
   const token = localStorage.getItem('access_token');
   try {
-    const response = await axios.get('/api/child/habits', {
+    const response = await api.get('/api/child/habits', {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -356,7 +358,7 @@ const toggleHabit = async (habitId) => {
   if (habitToToggle && !habitToToggle.completed) {
     try {
       // The backend POST endpoint marks it as complete
-      await axios.post(`/api/child/habit/${habitId}/complete`, null, {
+      await api.post(`/api/child/habit/${habitId}/complete`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -379,7 +381,7 @@ const fetchUserProfile = async () => {
   const token = localStorage.getItem('access_token');
   try {
     // Assuming you have an endpoint like '/api/child/profile'
-    const response = await axios.get('/api/child/profile', {
+    const response = await api.get('/api/child/profile', {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -392,7 +394,7 @@ const fetchUserProfile = async () => {
 
 const markSkillAsComplete = async (skillId) => { // Removed ': number' from here
   try {
-    await axios.post(`/api/child/skills/${skillId}/complete`); 
+    await api.post(`/api/child/skills/${skillId}/complete`); 
     isComplete.value = true
     console.log(`Weekly skill with ID ${skillId} marked as complete`)
   } catch (err) {
@@ -428,7 +430,7 @@ const fetchSkills = async () => {
     }
 
     // Make API call to get skills
-    const response = await axios.get('/api/child/skills', {
+    const response = await api.get('/api/child/skills', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -470,7 +472,7 @@ const fetchData = async (url, loadingRef, dataRef, transform = (d) => d, key = '
 
   loadingRef.value = true;
   try {
-    const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await api.get(url, { headers: { Authorization: `Bearer ${token}` } });
     dataRef.value = transform(response.data[key] || response.data) || [];
   } catch (err) {
     console.error(`Error fetching data from ${url}:`, err);
@@ -598,12 +600,22 @@ const lifelessons = ref([]) // Change to array since you're filtering multiple i
 const fetchLifelessons = async () => {
   try {
     const response = await api.get('/api/child/skills')
-    console.log('Weekly skillzzz fetched:', response.data)
+    console.log('Life lessons fetched:', response.data)
     
     const filteredSkills = response.data.skills.filter(skill => skill.skill_type === 'regular')
-    console.log('Weekly skillzzzdd filtered:', filteredSkills)
+    console.log('Life lessons filtered:', filteredSkills)
     
     lifelessons.value = filteredSkills
+    
+    // Initialize completion states for each lesson
+    filteredSkills.forEach(lesson => {
+      if (!lessonCompletionState.value[lesson.id]) {
+        lessonCompletionState.value[lesson.id] = {
+          isComplete: false, // You might want to check if it's already completed from the API
+          isLoading: false
+        };
+      }
+    });
     
   } catch (error) {
     console.error('Error fetching lifelessons:', error)
@@ -650,24 +662,80 @@ const getYouTubeVideoId = (url) => {
 }
 
 const message = ref('');
-const isCompleteSkill = ref(false);
-const isLoadingSkill = ref(false);
 
-const markWeeklySkillAsLearned = async (id) => {
-  message.value = '';
-  isLoading.value = true;
+// Weekly skill completion state
+const weeklySkillCompletionState = ref({
+  isComplete: false,
+  isLoading: false
+});
+
+// Life lessons completion state - object to track each lesson individually
+const lessonCompletionState = ref({});
+
+const markWeeklySkillAsLearned = async (skill) => {
+  weeklySkillCompletionState.value.isLoading = true;
 
   try {
     const response = await api.post(`/api/child/skills/${weeklySkill.value.id}/complete`);
-    console.log('Skill completed:', response.data);
+    console.log('Weekly skill completed:', response.data);
 
     // Update UI
-    message.value = 'Mark as completed!';
-    isCompleteSkill.value = true;
+    message.value = 'Weekly skill completed!';
+    weeklySkillCompletionState.value.isComplete = true;
+    
+    // Optional: Show success message
+    alert('🎉 Weekly skill completed! You earned XP!');
+    
   } catch (error) {
-    console.error('Error updating skill completed:', error);
+    console.error('Error completing weekly skill:', error);
+    
+    // Handle error (show message to user)
+    if (error.response?.status === 400) {
+      alert('This skill is already completed!');
+      weeklySkillCompletionState.value.isComplete = true;
+    } else {
+      alert('An error occurred. Please try again.');
+    }
   } finally {
-    isLoadingSkill.value = false;
+    weeklySkillCompletionState.value.isLoading = false;
+  }
+};
+
+// New function specifically for life lessons
+const markLifeLessonAsLearned = async (lessonId) => {
+  // Initialize state for this lesson if it doesn't exist
+  if (!lessonCompletionState.value[lessonId]) {
+    lessonCompletionState.value[lessonId] = {
+      isComplete: false,
+      isLoading: false
+    };
+  }
+
+  // Set loading state for this specific lesson
+  lessonCompletionState.value[lessonId].isLoading = true;
+
+  try {
+    const response = await api.post(`/api/child/skills/${lessonId}/complete`);
+    console.log('Life lesson completed:', response.data);
+
+    // Update completion state for this specific lesson
+    lessonCompletionState.value[lessonId].isComplete = true;
+    
+    // Optional: Show success message
+    alert('🎉 Life lesson completed! You earned XP!');
+    
+      } catch (error) {
+    console.error('Error completing life lesson:', error);
+    
+    // Handle error (show message to user)
+    if (error.response?.status === 400) {
+      alert('This lesson is already completed!');
+      lessonCompletionState.value[lessonId].isComplete = true;
+    } else {
+      alert('An error occurred. Please try again.');
+    }
+  } finally {
+    lessonCompletionState.value[lessonId].isLoading = false;
   }
 };
 
@@ -681,11 +749,11 @@ const markSkillAsLearned = async (id) => {
 
     // Update UI
     message.value = 'Mark as completed!';
-    isCompleteSkill.value = true;
+    isComplete.value = true;
   } catch (error) {
     console.error('Error updating skill completed:', error);
   } finally {
-    isLoadingSkill.value = false;
+    isLoading.value = false;
   }
 };
 

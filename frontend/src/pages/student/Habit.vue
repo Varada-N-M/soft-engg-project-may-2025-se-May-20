@@ -1,66 +1,87 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
-    <header class="max-w-4xl mx-auto mb-8 text-center">
-      <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Dashboard
-      </router-link>
-      <h1 class="text-4xl font-extrabold text-gray-900 mb-2">My Habits 🌟</h1>
-      <p class="text-lg text-gray-600 font-medium">
-        You are tracking <span class="text-blue-500 font-bold">{{ habits.length }}</span> habits.
-      </p>
-    </header>
+  <div class="min-h-screen flex">
+    <aside
+      class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
+      <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 font-playfair">My Dashboard</h2>
+      </div>
+      <nav class="space-y-3">
+        <router-link v-for="link in navLinks" :key="link.name" :to="link.path"
+          class="flex items-center gap-4 py-2 px-2 rounded-xl text-gray-700 hover:text-yellow-600 transition-colors duration-200 font-medium font-playfair">
+          <span class="text-xl">{{ link.icon }}</span> {{ link.name }}
+        </router-link>
+      </nav>
+    </aside>
 
-    <main class="max-w-6xl mx-auto">
-      <div class="flex justify-center mb-8">
-        <button
-          @click="openCreateModal"
-          class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center"
-        >
-          <span class="text-xl mr-2">➕</span>
-          Create New Habit
-        </button>
-      </div>
+    <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
+      <div class="max-w-7xl ml-3">
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-6">
+            <!-- Greeting Text (Left Side) -->
+            <div class="flex-1 min-w-max font-playfair">
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Habits 🌟</h1>
+              <p class="text-lg text-gray-600 font-medium">
+                You are tracking <span class="text-blue-500 font-bold">{{ habits.length }}</span> habits.
+              </p>
+            </div>
 
-      <div v-if="isLoading" class="text-center py-20">
-        <p class="text-lg text-gray-600">Loading habits...</p>
-      </div>
-      <div v-else-if="error" class="text-center py-20">
-        <p class="text-lg text-red-500 font-medium">{{ error }}</p>
-      </div>
-      <div v-else-if="habits.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="habit in habits"
-          :key="habit.id"
-          @click="openEditModal(habit)"
-          class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer"
-          :class="{'border-green-400 bg-green-50': habit.completedToday, 'border-gray-200': !habit.completedToday }"
-        >
-          <div class="flex items-center mb-4">
-            <div class="text-3xl mr-3">{{ getEmojiForCategory(habit.category) }}</div>
-            <div>
-              <h3 class="font-bold text-gray-800 text-lg">{{ habit.name }}</h3>
-              <p class="text-sm text-gray-600">{{ habit.description }}</p>
-            </div>
-          </div>
-          
-          <div class="flex justify-between items-center text-xs">
-            <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
-              <span class="mr-1">⭐</span>
-              +{{ habit.habit_xp }} XP
-            </div>
-            <div v-if="habit.completedToday" class="text-lg text-green-600 font-bold">
-              ✅ Done Today!
+            <!-- Buttons (Right Side - Horizontal Row) -->
+            <div class="flex space-x-4 min-w-fit font-playfair">
+              <router-link to="/student/profile"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
+                Profile
+              </router-link>
+
+              <button @click="logout"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
+                Logout
+              </button>
             </div>
           </div>
         </div>
-      </div>
-      <div v-else class="text-center py-20">
-        <div class="text-6xl mb-4">✨</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">No Habits Yet!</h2>
-        <p class="text-gray-600">Click the button above to create your first habit.</p>
+
+        <div class="flex justify-center mb-8">
+          <button @click="openCreateModal"
+            class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center">
+            <span class="text-xl mr-2">➕</span>
+            Create New Habit
+          </button>
+        </div>
+
+        <div v-if="isLoading" class="text-center py-20">
+          <p class="text-lg text-gray-600">Loading habits...</p>
+        </div>
+        <div v-else-if="error" class="text-center py-20">
+          <p class="text-lg text-red-500 font-medium">{{ error }}</p>
+        </div>
+        <div v-else-if="habits.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="habit in habits" :key="habit.id" @click="openEditModal(habit)"
+            class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer"
+            :class="{ 'border-green-400 bg-green-50': habit.completedToday, 'border-gray-200': !habit.completedToday }">
+            <div class="flex items-center mb-4">
+              <div class="text-3xl mr-3">{{ getEmojiForCategory(habit.category) }}</div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-lg">{{ habit.name }}</h3>
+                <p class="text-sm text-gray-600">{{ habit.description }}</p>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center text-xs">
+              <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
+                <span class="mr-1">⭐</span>
+                +{{ habit.habit_xp }} XP
+              </div>
+              <div v-if="habit.completedToday" class="text-lg text-green-600 font-bold">
+                ✅ Done Today!
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center py-20">
+          <div class="text-6xl mb-4">✨</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">No Habits Yet!</h2>
+          <p class="text-gray-600">Click the button above to create your first habit.</p>
+        </div>
       </div>
     </main>
 
@@ -80,31 +101,22 @@
         <form @submit.prevent="saveHabit" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Habit Name</label>
-            <input
-              v-model="habitForm.name"
-              type="text"
+            <input v-model="habitForm.name" type="text"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Read for 15 minutes"
-              required
-            >
+              placeholder="e.g., Read for 15 minutes" required>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="habitForm.description"
+            <textarea v-model="habitForm.description"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., This helps me learn new things."
-              rows="3"
-            ></textarea>
+              placeholder="e.g., This helps me learn new things." rows="3"></textarea>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-            <select
-              v-model="habitForm.category"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
+            <select v-model="habitForm.category"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <option value="reading">📚 Reading</option>
               <option value="health">💧 Health</option>
               <option value="chores">🧹 Chores</option>
@@ -116,10 +128,8 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">XP Reward</label>
-            <select
-              v-model="habitForm.habit_xp"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
+            <select v-model="habitForm.habit_xp"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <option :value="10">10 XP - Easy</option>
               <option :value="25">25 XP - Medium</option>
               <option :value="50">50 XP - Hard</option>
@@ -127,33 +137,20 @@
           </div>
 
           <div class="flex space-x-3 pt-4">
-            <button
-              v-if="editingHabit && !editingHabit.completedToday"
-              type="button"
-              @click="completeHabit(editingHabit.id)"
-              class="flex-1 py-3 px-4 rounded-xl bg-green-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <button v-if="editingHabit && !editingHabit.completedToday" type="button" @click="completeHabit(editingHabit.id)"
+              class="flex-1 py-3 px-4 rounded-xl bg-green-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
               Mark as Done
             </button>
-            <button
-              v-if="editingHabit"
-              type="button"
-              @click="deleteHabit"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors"
-            >
+            <button v-if="editingHabit" type="button" @click="deleteHabit"
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
               Delete
             </button>
-            <button
-              type="button"
-              @click="closeModal"
-              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
+            <button type="button" @click="closeModal"
+              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <button type="submit"
+              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
               {{ editingHabit ? 'Update Habit' : 'Create Habit' }}
             </button>
           </div>
@@ -165,14 +162,34 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-
+import { useRouter } from 'vue-router';
 import api from '@/plugins/axios.ts';
+import { clearAuthData } from '@/utils/auth';
+
+const router = useRouter();
+
 // --- Reactive Data ---
 const showModal = ref(false);
 const editingHabit = ref(null);
 const habits = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
+
+const navLinks = ref([
+  { name: 'Home', path: '/student/home', icon: '🏠' },
+  { name: 'Lesson Updates', path: '/student/lesson-updates', icon: '📚' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
+  { name: 'Habits', path: '/student/habit', icon: '🎯' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
+  { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },
+  { name: 'Badges', path: '/student/badges', icon: '🏅' },
+]);
+
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
 
 const habitForm = ref({
   id: null,
@@ -295,7 +312,7 @@ const updateHabit = async () => {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    
+
     const index = habits.value.findIndex(h => h.id === editingHabit.value.id);
     if (index !== -1) {
       habits.value[index] = { ...habits.value[index], ...habitForm.value };

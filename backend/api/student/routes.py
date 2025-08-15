@@ -1107,6 +1107,19 @@ class StudentProfile(Resource):
             if not child:
                 return {'error': 'Child profile not found'}, 404
 
+            # Count badges
+            badge_count = Badge.query.filter_by(child_id=child.child_id).count()
+            # Count habits
+            habit_count = Habit.query.filter_by(child_id=child.child_id).count()
+            # Count completed skills
+            completed_skills_count = SkillCompleted.query.filter_by(child_id=child.child_id, is_learned=True).count()
+            # Count completed habits
+            completed_habits_count = HabitCompletion.query.filter_by(child_id=child.child_id, is_done=True).count()
+            # Count completed badges
+            completed_badges_count = Badge.query.filter_by(child_id=child.child_id, is_earned=True).count()
+
+            activity_points = completed_skills_count + completed_habits_count + completed_badges_count
+
             profile_data = {
                 'user_id': user.user_id,
                 'first_name': user.first_name,
@@ -1122,6 +1135,12 @@ class StudentProfile(Resource):
                 'streak': child.streak,
                 'xp_points': child.xp_points,
                 'is_linked': child.is_linked,
+                'badge_count': badge_count,
+                'habit_count': habit_count,
+                'completed_skills_count': completed_skills_count,
+                'completed_habits_count': completed_habits_count,
+                'completed_badges_count': completed_badges_count,
+                'activity_points': activity_points
             }
             
             return {'profile': profile_data}, 200

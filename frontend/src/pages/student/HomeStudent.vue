@@ -627,7 +627,7 @@ const markWeeklySkillAsLearned = async (skill) => {
     weeklySkillCompletionState.value.isComplete = true;
 
     // Optional: Show success message
-    alert('🎉 Weekly skill completed! You earned XP!');
+    alert('🎉 Weekly skill completed!');
 
   } catch (error) {
     console.error('Error completing weekly skill:', error);
@@ -665,7 +665,7 @@ const markLifeLessonAsLearned = async (lessonId) => {
     lessonCompletionState.value[lessonId].isComplete = true;
 
     // Optional: Show success message
-    alert('🎉 Life lesson completed! You earned XP!');
+    alert('🎉 Life lesson completed!');
 
   } catch (error) {
     console.error('Error completing life lesson:', error);

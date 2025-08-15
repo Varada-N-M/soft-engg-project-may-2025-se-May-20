@@ -1,9 +1,9 @@
 <template>
-  <div class="bg-white rounded-3xl p-6 shadow-lg border border-yellow-300 transform transition-transform hover:scale-102 cursor-pointer relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-r from-yellow-200/30 to-orange-200/30 rounded-3xl"></div>
+  <div class="bg-white rounded-3xl p-6 shadow-lg transform transition-transform hover:scale-101 cursor-pointer relative overflow-hidden">
+    <div class="absolute inset-0 rounded-3xl"></div>
 
     <div class="relative z-10 text-center">
-      <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-xl">
+      <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 text-white shadow-xl">
         {{ badge.emoji }}
       </div>
 

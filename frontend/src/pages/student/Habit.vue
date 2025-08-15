@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -14,36 +14,22 @@
     </aside>
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
-      <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+      <div class="max-w-7xl ml-6">
+        <div class="rounded-3xl mb-8">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
-              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Habits 🌟</h1>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Habits</h1>
               <p class="text-lg text-gray-600 font-medium">
                 You are tracking <span class="text-blue-500 font-bold">{{ habits.length }}</span> habits.
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
 
         <div class="flex justify-center mb-8">
           <button @click="openCreateModal"
-            class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center">
-            <span class="text-xl mr-2">➕</span>
+            class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center font-playfair">
             Create New Habit
           </button>
         </div>
@@ -56,8 +42,7 @@
         </div>
         <div v-else-if="habits.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="habit in habits" :key="habit.id" @click="openEditModal(habit)"
-            class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer"
-            :class="{ 'border-green-400 bg-green-50': habit.completedToday, 'border-gray-200': !habit.completedToday }">
+            class="bg-white rounded-3xl p-6 shadow-lg border-1 transition-transform hover:scale-101 cursor-pointer">
             <div class="flex items-center mb-4">
               <div class="text-3xl mr-3">{{ getEmojiForCategory(habit.category) }}</div>
               <div>
@@ -68,24 +53,21 @@
 
             <div class="flex justify-between items-center text-xs">
               <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
-                <span class="mr-1">⭐</span>
                 +{{ habit.habit_xp }} XP
               </div>
               <div v-if="habit.completedToday" class="text-lg text-green-600 font-bold">
-                ✅ Done Today!
+                Done Today!
               </div>
             </div>
           </div>
         </div>
         <div v-else class="text-center py-20">
-          <div class="text-6xl mb-4">✨</div>
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">No Habits Yet!</h2>
-          <p class="text-gray-600">Click the button above to create your first habit.</p>
+          <p class="text-gray-600">Click the button above to create your first habit!</p>
         </div>
       </div>
     </main>
 
-    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div v-if="showModal" class="fixed inset-0 flex bg-black/30 items-center justify-center z-50 p-4 shadow-2xl">
       <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
         <div class="flex items-center justify-between mb-6">
           <h3 class="text-2xl font-bold text-gray-800">
@@ -138,19 +120,19 @@
 
           <div class="flex space-x-3 pt-4">
             <button v-if="editingHabit && !editingHabit.completedToday" type="button" @click="completeHabit(editingHabit.id)"
-              class="flex-1 py-3 px-4 rounded-xl bg-green-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+              class="flex-1 py-3 px-4 rounded-xl bg-green-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
               Mark as Done
             </button>
             <button v-if="editingHabit" type="button" @click="deleteHabit"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 bg-red-500 text-white font-medium hover:bg-red-600 transition-colors cursor-pointer">
               Delete
             </button>
             <button type="button" @click="closeModal"
-              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer">
               Cancel
             </button>
             <button type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+              class="flex-1 py-3 px-4 rounded-xl bg-blue-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
               {{ editingHabit ? 'Update Habit' : 'Create Habit' }}
             </button>
           </div>
@@ -384,3 +366,10 @@ onMounted(() => {
   fetchHabits();
 });
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+</style>

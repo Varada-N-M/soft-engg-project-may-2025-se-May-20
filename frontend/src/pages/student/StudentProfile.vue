@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
+  <div class="min-h-screen bg-gray-50 p-8 font-playfair">
     <header class="max-w-4xl mx-auto mb-8 text-center">
       <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -10,7 +10,7 @@
       <h1 class="text-4xl font-extrabold text-gray-900 mb-2">My Profile</h1>
     </header>
 
-    <main class="max-w-4xl mx-auto bg-white rounded-3xl p-8 shadow-lg border border-gray-200">
+    <main class="max-w-4xl mx-auto rounded-3xl p-8">
       <div v-if="isLoading" class="text-center py-20">
         <p class="text-lg text-gray-600">Loading profile data...</p>
       </div>
@@ -18,7 +18,7 @@
         <p class="text-lg text-red-500 font-medium">{{ error }}</p>
       </div>
       <div v-else class="space-y-6">
-        <div class="flex items-center space-x-6 pb-6 border-b border-gray-100">
+        <div class="flex items-center space-x-6 pb-6 border-gray-100">
           <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-5xl font-bold text-blue-600 shadow-inner">
             {{ getInitials(profile.first_name, profile.last_name) }}
           </div>
@@ -29,18 +29,8 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-yellow-50 rounded-2xl p-5 flex items-center space-x-4 shadow-sm border border-yellow-200">
-            <div class="text-4xl">✨</div>
-            <div>
-              <p class="text-sm text-yellow-700 font-medium">Total XP Points</p>
-              <p class="text-3xl font-bold text-yellow-800">{{ profile.xp_points }}</p>
-            </div>
-          </div>
-        </div>
-
         <div class="space-y-4">
-          <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Personal Details</h3>
+          <h3 class="text-xl font-bold text-gray-800 pb-2 mb-4">Personal Details</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-100 p-4 rounded-xl">
               <p class="text-sm text-gray-600">Date of Birth</p>
@@ -129,3 +119,10 @@ onMounted(() => {
   fetchUserProfile();
 });
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+</style>

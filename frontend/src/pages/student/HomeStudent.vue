@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64  bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -47,10 +47,10 @@
         
         <!-- NEW Stats Section -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard icon="✨" label="Total XP" :value="studentProfile.xp_points" />
-          <StatCard icon="🏅" label="Badges Earned" :value="studentProfile.badge_count" :loading="isBadgeCountLoading" />
-          <StatCard icon="🎯" label="Total Habits" :value="studentProfile.habit_count" />
-          <StatCard icon="✅" label="Activities Completed" :value="studentProfile.activity_points" :loading="isCompletedSkillsLoading" unit="this week" />
+          <StatCard label="Total XP" :value="studentProfile.xp_points" />
+          <StatCard label="Badges Earned" :value="studentProfile.badge_count" :loading="isBadgeCountLoading" />
+          <StatCard label="Total Habits" :value="studentProfile.habit_count" />
+          <StatCard label="Activities Completed" :value="studentProfile.activity_points" :loading="isCompletedSkillsLoading" unit="this week" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -139,11 +139,8 @@
           </div>
 
           <div v-else class="text-center">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">
-              All Weekly Skills Completed 🎉
-            </h3>
             <p class="text-gray-700 mb-4">
-              You’ve completed all the weekly skill challenges. Great job!
+              All Weekly Skills Completed!
             </p>
             <ul class="list-disc list-inside text-gray-700 inline-block text-left">
               <li v-for="skill in completedWeeklySkills" :key="skill.id">
@@ -192,11 +189,8 @@
             </div>
           </div>
 
-          <div v-else class="text-center">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">
-              All Life Lessons Completed! 🎉
-            </h3>
-            <p class="text-gray-700">You’ve finished all available lessons. Great work!</p>
+          <div v-else class="text-center mt-6">
+            <p class="text-gray-700 mt-6">All Life Lessons Completed!</p>
           </div>
         </div>
 
@@ -307,12 +301,11 @@ const toggleHabit = async (habitId) => {
 
       // Update the UI after successful API call
       habitToToggle.completed = true;
-      alert(`🎉 You earned +${habitToToggle.xp} XP!`);
 
     } catch (err) {
       console.error('Failed to complete habit:', err);
       if (err.response && err.response.status === 400) {
-        alert('This habit is already completed for today!');
+
       } else {
         alert('An error occurred. Please try again.');
       }
@@ -626,8 +619,6 @@ const markWeeklySkillAsLearned = async (skill) => {
     message.value = 'Weekly skill completed!';
     weeklySkillCompletionState.value.isComplete = true;
 
-    // Optional: Show success message
-    alert('🎉 Weekly skill completed!');
 
   } catch (error) {
     console.error('Error completing weekly skill:', error);
@@ -664,8 +655,6 @@ const markLifeLessonAsLearned = async (lessonId) => {
     // Update completion state for this specific lesson
     lessonCompletionState.value[lessonId].isComplete = true;
 
-    // Optional: Show success message
-    alert('🎉 Life lesson completed!');
 
   } catch (error) {
     console.error('Error completing life lesson:', error);
@@ -708,3 +697,10 @@ onMounted(async () => {
 })
 
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+</style>

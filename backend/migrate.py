@@ -116,7 +116,7 @@ def create_seed_data():
             unique_key=f"STU{student_data['user_idx']:03d}",
             is_linked=True,
             streak=0,
-            xp_points=100
+            xp_points=0
         )
         students.append(student)
         db.session.add(student)

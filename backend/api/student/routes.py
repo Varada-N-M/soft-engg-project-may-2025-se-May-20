@@ -1701,13 +1701,10 @@ class StoryStarter(Resource):
 
 
 PREDEFINED_BADGES = [
-    {"xp": 0,   "name": "Newbie",     "emoji": "👶", "description": "Awarded for starting your journey."},
     {"xp": 10,  "name": "Beginner",   "emoji": "🎉", "description": "Awarded for reaching 10 XP total."},
     {"xp": 50,  "name": "Adventurer", "emoji": "🚀", "description": "Awarded for reaching 50 XP total."},
     {"xp": 100, "name": "Excellency", "emoji": "🥇", "description": "Awarded for reaching 100 XP total."},
-    {"xp": 150, "name": "Master",     "emoji": "👑", "description": "Awarded for reaching 150 XP total."},
     {"xp": 250, "name": "Achiever",   "emoji": "🏆", "description": "Awarded for reaching 250 XP total."},
-    {"xp": 350, "name": "Champion",   "emoji": "🏅", "description": "Awarded for reaching 350 XP total."},
     {"xp": 500, "name": "Super Star", "emoji": "🌟", "description": "Awarded for reaching 500 XP total."},
     {"xp": 750, "name": "Legend",     "emoji": "🦸", "description": "Awarded for reaching 750 XP total."},
     {"xp": 1000, "name": "Hero",      "emoji": "🦸‍♂️", "description": "Awarded for reaching 1000 XP total."},

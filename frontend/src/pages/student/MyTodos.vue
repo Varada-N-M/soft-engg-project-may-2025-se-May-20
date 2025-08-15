@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -14,36 +14,22 @@
     </aside>
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
-      <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+      <div class="max-w-7xl ml-6">
+        <div class="rounded-3xl mb-8">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
-              <h1 class="text-4xl font-bold text-gray-900 mb-2">My To-Do List ✅</h1>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My To-Do List</h1>
               <p class="text-lg text-gray-600 font-medium">
                 You have <span class="text-blue-500 font-bold">{{ todos.length }}</span> tasks on your list.
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
 
         <div class="flex justify-center mb-8">
           <button @click="openCreateModal"
-            class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center">
-            <span class="text-xl mr-2">➕</span>
+            class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center font-playfair">
             Add New Task
           </button>
         </div>
@@ -56,14 +42,14 @@
           <p class="text-lg text-red-500 font-medium">{{ error }}</p>
         </div>
 
-        <div v-else-if="todos.length > 0" class="space-y-4">
+        <div v-else-if="todos.length > 0" class="space-y-3 max-w-2xl mx-auto">
           <div v-for="todo in todos" :key="todo.id" @click="openEditModal(todo)"
-            class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer flex items-center justify-between"
-            :class="{ 'border-green-400 bg-green-50': todo.is_completed, 'border-gray-200': !todo.is_completed }">
+            class="bg-white rounded-3xl p-4 shadow-lg border-1 transition-transform hover:scale-101 cursor-pointer flex items-center justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
                 <h3 class="font-bold text-gray-800 text-lg"
                   :class="{ 'line-through text-gray-500': todo.is_completed }">
+                  {{ todo.id }}.
                   {{ todo.task_name }}
                 </h3>
                 <span v-if="todo.is_daily" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">🔁 Daily</span>
@@ -72,20 +58,17 @@
               <p v-if="todo.completion_date" class="text-xs text-gray-500">
                 Due: {{ formatDate(todo.completion_date) }}
               </p>
-              <p class="text-xs text-gray-400 mt-1">Created: {{ formatDate(todo.created_at) }}</p>
             </div>
 
             <div class="flex-shrink-0 ml-4">
-              <div v-if="todo.is_completed" class="text-2xl text-green-600 font-bold">✅</div>
-              <div v-else class="text-2xl text-yellow-500 font-bold">⏳</div>
+              <div v-if="todo.is_completed" class="text-lg text-green-600 font-bold">Completed</div>
+              <div v-else class="text-lg text-yellow-500 font-bold">Due</div>
             </div>
           </div>
         </div>
 
         <div v-else class="text-center py-20">
-          <div class="text-6xl mb-4">✨</div>
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">No Tasks Yet!</h2>
-          <p class="text-gray-600">Click the button above to add your first task.</p>
+          <p class="text-gray-600">Click the button above to add your first task!</p>
         </div>
       </div>
     </main>
@@ -142,7 +125,7 @@
 
           <div class="flex space-x-3 pt-4">
             <button v-if="editingTodo" type="button" @click="deleteTodo"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 bg-red-500 text-white font-medium hover:bg-red-600 transition-colors ">
               Delete
             </button>
             <button type="button" @click="closeModal"
@@ -150,7 +133,7 @@
               Cancel
             </button>
             <button type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+              class="flex-1 py-3 px-4 rounded-xl bg-blue-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
               {{ editingTodo ? 'Update Task' : 'Add Task' }}
             </button>
           </div>
@@ -390,7 +373,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 .line-through {
   text-decoration: line-through;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
 }
 </style>

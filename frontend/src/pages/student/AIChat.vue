@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -15,34 +15,21 @@
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
       <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+        <div class="rounded-3xl p-8">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
               <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                AI Companion
+                Meet Rohit!
               </h1>
               <p class="text-gray-600 text-lg">
-                Improve your writing and speaking skills with AI-powered suggestions.
+                Improve your writing and speaking skills with your AI-powered assistant.
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-8 shadow-md">
+        <div class="rounded-3xl p-8">
           <div class="tabs">
             <button class="tab" :class="{ 'active': activeTab === 'sentence' }" @click="activeTab = 'sentence'">
               Sentence Improver
@@ -60,7 +47,7 @@
             <div class="form-group">
               <label for="sentence-input">Enter your sentence:</label>
               <textarea id="sentence-input" v-model="sentenceInput" class="form-control" rows="3"
-                placeholder="Example: Yesterday I told her that I have had to go home"></textarea>
+                placeholder="Start typing your sentence here..."></textarea>
             </div>
             <button class="btn" @click="improveSentence" :disabled="loading || !sentenceInput.trim()">
               <span v-if="loading" class="spinner"></span>
@@ -69,19 +56,19 @@
 
             <div v-if="sentenceResults" class="results">
               <div class="result-section">
-                <h3>📝 AI Improved Version</h3>
+                <h3>AI Improved Version :</h3>
                 <div class="improved-text" v-html="formatAIResponse(sentenceResults.ai_improvement)"></div>
               </div>
 
               <div v-if="sentenceResults.issues && sentenceResults.issues.length > 0" class="result-section">
-                <h3>⚠️ Issues Found</h3>
+                <h3>Issues Found</h3>
                 <ul class="issues-list">
                   <li v-for="issue in sentenceResults.issues" :key="issue">{{ issue }}</li>
                 </ul>
               </div>
 
               <div v-if="sentenceResults.suggestions && sentenceResults.suggestions.length > 0" class="result-section">
-                <h3>💡 Suggestions</h3>
+                <h3>Suggestions</h3>
                 <ul class="tips-list">
                   <li v-for="suggestion in sentenceResults.suggestions" :key="suggestion">{{ suggestion }}</li>
                 </ul>
@@ -89,20 +76,10 @@
 
               <div v-if="sentenceResults.speaking_tips && sentenceResults.speaking_tips.length > 0"
                 class="result-section">
-                <h3>🎤 Speaking Tips</h3>
+                <h3>Speaking Tips</h3>
                 <ul class="tips-list">
                   <li v-for="tip in sentenceResults.speaking_tips" :key="tip">{{ tip }}</li>
                 </ul>
-              </div>
-
-              <div class="result-section">
-                <h3>📊 Analysis</h3>
-                <div class="stats">
-                  <div class="stat-item">
-                    <div class="stat-number">{{ sentenceResults.word_count || 0 }}</div>
-                    <div class="stat-label">Words</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -149,13 +126,13 @@
               </div>
 
               <div class="result-section">
-                <h3>🤖 AI Feedback</h3>
+                <h3>AI Feedback</h3>
                 <div class="improved-text" v-html="formatAIResponse(writingResults.ai_feedback)"></div>
               </div>
 
               <div v-if="writingResults.analysis?.issues && writingResults.analysis.issues.length > 0"
                 class="result-section">
-                <h3>⚠️ Issues to Address</h3>
+                <h3>Issues to Address</h3>
                 <ul class="issues-list">
                   <li v-for="issue in writingResults.analysis.issues.slice(0, 5)" :key="issue">{{ issue }}</li>
                 </ul>
@@ -163,7 +140,7 @@
 
               <div v-if="writingResults.analysis?.suggestions && writingResults.analysis.suggestions.length > 0"
                 class="result-section">
-                <h3>💡 Suggestions</h3>
+                <h3>Suggestions</h3>
                 <ul class="tips-list">
                   <li v-for="suggestion in writingResults.analysis.suggestions.slice(0, 5)" :key="suggestion">
                     {{ 
@@ -174,7 +151,7 @@
 
               <div v-if="writingResults.speaking_tips && writingResults.speaking_tips.length > 0"
                 class="result-section">
-                <h3>🎤 Speaking Tips</h3>
+                <h3>Speaking Tips</h3>
                 <ul class="tips-list">
                   <li v-for="tip in writingResults.speaking_tips.slice(0, 4)" :key="tip">{{ tip }}</li>
                 </ul>
@@ -198,18 +175,18 @@
             <div v-if="grammarResults" class="results">
               <!-- Show AI improved text if available -->
               <div v-if="grammarResults.ai_improved_text" class="result-section">
-                <h3>✏️ AI Improved Version</h3>
+                <h3>AI Improved Version :</h3>
                 <div class="improved-text">{{ grammarResults.ai_improved_text }}</div>
               </div>
 
               <!-- Show grammar status -->
               <div v-if="grammarResults.is_correct" class="success">
-                ✅ Great! No major grammar issues found.
+                Great! No major grammar issues found.
               </div>
 
               <!-- Show grammar issues if any -->
               <div v-if="grammarResults.issues && grammarResults.issues.length > 0" class="result-section">
-                <h3>⚠️ Grammar Issues</h3>
+                <h3>Grammar Issues</h3>
                 <ul class="issues-list">
                   <li v-for="issue in grammarResults.issues" :key="issue">{{ issue }}</li>
                 </ul>
@@ -217,7 +194,7 @@
 
               <!-- Show corrections if any -->
               <div v-if="grammarResults.corrections && grammarResults.corrections.length > 0" class="result-section">
-                <h3>✏️ Suggested Corrections</h3>
+                <h3>Suggested Corrections</h3>
                 <div v-for="correction in grammarResults.corrections" :key="correction" class="improved-text">
                   {{ correction }}
                 </div>
@@ -225,7 +202,7 @@
 
               <!-- Show any other feedback -->
               <div v-if="grammarResults.feedback" class="result-section">
-                <h3>💭 Feedback</h3>
+                <h3>Feedback</h3>
                 <div class="improved-text">{{ grammarResults.feedback }}</div>
               </div>
 
@@ -241,7 +218,7 @@
               <div
                 v-if="grammarResults && grammarResults.vocabulary_suggestions && grammarResults.vocabulary_suggestions.length > 0"
                 class="result-section">
-                <h3>📚 Vocabulary Enhancements</h3>
+                <h3>Vocabulary Enhancements</h3>
                 <div v-for="suggestion in grammarResults.vocabulary_suggestions" :key="suggestion.original"
                   class="vocab-suggestion">
                   <strong>"{{ suggestion.original }}"</strong> could be replaced with:
@@ -252,14 +229,14 @@
                   </div>
                 </div>
                 <div class="success" v-if="grammarResults.tip">
-                  💡 {{ grammarResults.tip }}
+                   {{ grammarResults.tip }}
                 </div>
               </div>
 
               <div
                 v-else-if="grammarResults && grammarResults.vocabulary_suggestions && grammarResults.vocabulary_suggestions.length === 0"
                 class="success">
-                ✅ Your vocabulary looks good! No obvious improvements needed.
+                Your vocabulary looks good! No obvious improvements needed.
               </div>
             </div>
           </div>
@@ -267,7 +244,7 @@
 
         <!-- Error Display -->
         <div v-if="error" class="error" style="margin-top: 20px;">
-          ❌ {{ error }}
+          {{ error }}
         </div>
       </div>
     </main>
@@ -322,7 +299,7 @@ const logout = () => {
 
 onMounted(() => {
   // Set example sentence on load
-  sentenceInput.value = 'Yesterday I told her that I have had to go home';
+  sentenceInput.value = '';
 });
 
 const improveSentence = async () => {
@@ -456,6 +433,8 @@ const formatAIResponse = (text) => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 .tabs {
   display: flex;
   border-bottom: 1px solid #e5e7eb;
@@ -473,8 +452,8 @@ const formatAIResponse = (text) => {
 }
 
 .tab.active {
-  color: #4f46e5;
-  border-bottom: 2px solid #4f46e5;
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
 }
 
 .tab-content {
@@ -503,16 +482,16 @@ const formatAIResponse = (text) => {
 
 .form-control:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .btn {
-  background-color: #4f46e5;
+  background-color: #3b82f6;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
@@ -523,7 +502,8 @@ const formatAIResponse = (text) => {
 }
 
 .btn:hover {
-  background-color: #4338ca;
+  background-color: #3a7ce6;
+  cursor: pointer;
 }
 
 .btn:disabled {
@@ -535,8 +515,7 @@ const formatAIResponse = (text) => {
   margin-top: 2rem;
   padding: 1.5rem;
   background-color: #f9fafb;
-  border-radius: 0.5rem;
-  border-left: 4px solid #4f46e5;
+  border-radius: 1rem;
 }
 
 .result-section {
@@ -551,12 +530,10 @@ const formatAIResponse = (text) => {
 }
 
 .improved-text {
-  background-color: #e0e7ff;
+  background-color: #f0f1f3;
   padding: 1rem;
-  border-radius: 0.5rem;
-  border-left: 4px solid #4f46e5;
+  border-radius: 1rem;
   margin: 0.5rem 0;
-  font-style: italic;
   white-space: pre-wrap;
 }
 
@@ -571,7 +548,7 @@ const formatAIResponse = (text) => {
   background-color: white;
   margin: 0.5rem 0;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   border-left: 4px solid #f59e0b;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -591,14 +568,14 @@ const formatAIResponse = (text) => {
   text-align: center;
   padding: 1.5rem;
   background-color: white;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .stat-number {
   font-size: 2rem;
   font-weight: bold;
-  color: #4f46e5;
+  color: #3b82f6;
 }
 
 .stat-label {
@@ -611,7 +588,7 @@ const formatAIResponse = (text) => {
   width: 20px;
   height: 20px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #4f46e5;
+  border-top: 3px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: 0.5rem;
@@ -673,7 +650,7 @@ const formatAIResponse = (text) => {
   padding: 1.5rem;
   margin: 1rem 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid #3b82f6;
 }
 
 .vocab-alternatives {
@@ -687,5 +664,8 @@ const formatAIResponse = (text) => {
   border-radius: 9999px;
   display: inline-block;
   font-size: 0.875rem;
+}
+.font-playfair {
+  font-family: 'Playfair Display', serif;
 }
 </style>

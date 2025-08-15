@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -14,31 +14,18 @@
     </aside>
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
-      <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+      <div class="max-w-7xl ml-6">
+        <div class="bg-rounded-3xl mb-10">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
               <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                Lesson Updates 📚
+                My Lesson Updates
               </h1>
               <p class="text-lg text-gray-600 font-medium">
                 You have <span class="text-blue-500 font-bold">{{ lessons.length }}</span> updates from
                 <span class="text-green-500 font-bold">{{ uniqueTeachers.length }}</span> teachers.
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
@@ -67,7 +54,7 @@
         <div v-if="!isLoading && !errorMessage && lessons.length > 0"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="lesson in lessons" :key="lesson.lesson_id"
-            class="bg-white rounded-3xl p-6 shadow-lg border-2 border-gray-200 transition-transform hover:scale-102 cursor-default">
+            class="bg-white rounded-3xl p-6 shadow-lg border-1 border-gray-200 transition-transform hover:scale-102 cursor-default">
             <!-- Header -->
             <div class="flex items-center mb-4">
               <div class="text-3xl mr-3">{{ getEmojiForSubject(lesson.subject) }}</div>
@@ -214,3 +201,10 @@ onMounted(async () => {
   await fetchLessonUpdates()
 })
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+</style>

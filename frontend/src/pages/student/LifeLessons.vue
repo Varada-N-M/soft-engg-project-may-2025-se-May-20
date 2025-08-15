@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -14,12 +14,12 @@
     </aside>
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
-      <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+      <div class="max-w-7xl ml-5">
+        <div class="rounded-3xl p-8 mb-8">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
-              <h1 class="text-4xl font-bold text-gray-900 mb-2">Life Lessons 💡</h1>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">Life Lessons</h1>
               <p class="text-lg text-gray-600 font-medium">
                 You’ve completed
                 <span class="text-green-500 font-bold">{{ completedLessons.length }}</span>
@@ -27,19 +27,6 @@
                 <span class="text-blue-500 font-bold">{{ lifeLessons.length }}</span>
                 lessons!
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
@@ -52,7 +39,7 @@
 
         <!-- Error -->
         <div v-else-if="error" class="text-center py-20">
-          <div class="text-6xl mb-4">⚠️</div>
+          <div class="text-6xl mb-4"></div>
           <h2 class="text-2xl font-bold text-red-600 mb-2">Error Loading Lessons</h2>
           <p class="text-gray-600 mb-4">{{ error }}</p>
           <button @click="fetchLifeLessons"
@@ -64,24 +51,24 @@
         <!-- Lessons -->
         <div v-else>
           <!-- To Complete -->
-          <section v-if="pendingLessons.length > 0" class="mb-12">
+          <section v-if="pendingLessons.length > 0" class="mb-12 ml-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              🚀 Lessons To Complete
+              Lessons To Complete
               <span class="ml-2 text-sm text-gray-500 font-normal">({{ pendingLessons.length }})</span>
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               <LifeLessonCard v-for="lesson in pendingLessons" :key="lesson.id" :lesson="lesson"
                 @lesson-completed="markLessonAsComplete" />
             </div>
           </section>
 
           <!-- Completed -->
-          <section v-if="completedLessons.length > 0">
+          <section v-if="completedLessons.length > 0" class="ml-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              ✅ Completed Lessons
+              Completed Lessons
               <span class="ml-2 text-sm text-gray-500 font-normal">({{ completedLessons.length }})</span>
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               <LifeLessonCard v-for="lesson in completedLessons" :key="lesson.id" :lesson="lesson" />
             </div>
           </section>
@@ -177,3 +164,10 @@ onMounted(() => {
   fetchLifeLessons()
 })
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+</style>

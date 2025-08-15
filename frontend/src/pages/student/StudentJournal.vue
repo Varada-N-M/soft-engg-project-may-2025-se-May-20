@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex font-playfair">
     <aside
       class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
       <div class="mb-8">
@@ -15,27 +15,14 @@
 
     <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
       <div class="max-w-7xl ml-3">
-        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+        <div class="rounded-3xl p-8 mb-8">
           <div class="flex flex-wrap items-center justify-between gap-6">
             <!-- Greeting Text (Left Side) -->
             <div class="flex-1 min-w-max font-playfair">
-              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Learning Journal 📝</h1>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Journal</h1>
               <p class="text-lg text-gray-600 font-medium">
                 Reflect on your progress and capture your thoughts.
               </p>
-            </div>
-
-            <!-- Buttons (Right Side - Horizontal Row) -->
-            <div class="flex space-x-4 min-w-fit font-playfair">
-              <router-link to="/student/profile"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
-                Profile
-              </router-link>
-
-              <button @click="logout"
-                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
-                Logout
-              </button>
             </div>
           </div>
         </div>
@@ -43,8 +30,7 @@
         <!-- Show "New Entry" button only if logged in -->
         <div v-if="isLoggedIn" class="flex justify-center mb-8">
           <button @click="openCreateModal"
-            class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-101 transition-all duration-200 flex items-center">
-            <span class="text-xl mr-2">➕</span>
+            class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-102 transition-all duration-200 flex items-center">
             New Journal Entry
           </button>
         </div>
@@ -71,18 +57,17 @@
 
         <div v-else-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="entry in journalEntries" :key="entry.id" @click="openEditModal(entry)"
-            class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-102 cursor-pointer flex flex-col justify-between">
+            class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-101 cursor-pointer flex flex-col justify-between">
             <div>
-              <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>
-              <p class="text-sm text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
+              <p class="font-bold text-lg text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
+              <h3 class="text-gray-800 text-sm mb-2">Date: {{ formatDate(entry.date) }}</h3>
+
             </div>
           </div>
         </div>
 
         <!-- Empty journal (logged in but no entries) -->
         <div v-else class="text-center py-20">
-          <div class="text-6xl mb-4">📖</div>
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Journal is Empty</h2>
           <p class="text-gray-600">Start writing to capture your thoughts and ideas!</p>
         </div>
       </div>
@@ -112,15 +97,15 @@
 
           <div class="flex space-x-3 pt-4">
             <button v-if="editingEntry" type="button" @click="deleteEntry"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-white bg-red-500 font-medium hover:bg-red-600 transition-colors cursor-pointer">
               Delete
             </button>
             <button type="button" @click="closeModal"
-              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer">
               Cancel
             </button>
             <button type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+              class="flex-1 py-3 px-4 rounded-xl bg-blue-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
               {{ editingEntry ? 'Update Entry' : 'Save Entry' }}
             </button>
           </div>
@@ -328,10 +313,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 .line-clamp-4 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
 }
 </style>

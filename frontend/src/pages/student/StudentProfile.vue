@@ -1,8 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50 p-8">
     <header class="max-w-4xl mx-auto mb-8 text-center">
-      <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <router-link to="/student/home"
+        class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Back to Dashboard
@@ -19,7 +21,8 @@
       </div>
       <div v-else class="space-y-6">
         <div class="flex items-center space-x-6 pb-6 border-b border-gray-100">
-          <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-5xl font-bold text-blue-600 shadow-inner">
+          <div
+            class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-5xl font-bold text-blue-600 shadow-inner">
             {{ getInitials(profile.first_name, profile.last_name) }}
           </div>
           <div>
@@ -30,6 +33,13 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-yellow-50 rounded-2xl p-5 flex items-center space-x-4 shadow-sm border border-yellow-200">
+            <div class="text-4xl">🗝</div>
+            <div>
+              <p class="text-sm text-yellow-700 font-medium">Your Key</p>
+              <p class="text-3xl font-bold text-yellow-800">{{ profile.unique_key }}</p>
+            </div>
+          </div>
           <div class="bg-yellow-50 rounded-2xl p-5 flex items-center space-x-4 shadow-sm border border-yellow-200">
             <div class="text-4xl">✨</div>
             <div>

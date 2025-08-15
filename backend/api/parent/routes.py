@@ -430,7 +430,7 @@ class ChildBadgesAPI(Resource):
             badges_data = []
             for badge in badges:
                 badges_data.append({
-                    'badge_id': badge.badge_id,
+                    'badge_id': badge.id,
                     'badge_name': badge.badge,
                     'description': f"Earned {badge.badge} at level {badge.level}",
                     'badge_type': 'achievement',
@@ -483,13 +483,12 @@ class ChildTodosAPI(Resource):
             todos_data = []
             for todo in todos:
                 todos_data.append({
-                    'todo_id': todo.todo_id,
+                    'todo_id': todo.list_id,
                     'to_do': todo.to_do,
                     'description': todo.description,
                     'is_done': todo.is_done,
                     'is_daily': todo.is_daily,
                     'created_at': todo.created_at.isoformat(),
-                    'updated_at': todo.updated_at.isoformat() if todo.updated_at else None
                 })
 
             return {'todos': todos_data}, 200

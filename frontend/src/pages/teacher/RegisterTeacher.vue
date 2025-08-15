@@ -1,25 +1,17 @@
 <template>
-  <div class="bg-gradient-to-br from-blue-400 via-purple-400 to-teal-300">
+  <div class="min-h-screen bg-gray-50">
     <GuestNavbar/>
-    <div
-        class="min-h-screen  flex items-center justify-center p-4">
-      <!-- Floating decorative elements -->
-      <FloatingDecorativeElements/>
-
+    <div class="flex items-center justify-center p-4 pt-16">
       <div class="w-full max-w-2xl">
         <!-- Main registration card -->
-        <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-          <!-- Decorative top wave -->
-          <div
-              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-3xl"></div>
-
+        <Card class="bg-white border shadow-sm p-8">
           <!-- App logo and title -->
-          <div class="relative z-10 text-center  pt-4">
-            <div
-                class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <GraduationCapIcon class="w-10 h-10 text-white"/>
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-slate-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+              <GraduationCapIcon class="w-8 h-8 text-white"/>
             </div>
-            <p class="text-gray-600 text-sm">Join Our Teaching Community - Create Your Teacher Account</p>
+            <h1 class="text-2xl font-semibold text-gray-900 mb-2">Create Teacher Account</h1>
+            <p class="text-gray-600 text-sm">Join our teaching community</p>
           </div>
 
           <!-- Response Alert -->
@@ -35,26 +27,26 @@
 
           <!-- Role Toggle -->
           <div class="mb-6">
-            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-full p-1">
+            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-lg p-1">
               <button
                   type="button"
                   @click="formData.role = 'teacher'"
                   :class="formData.role === 'teacher' 
-                    ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'text-gray-600 hover:text-blue-600'"
-                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200"
               >
-                👨‍🏫 Teacher
+                Teacher
               </button>
               <button
                   type="button"
                   @click="formData.role = 'principal'"
                   :class="formData.role === 'principal' 
-                    ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'text-gray-600 hover:text-blue-600'"
-                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200"
               >
-                👑 Principal
+                Admin Teacher
               </button>
             </div>
           </div>
@@ -63,59 +55,62 @@
           <form @submit.prevent="handleSubmit" class="space-y-5">
             <!-- Name Fields -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👤 First Name *
+              <div class="space-y-2">
+                <label for="firstName" class="block text-sm font-medium text-gray-700">
+                  First Name *
                 </label>
                 <Input
                     id="firstName"
                     v-model="formData.first_name"
                     type="text"
                     placeholder="Your first name"
+                    class="h-10"
                     :class="getInputClasses('first_name')"
                     required
                 />
-                <p v-if="errors.first_name" class="text-xs text-red-500 mt-1">{{ errors.first_name }}</p>
+                <p v-if="allErrors.first_name" class="text-xs text-red-500">{{ allErrors.first_name }}</p>
               </div>
 
-              <div>
-                <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👤 Last Name *
+              <div class="space-y-2">
+                <label for="lastName" class="block text-sm font-medium text-gray-700">
+                  Last Name *
                 </label>
                 <Input
                     id="lastName"
                     v-model="formData.last_name"
                     type="text"
                     placeholder="Your last name"
+                    class="h-10"
                     :class="getInputClasses('last_name')"
                     required
                 />
-                <p v-if="errors.last_name" class="text-xs text-red-500 mt-1">{{ errors.last_name }}</p>
+                <p v-if="allErrors.last_name" class="text-xs text-red-500">{{ allErrors.last_name }}</p>
               </div>
             </div>
 
             <!-- Email -->
-            <div>
-              <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                📧 Email Address *
+            <div class="space-y-2">
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email Address *
               </label>
               <Input
                   id="email"
                   v-model="formData.email"
                   type="email"
                   placeholder="your.email@school.edu"
+                  class="h-10"
                   :class="getInputClasses('email')"
                   required
               />
-              <p class="text-xs text-gray-500 mt-1">This will be your login email</p>
-              <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
+              <p class="text-xs text-gray-500">This will be your login email</p>
+              <p v-if="allErrors.email" class="text-xs text-red-500">{{ allErrors.email }}</p>
             </div>
 
             <!-- Subject and School -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">
-                  📚 Subject *
+              <div class="space-y-2">
+                <label for="subject" class="block text-sm font-medium text-gray-700">
+                  Subject *
                 </label>
                 <Select
                     id="subject"
@@ -123,26 +118,26 @@
                     :class="getInputClasses('subject')"
                     required
                 >
-                  <SelectTrigger class="w-full">
+                  <SelectTrigger class="w-full h-10">
                     <SelectValue placeholder="Select your subject"></SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Math">🔢 Mathematics</SelectItem>
-                    <SelectItem value="English">📖 English</SelectItem>
-                    <SelectItem value="Science">🔬 Science</SelectItem>
-                    <SelectItem value="Social Studies">🌍 Social Studies</SelectItem>
-                    <SelectItem value="Computers">💻 Computer Science</SelectItem>
-                    <SelectItem value="Art">🎨 Art</SelectItem>
-                    <SelectItem value="Music">🎵 Music</SelectItem>
-                    <SelectItem value="Physical Education">⚽ Physical Education</SelectItem>
+                    <SelectItem value="Math">Mathematics</SelectItem>
+                    <SelectItem value="English">English</SelectItem>
+                    <SelectItem value="Science">Science</SelectItem>
+                    <SelectItem value="Social Studies">Social Studies</SelectItem>
+                    <SelectItem value="Computers">Computer Science</SelectItem>
+                    <SelectItem value="Art">Art</SelectItem>
+                    <SelectItem value="Music">Music</SelectItem>
+                    <SelectItem value="Physical Education">Physical Education</SelectItem>
                   </SelectContent>
                 </Select>
-                <p v-if="errors.subject" class="text-xs text-red-500 mt-1">{{ errors.subject }}</p>
+                <p v-if="allErrors.subject" class="text-xs text-red-500">{{ allErrors.subject }}</p>
               </div>
 
-              <div>
-                <label for="school" class="block text-sm font-semibold text-gray-700 mb-2">
-                  🏫 School *
+              <div class="space-y-2">
+                <label for="school" class="block text-sm font-medium text-gray-700">
+                  School *
                 </label>
                 
                 <!-- Teacher: Select from existing schools -->
@@ -153,7 +148,7 @@
                     :class="getInputClasses('school_id')"
                     required
                 >
-                  <SelectTrigger class="w-full">
+                  <SelectTrigger class="w-full h-10">
                     <SelectValue placeholder="Select your school"></SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -172,12 +167,13 @@
                 </Select>
                 
                 <!-- Principal: Enter new school name -->
-                <div v-else class="space-y-2">
+                <div v-else class="space-y-3">
                   <Input
                       id="school_name"
                       v-model="formData.school_name"
                       type="text"
                       placeholder="Enter your school name"
+                      class="h-10"
                       :class="getInputClasses('school_name')"
                       required
                   />
@@ -186,6 +182,7 @@
                       v-model="formData.school_address"
                       type="text"
                       placeholder="School address (optional)"
+                      class="h-10"
                       :class="getInputClasses('school_address')"
                   />
                   <Input
@@ -193,21 +190,22 @@
                       v-model="formData.school_phone"
                       type="tel"
                       placeholder="School phone number (optional)"
+                      class="h-10"
                       :class="getInputClasses('school_phone')"
                   />
                 </div>
                 
-                <p v-if="formData.role === 'teacher'" class="text-xs text-gray-500 mt-1">Select the school you work at</p>
-                <p v-else class="text-xs text-gray-500 mt-1">Enter the name of your school to create it</p>
-                <p v-if="errors.school_id" class="text-xs text-red-500 mt-1">{{ errors.school_id }}</p>
-                <p v-if="errors.school_name" class="text-xs text-red-500 mt-1">{{ errors.school_name }}</p>
+                <p v-if="formData.role === 'teacher'" class="text-xs text-gray-500">Select the school you work at</p>
+                <p v-else class="text-xs text-gray-500">Enter the name of your school to create it</p>
+                <p v-if="allErrors.school_id" class="text-xs text-red-500">{{ allErrors.school_id }}</p>
+                <p v-if="allErrors.school_name" class="text-xs text-red-500">{{ allErrors.school_name }}</p>
               </div>
             </div>
 
             <!-- Password -->
-            <div>
-              <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                🔒 Password *
+            <div class="space-y-2">
+              <label for="password" class="block text-sm font-medium text-gray-700">
+                Password *
               </label>
               <div class="relative">
                 <Input
@@ -215,6 +213,7 @@
                     v-model="formData.password"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Create a strong password"
+                    class="h-10 pr-10"
                     :class="getInputClasses('password')"
                     required
                 />
@@ -223,11 +222,11 @@
                     @click="showPassword = !showPassword"
                     class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  <EyeIcon v-if="showPassword" class="w-5 h-5"/>
-                  <EyeOffIcon v-else class="w-5 h-5"/>
+                  <EyeIcon v-if="showPassword" class="w-4 h-4"/>
+                  <EyeOffIcon v-else class="w-4 h-4"/>
                 </button>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+              <p v-if="allErrors.password" class="text-xs text-red-500">{{ allErrors.password }}</p>
 
               <!-- Password strength indicator -->
               <div v-if="formData.password" class="mt-2">
@@ -246,29 +245,29 @@
             </div>
 
             <!-- Role info section -->
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
-              <h4 class="font-semibold text-gray-800 mb-2 flex items-center justify-center">
-                🌟 As a {{ formData.role === 'principal' ? 'Principal' : 'Teacher' }}, You'll Be Able To:
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h4 class="font-medium text-gray-900 mb-3 text-center">
+                As a {{ formData.role === 'principal' ? 'Principal' : 'Teacher' }}, you'll be able to:
               </h4>
-              <div class="grid grid-cols-2 gap-2 text-xs text-gray-700">
+              <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
                 <div class="flex items-center">
-                  <span class="text-blue-500 mr-1">✓</span>
+                  <span class="text-slate-600 mr-2">✓</span>
                   Manage lesson updates
                 </div>
                 <div class="flex items-center">
-                  <span class="text-blue-500 mr-1">✓</span>
+                  <span class="text-slate-600 mr-2">✓</span>
                   Track student progress
                 </div>
                 <div class="flex items-center">
-                  <span class="text-blue-500 mr-1">✓</span>
+                  <span class="text-slate-600 mr-2">✓</span>
                   Add and manage students
                 </div>
                 <div v-if="formData.role === 'principal'" class="flex items-center">
-                  <span class="text-blue-500 mr-1">✓</span>
+                  <span class="text-slate-600 mr-2">✓</span>
                   Manage teachers
                 </div>
                 <div class="flex items-center">
-                  <span class="text-blue-500 mr-1">✓</span>
+                  <span class="text-slate-600 mr-2">✓</span>
                   View survey reports
                 </div>
               </div>
@@ -278,13 +277,13 @@
             <Button
                 type="submit"
                 :disabled="isLoading || !isFormValid"
-                class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-4 px-4 rounded-xl hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
+                class="w-full bg-slate-900 text-white font-medium py-2.5 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              🎓 Create Teacher Account!
+              Create Account
             </span>
               <span v-else class="flex items-center justify-center">
-              <Loader class="animate-spin mr-2"/>
+              <Loader class="animate-spin mr-2 w-4 h-4"/>
               Creating Account...
             </span>
             </Button>
@@ -296,7 +295,7 @@
               Already have an account?
               <router-link
                   to="/teacher/login"
-                  class="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                  class="font-medium text-slate-900 hover:text-slate-700 transition-colors"
               >
                 Sign in here
               </router-link>
@@ -305,14 +304,12 @@
 
           <sign-in-links active-link="teacher"/>
 
-          <emoji-bounce-animation :emojis="['🎓','📚','👨‍🏫','⭐']"/>
-
         </Card>
 
         <!-- Footer text -->
         <div class="text-center mt-6">
-          <p class="text-white text-sm opacity-80">
-            Ready to inspire and educate young minds? 🌟
+          <p class="text-gray-600 text-sm">
+            Ready to inspire and educate young minds?
           </p>
         </div>
       </div>
@@ -329,9 +326,7 @@ import axios from '@/plugins/axios.js'
 import {Input} from "@/components/ui/input/index.js";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select/index.js";
 import {Button} from "@/components/ui/button/index.js";
-import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import SignInLinks from "@/components/partials/SignInLinks.vue";
-import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
 import {Card} from "@/components/ui/card/index.js";
 import GuestNavbar from "@/components/app/GuestNavbar.vue";
 
@@ -384,22 +379,63 @@ const passwordStrengthTextColor = computed(() => {
   return colors[strength] || colors[0]
 })
 
+// Real-time validation errors
+const realTimeErrors = computed(() => {
+  const errors = {}
+  
+  if (formData.value.email && !/\S+@\S+\.\S+/.test(formData.value.email)) {
+    errors.email = 'Email is invalid'
+  }
+  
+  if (formData.value.password && formData.value.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
+  }
+  
+  // Role-specific validation
+  if (formData.value.role === 'teacher') {
+    if (formData.value.school_id && (formData.value.school_id === 'loading' || formData.value.school_id === 'no-schools')) {
+      errors.school_id = 'Please select a valid school'
+    }
+  } else {
+    if (formData.value.school_name && formData.value.school_name.length === 0) {
+      errors.school_name = 'School name is required'
+    }
+  }
+  
+  return errors
+})
+
+// Combined errors (server errors + real-time errors)
+const allErrors = computed(() => {
+  return { ...errors.value, ...realTimeErrors.value }
+})
+
 const isFormValid = computed(() => {
-  const baseValid = formData.value.first_name &&
+  // Check if all required fields are filled
+  const hasAllFields = formData.value.first_name &&
       formData.value.last_name &&
       formData.value.email &&
       formData.value.subject &&
-      formData.value.password &&
-      passwordStrength.value >= 2 &&
-      Object.keys(errors.value).length === 0
+      formData.value.password
   
+  if (!hasAllFields) return false
+  
+  // Check password strength
+  if (passwordStrength.value < 2) return false
+  
+  // Check password length
+  if (formData.value.password.length < 6) return false
+  
+  // Check email validity
+  if (!/\S+@\S+\.\S+/.test(formData.value.email)) return false
+  
+  // Role-specific validation
   if (formData.value.role === 'teacher') {
-    return baseValid &&
-        formData.value.school_id &&
+    return formData.value.school_id &&
         formData.value.school_id !== 'loading' &&
         formData.value.school_id !== 'no-schools'
   } else {
-    return baseValid && formData.value.school_name
+    return formData.value.school_name && formData.value.school_name.length > 0
   }
 })
 
@@ -421,8 +457,8 @@ const getPasswordStrengthColor = (index) => {
 }
 
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-blue-400'
-  const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
+  const baseClasses = 'focus:border-slate-400 focus:ring-slate-400'
+  const errorClasses = allErrors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
   return `${baseClasses} ${errorClasses}`
 }
 
@@ -523,6 +559,8 @@ watch(formData, (newData, oldData) => {
   Object.keys(newData).forEach(key => {
     if (newData[key] !== oldData[key] && errors.value[key]) {
       delete errors.value[key]
+      // Force reactivity update
+      errors.value = { ...errors.value }
     }
   })
 }, {deep: true})

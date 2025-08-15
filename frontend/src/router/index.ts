@@ -36,6 +36,7 @@ import TeacherProfile from "../pages/teacher/TeacherProfile.vue";
 import TeacherStudents from "../pages/teacher/TeacherStudents.vue";
 import StudentProgress from "../pages/teacher/StudentProgress.vue";
 import ClassAnalytics from "../pages/teacher/ClassAnalytics.vue";
+import PrincipalReports from "../pages/teacher/PrincipalReports.vue";
 import ChildProgress from "../pages/parent/ChildProgress.vue";
 import Achievements from "../pages/parent/Achievements.vue";
 import NotFound from "../pages/NotFound.vue";
@@ -101,6 +102,7 @@ const routes = [
     {path: '/teacher/add-student', component: AddStudent},
     {path: '/teacher/student-progress/:studentId', component: StudentProgress},
     {path: '/teacher/class-analytics', component: ClassAnalytics},
+    {path: '/teacher/principal-reports', component: PrincipalReports},
     // END TEACHER SECTION
 
     // 404 Catch-all route - must be last

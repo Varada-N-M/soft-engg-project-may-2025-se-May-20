@@ -25,8 +25,8 @@
               <logo/>
             </h1>
             <h2 class="text-4xl md:text-6xl leading-20 font-medium">
-              The best place to <span class="italic text-yellow-500  tilt-left-2 creative-underline">learn</span> & <br>
-              <span class="italic text-blue-600 creative-underline tilt-right-1">play</span>
+              The best place to <span class="italic font-fancy text-yellow-500  tilt-left-2 creative-underline">learn</span> & <br>
+              <span class="italic font-fancy text-blue-600 creative-underline tilt-right-1">play</span>
               for your Kids
             </h2>
 

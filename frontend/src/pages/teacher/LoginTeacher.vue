@@ -1,25 +1,17 @@
 <template>
-  <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-400">
+  <div class="min-h-screen bg-gray-50">
     <GuestNavbar/>
-    <div
-        class="min-h-screen  flex items-center justify-center p-4">
-      <!-- Floating decorative elements -->
-      <FloatingDecorativeElements/>
-
+    <div class="flex items-center justify-center p-4 pt-16">
       <div class="w-full max-w-md">
         <!-- Main login card -->
-        <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-          <!-- Decorative top wave -->
-          <div
-              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-3xl"></div>
-
+        <Card class="bg-white border shadow-sm p-8">
           <!-- App logo and title -->
-          <div class="relative z-10 text-center pt-4">
-            <div
-                class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <GraduationCapIcon class="w-10 h-10 text-white"/>
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-slate-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+              <GraduationCapIcon class="w-8 h-8 text-white"/>
             </div>
-            <p class="text-gray-600 text-sm">Teacher Portal - Inspire & Educate</p>
+            <h1 class="text-2xl font-semibold text-gray-900 mb-2">Teacher Portal</h1>
+            <p class="text-gray-600 text-sm">Sign in to your account</p>
           </div>
 
           <!-- Response Alert -->
@@ -35,26 +27,26 @@
 
           <!-- Role Toggle -->
           <div class="mb-6">
-            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-full p-1">
+            <div class="flex items-center justify-center space-x-1 bg-gray-100 rounded-lg p-1">
               <button
                   type="button"
                   @click="formData.role = 'teacher'"
                   :class="formData.role === 'teacher' 
-                    ? 'bg-indigo-600 text-white shadow-sm' 
-                    : 'text-gray-600 hover:text-indigo-600'"
-                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200"
               >
-                👨‍🏫 Teacher
+                Teacher
               </button>
               <button
                   type="button"
                   @click="formData.role = 'principal'"
                   :class="formData.role === 'principal' 
-                    ? 'bg-indigo-600 text-white shadow-sm' 
-                    : 'text-gray-600 hover:text-indigo-600'"
-                  class="flex-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'"
+                  class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200"
               >
-                👑 Principal
+                Admin Teacher
               </button>
             </div>
           </div>
@@ -63,34 +55,34 @@
           <form @submit.prevent="handleLogin" class="space-y-6">
             <div class="space-y-4">
               <!-- Username/Email field -->
-              <div class="relative">
-                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👨‍🏫 Email Address
+              <div class="space-y-2">
+                <label for="email" class="block text-sm font-medium text-gray-700">
+                  Email Address
                 </label>
                 <Input
                     id="email"
                     v-model="formData.email"
                     type="email"
-                    placeholder="Enter your professional email"
-                    class="w-full px-4 py-6 border-2 placeholder-gray-400 text-lg"
+                    placeholder="Enter your email"
+                    class="w-full h-10"
                     :class="getInputClasses('email')"
                     required
                 />
-                <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
+                <p v-if="errors.email" class="text-xs text-red-500">{{ errors.email }}</p>
               </div>
 
               <!-- Password field -->
-              <div class="relative">
-                <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                  🔐 Password
+              <div class="space-y-2">
+                <label for="password" class="block text-sm font-medium text-gray-700">
+                  Password
                 </label>
                 <div class="relative">
                   <Input
                       id="password"
                       v-model="formData.password"
                       :type="showPassword ? 'text' : 'password'"
-                      placeholder="Enter your secure password"
-                      class="w-full px-4 py-6 border-2  pr-12 text-lg"
+                      placeholder="Enter your password"
+                      class="w-full h-10 pr-10"
                       :class="getInputClasses('password')"
                       required
                   />
@@ -99,11 +91,11 @@
                       @click="showPassword = !showPassword"
                       class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                   >
-                    <EyeIcon v-if="showPassword" class="w-5 h-5"/>
-                    <EyeOffIcon v-else class="w-5 h-5"/>
+                    <EyeIcon v-if="showPassword" class="w-4 h-4"/>
+                    <EyeOffIcon v-else class="w-4 h-4"/>
                   </button>
                 </div>
-                <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+                <p v-if="errors.password" class="text-xs text-red-500">{{ errors.password }}</p>
               </div>
             </div>
 
@@ -111,7 +103,7 @@
             <div class="flex justify-end">
               <router-link 
                 to="/user/password/reset" 
-                class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                class="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
               >
                 Forgot your password?
               </router-link>
@@ -121,14 +113,14 @@
             <button
                 type="submit"
                 :disabled="isLoading"
-                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg"
+                class="w-full bg-slate-900 text-white font-medium py-2.5 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
             <span v-if="!isLoading" class="flex items-center justify-center">
-                Login
+                Sign In
             </span>
               <span v-else class="flex items-center justify-center">
-               <Loader class="animate-spin mr-2"/>
-              Authenticating...
+               <Loader class="animate-spin mr-2 w-4 h-4"/>
+              Signing in...
             </span>
             </button>
           </form>
@@ -136,26 +128,21 @@
           <!-- Sign up link -->
           <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-              New educator at
-              <logo/>
-              ?
-              <a href="/teacher/register" class="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
-                Join our faculty
+              New to the platform?
+              <a href="/teacher/register" class="font-medium text-slate-900 hover:text-slate-700 transition-colors">
+                Create an account
               </a>
             </p>
           </div>
 
           <!-- Other login types -->
           <sign-in-links active-link="teacher"/>
-
-          <!-- Professional elements at bottom -->
-          <emoji-bounce-animation :emojis="['📖','🎓','✏️','🏅']"/>
         </Card>
 
         <!-- Footer text -->
         <div class="text-center mt-6">
-          <p class="text-white text-sm opacity-80">
-            Empowering minds, shaping futures with EduMaster! 🌟
+          <p class="text-gray-600 text-sm">
+            Empowering education through technology
           </p>
         </div>
       </div>
@@ -171,10 +158,7 @@ import {useRouter} from 'vue-router'
 import {AlertCircleIcon, CheckCircleIcon, EyeIcon, EyeOffIcon, GraduationCapIcon, Loader} from 'lucide-vue-next'
 import axios from '@/plugins/axios.js'
 import SignInLinks from "@/components/partials/SignInLinks.vue";
-import Logo from "@/components/partials/Logo.vue";
-import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import {Input} from "@/components/ui/input/index.js";
-import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
 import {Card} from "@/components/ui/card/index.js";
 import GuestNavbar from "@/components/app/GuestNavbar.vue";
 
@@ -193,7 +177,6 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 const response = ref(null)
 const errors = ref({})
-const showHelp = ref(false)
 
 // Computed properties
 const alertClasses = computed(() => {
@@ -205,8 +188,8 @@ const alertClasses = computed(() => {
 
 // Methods
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-indigo-400'
-  const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
+  const baseClasses = 'focus:border-slate-400 focus:ring-slate-400'
+  const errorClasses = errors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
   return `${baseClasses} ${errorClasses}`
 }
 
@@ -256,9 +239,13 @@ const handleLogin = async () => {
         message: apiResponse.data.message || 'Welcome back, educator! Ready to inspire? 🎓'
       }
 
-      // Redirect to teacher dashboard after a short delay
+      // Redirect based on role after a short delay
       setTimeout(() => {
-        router.push('/teacher/dashboard')
+        if (formData.value.role === 'principal') {
+          router.push('/teacher/principal-reports')
+        } else {
+          router.push('/teacher/dashboard')
+        }
       }, 500)
     }
   } catch (error) {

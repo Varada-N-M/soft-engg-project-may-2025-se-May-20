@@ -608,7 +608,6 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
   background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 25%, #0077b6 50%, #7209b7 75%, #a663cc 100%);
   min-height: 100vh;
   position: relative;

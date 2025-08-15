@@ -1,44 +1,17 @@
 <template>
-  <div class="bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-300">
+  <div class="min-h-screen bg-gray-50">
     <GuestNavbar/>
-    <div
-        class="min-h-screen  flex items-center justify-center p-4">
-      <!-- Floating decorative elements -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-16 left-8 w-14 h-14 bg-yellow-300 rounded-full opacity-60 animate-bounce"></div>
-        <div
-            class="absolute top-32 right-16 w-18 h-18 bg-green-300 rounded-full opacity-60 animate-bounce"
-            style="animation-delay: 0.3s"
-        ></div>
-        <div
-            class="absolute bottom-40 left-16 w-16 h-16 bg-orange-300 rounded-full opacity-60 animate-bounce"
-            style="animation-delay: 0.8s"
-        ></div>
-        <div
-            class="absolute bottom-24 right-12 w-12 h-12 bg-cyan-300 rounded-full opacity-60 animate-bounce"
-            style="animation-delay: 1.2s"
-        ></div>
-        <div
-            class="absolute top-1/2 left-4 w-10 h-10 bg-red-300 rounded-full opacity-60 animate-bounce"
-            style="animation-delay: 1.8s"
-        ></div>
-      </div>
-
+    <div class="flex items-center justify-center p-4 pt-16">
       <div class="w-full max-w-lg">
         <!-- Main registration card -->
-        <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-          <!-- Decorative top wave -->
-          <div
-              class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-3xl"></div>
-
+        <Card class="bg-white border shadow-sm p-8">
           <!-- App logo and title -->
-          <div class="relative z-10 text-center mb-6 pt-4">
-            <div
-                class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <HeartIcon class="w-10 h-10 text-white"/>
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-slate-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+              <HeartIcon class="w-8 h-8 text-white"/>
             </div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Join as a Parent!</h1>
-            <p class="text-gray-600 text-sm">Create your account and support your child's learning journey!</p>
+            <h1 class="text-2xl font-semibold text-gray-900 mb-2">Create Parent Account</h1>
+            <p class="text-gray-600 text-sm">Join our parent community</p>
           </div>
 
           <!-- Response Alert -->
@@ -56,75 +29,79 @@
           <form @submit.prevent="handleSubmit" class="space-y-5">
             <!-- Name Fields -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="firstName" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👤 First Name *
+              <div class="space-y-2">
+                <label for="firstName" class="block text-sm font-medium text-gray-700">
+                  First Name *
                 </label>
                 <Input
                     id="firstName"
                     v-model="formData.first_name"
                     type="text"
                     placeholder="Your first name"
+                    class="h-10"
                     :class="getInputClasses('first_name')"
                     required
                 />
-                <p v-if="errors.first_name" class="text-xs text-red-500 mt-1">{{ errors.first_name }}</p>
+                <p v-if="allErrors.first_name" class="text-xs text-red-500">{{ allErrors.first_name }}</p>
               </div>
 
-              <div>
-                <label for="lastName" class="block text-sm font-semibold text-gray-700 mb-2">
-                  👤 Last Name *
+              <div class="space-y-2">
+                <label for="lastName" class="block text-sm font-medium text-gray-700">
+                  Last Name *
                 </label>
                 <Input
                     id="lastName"
                     v-model="formData.last_name"
                     type="text"
                     placeholder="Your last name"
+                    class="h-10"
                     :class="getInputClasses('last_name')"
                     required
                 />
-                <p v-if="errors.last_name" class="text-xs text-red-500 mt-1">{{ errors.last_name }}</p>
+                <p v-if="allErrors.last_name" class="text-xs text-red-500">{{ allErrors.last_name }}</p>
               </div>
             </div>
 
             <!-- Email -->
-            <div>
-              <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                📧 Email Address *
+            <div class="space-y-2">
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email Address *
               </label>
               <Input
                   id="email"
                   v-model="formData.email"
                   type="email"
                   placeholder="your.email@example.com"
+                  class="h-10"
                   :class="getInputClasses('email')"
                   required
               />
-              <p class="text-xs text-gray-500 mt-1">This will be your login email and where we'll send updates</p>
-              <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
+              <p class="text-xs text-gray-500">This will be your login email</p>
+              <p v-if="allErrors.email" class="text-xs text-red-500">{{ allErrors.email }}</p>
             </div>
 
             <!-- Phone Number -->
-            <div>
-              <label for="phoneNumber" class="block text-sm font-semibold text-gray-700 mb-2">
-                📱 Phone Number *
+            <div class="space-y-2">
+              <label for="phoneNumber" class="block text-sm font-medium text-gray-700">
+                Phone Number *
               </label>
               <Input
                   id="phoneNumber"
                   v-model="formData.phone_number"
                   type="tel"
                   placeholder="1234567890"
+                  class="h-10"
                   :class="getInputClasses('phone_number')"
                   required
               />
-              <p class="text-xs text-gray-500 mt-1">We'll use this for important notifications about your child</p>
-              <p v-if="errors.phone_number" class="text-xs text-red-500 mt-1">{{ errors.phone_number }}</p>
+              <p class="text-xs text-gray-500">For important notifications</p>
+              <p v-if="allErrors.phone_number" class="text-xs text-red-500">{{ allErrors.phone_number }}</p>
             </div>
 
             <!-- Password -->
-            <div>
-              <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                🔒 Password *
+            <div class="space-y-2">
+              <label for="password" class="block text-sm font-medium text-gray-700">
+                Password *
               </label>
               <div class="relative">
                 <Input
@@ -132,6 +109,7 @@
                     v-model="formData.password"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Create a secure password"
+                    class="h-10 pr-10"
                     :class="getInputClasses('password')"
                     required
                 />
@@ -140,11 +118,11 @@
                     @click="showPassword = !showPassword"
                     class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  <EyeIcon v-if="showPassword" class="w-5 h-5"/>
-                  <EyeOffIcon v-else class="w-5 h-5"/>
+                  <EyeIcon v-if="showPassword" class="w-4 h-4"/>
+                  <EyeOffIcon v-else class="w-4 h-4"/>
                 </button>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+              <p v-if="allErrors.password" class="text-xs text-red-500">{{ allErrors.password }}</p>
 
               <!-- Password strength indicator -->
               <div v-if="formData.password" class="mt-2">
@@ -163,65 +141,55 @@
             </div>
 
             <!-- Parent-specific information box -->
-            <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4 border border-pink-200">
-              <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
-                💝 As a parent, you'll be able to:
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h4 class="font-medium text-gray-900 mb-3">
+                As a parent, you'll be able to:
               </h4>
-              <ul class="text-sm text-gray-700 space-y-1">
-                <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Track your child's learning
-                  progress
+              <ul class="text-sm text-gray-700 space-y-2">
+                <li class="flex items-center"><span class="text-slate-600 mr-2">✓</span>Track your child's learning progress
                 </li>
-                <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Receive weekly progress reports
+                <li class="flex items-center"><span class="text-slate-600 mr-2">✓</span>Receive weekly progress reports
                 </li>
-                <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Set learning goals and rewards
+                <li class="flex items-center"><span class="text-slate-600 mr-2">✓</span>Set learning goals and rewards
                 </li>
-                <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Connect with teachers and other
-                  parents
+                <li class="flex items-center"><span class="text-slate-600 mr-2">✓</span>Connect with oks
                 </li>
               </ul>
             </div>
 
             <!-- Submit Button -->
-            <button
+            <Button
                 type="submit"
                 :disabled="isLoading || !isFormValid"
-                class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 px-4 rounded-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                class="w-full bg-slate-900 text-white font-medium py-2.5 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              💝 Create Parent Account
+              Create Account
             </span>
               <span v-else class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                   viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <Loader class="animate-spin mr-2 w-4 h-4"/>
               Creating Account...
             </span>
-            </button>
+            </Button>
           </form>
 
 
           <!-- Login link -->
           <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-              Already have a parent account?
-              <router-link to="/parent/login" class="font-semibold text-pink-600 hover:text-pink-800 transition-colors">
+              Already have an account?
+              <router-link to="/parent/login" class="font-medium text-slate-900 hover:text-slate-700 transition-colors">
                 Sign in here
               </router-link>
             </p>
           </div>
 
-          <!-- Fun characters at bottom -->
-          <EmojiBounceAnimation :emojis="['👨‍👩‍👧‍👦','💕','📚','🌟']"/>
-
         </Card>
 
         <!-- Footer text -->
         <div class="text-center mt-6">
-          <p class="text-white text-sm opacity-80">
-            Join thousands of parents supporting their children's learning journey
+          <p class="text-gray-600 text-sm">
+            Join our parent community
           </p>
         </div>
       </div>
@@ -233,10 +201,10 @@
 
 <script setup>
 import {ref, computed, watch} from 'vue'
-import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
+import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon, Loader} from 'lucide-vue-next'
 import api from '@/plugins/axios'
-import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
 import {Input} from "@/components/ui/input/index.js";
+import {Button} from "@/components/ui/button/index.js";
 import {Card} from "@/components/ui/card/index.js";
 import GuestNavbar from "@/components/app/GuestNavbar.vue";
 import {useRouter} from "vue-router";
@@ -280,14 +248,49 @@ const passwordStrengthTextColor = computed(() => {
   return colors[strength] || colors[0]
 })
 
+// Real-time validation errors
+const realTimeErrors = computed(() => {
+  const errors = {}
+  
+  if (formData.value.email && !/\S+@\S+\.\S+/.test(formData.value.email)) {
+    errors.email = 'Email is invalid'
+  }
+  
+  if (formData.value.password && formData.value.password.length < 8) {
+    errors.password = 'Password must be at least 8 characters'
+  }
+  
+  if (formData.value.phone_number && !/^\d+$/.test(formData.value.phone_number)) {
+    errors.phone_number = 'Phone number must contain only digits'
+  }
+  
+  return errors
+})
+
+// Combined errors (server errors + real-time errors)
+const allErrors = computed(() => {
+  return { ...errors.value, ...realTimeErrors.value }
+})
+
 const isFormValid = computed(() => {
-  return formData.value.first_name &&
+  // Check if all required fields are filled
+  const hasAllFields = formData.value.first_name &&
       formData.value.last_name &&
       formData.value.email &&
       formData.value.phone_number &&
-      formData.value.password &&
-      passwordStrength.value >= 2 &&
-      Object.keys(errors.value).length === 0
+      formData.value.password
+  
+  if (!hasAllFields) return false
+  
+  // Check password strength
+  if (passwordStrength.value < 2) return false
+  
+  // Real-time validation checks
+  const emailValid = /\S+@\S+\.\S+/.test(formData.value.email)
+  const phoneValid = /^\d+$/.test(formData.value.phone_number)
+  const passwordValid = formData.value.password.length >= 8
+  
+  return emailValid && phoneValid && passwordValid
 })
 
 const alertClasses = computed(() => {
@@ -308,8 +311,8 @@ const getPasswordStrengthColor = (index) => {
 }
 
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-pink-400'
-  const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
+  const baseClasses = 'focus:border-slate-400 focus:ring-slate-400'
+  const errorClasses = allErrors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
   return `${baseClasses} ${errorClasses}`
 }
 
@@ -399,6 +402,8 @@ watch(formData, (newData, oldData) => {
   Object.keys(newData).forEach(key => {
     if (newData[key] !== oldData[key] && errors.value[key]) {
       delete errors.value[key]
+      // Force reactivity update
+      errors.value = { ...errors.value }
     }
   })
 }, {deep: true})

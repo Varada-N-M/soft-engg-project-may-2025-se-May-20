@@ -45,7 +45,7 @@
 
       <!-- Filters Section -->
       <div class="mb-8">
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border ">
           <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 Filter Lessons</h3>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Date Filter -->
@@ -380,13 +380,6 @@
       </div>
     </div>
 
-    <!-- Floating decorative elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute top-20 left-10 w-8 h-8 bg-yellow-300 rounded-full opacity-20 animate-bounce"></div>
-      <div class="absolute top-40 right-20 w-6 h-6 bg-pink-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 0.5s"></div>
-      <div class="absolute bottom-32 left-20 w-10 h-10 bg-orange-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 1s"></div>
-      <div class="absolute bottom-20 right-10 w-7 h-7 bg-cyan-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 1.5s"></div>
-    </div>
   </div>
 </template>
 

@@ -4,9 +4,79 @@
       <!-- Hero Section -->
       <div class="min-h-screen  ">
         <!-- Navbar -->
-        <div class="flex justify-between items-center text-4xl mb-5 font-fancy p-6 md:p-10">
+        <div class="flex justify-between items-center mb-5 p-6 md:p-10">
           <div class="text-4xl font-semibold">
             <logo/>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Login Dropdown -->
+            <div class="relative">
+              <Button
+                  @click="showLoginMenu = !showLoginMenu"
+                  class="flex items-center space-x-2 px-4 py-2  rounded-lg transition-colors font-medium"
+              >
+                <LogInIcon class="w-4 h-4" />
+                <span>Sign In</span>
+                <ChevronDownIcon class="w-4 h-4" />
+              </Button>
+
+              <!-- Login Menu Dropdown -->
+              <div
+                  v-if="showLoginMenu"
+                  class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                  @click.stop
+              >
+                <div class="px-4 py-2 border-b border-gray-100">
+                  <h3 class="font-semibold text-gray-800">Choose Your Role</h3>
+                  <p class="text-xs text-gray-500 mt-1">Select how you want to sign in</p>
+                </div>
+
+                <div class="py-1">
+                  <router-link
+                      to="/student/login"
+                      class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      @click="showLoginMenu = false"
+                  >
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mr-3">
+                      <span class="text-white text-xs font-bold">👦</span>
+                    </div>
+                    <div>
+                      <p class="font-medium">Student Login</p>
+                      <p class="text-xs text-gray-500">Access your learning dashboard</p>
+                    </div>
+                  </router-link>
+
+                  <router-link
+                      to="/parent/login"
+                      class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      @click="showLoginMenu = false"
+                  >
+                    <div class="w-8 h-8 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center mr-3">
+                      <span class="text-white text-xs font-bold">👨‍👩‍👧‍👦</span>
+                    </div>
+                    <div>
+                      <p class="font-medium">Parent Login</p>
+                      <p class="text-xs text-gray-500">Monitor your child's progress</p>
+                    </div>
+                  </router-link>
+
+                  <router-link
+                      to="/teacher/login"
+                      class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                      @click="showLoginMenu = false"
+                  >
+                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-teal-500 rounded-full flex items-center justify-center mr-3">
+                      <span class="text-white text-xs font-bold">👨‍🏫</span>
+                    </div>
+                    <div>
+                      <p class="font-medium">Teacher Login</p>
+                      <p class="text-xs text-gray-500">Manage your classroom</p>
+                    </div>
+                  </router-link>
+
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -24,8 +94,8 @@
               Welcome to
               <logo/>
             </h1>
-            <h2 class="text-4xl md:text-6xl leading-20 font-medium">
-              The best place to <span class="italic font-fancy text-yellow-500  tilt-left-2 creative-underline">learn</span> & <br>
+            <h2 class="text-4xl md:text-6xl md:leading-16 font-medium">
+              The best place to <span class="italic font-fancy text-yellow-500  tilt-left-2 creative-underline">learn</span> & <br class="hidden md:inline-block">
               <span class="italic font-fancy text-blue-600 creative-underline tilt-right-1">play</span>
               for your Kids
             </h2>
@@ -49,18 +119,18 @@
     </WarpBackground>
 
     <!-- Features Section -->
-    <div class="w-full max-w-7xl mx-auto flex flex-col gap-6 p-5 md:p-10">
-      <h2 class="text-3xl md:text-4xl text-center mb-16 md:mb-25 text-slate-700 drop-shadow-sm">Features</h2>
+    <div class="w-full max-w-7xl mx-auto flex flex-col gap-6 p-5 md:p-12">
+      <h2 class="text-3xl md:text-4xl text-center mb-8 md:mb-12 text-slate-700 drop-shadow-sm">Features</h2>
 
       <!-- Students Card -->
       <div
-          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border border-white/30 transition-all duration-300 flex flex-col md:flex-row gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
+          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border  transition-all duration-300 flex flex-col md:flex-row gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
         <div
-            class="w-full md:w-[650px] h-52 md:h-auto rounded-3xl md:rounded-[45px] bg-gradient-to-br from-sky-400 to-cyan-400 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
+            class="w-full md:w-[650px] h-52 md:h-auto bg-gradient-to-br from-sky-400 to-cyan-400 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
           <img src="../assets/child.svg" alt="Children SVG" width="600" class="max-w-full max-h-full"/>
         </div>
         <div class="flex-1 p-6 md:p-10 flex flex-col justify-center">
-          <h3 class="font-fancy text-3xl md:text-6xl text-slate-700 mb-4">For Students</h3>
+          <h3 class="font-fancy text-3xl md:text-5xl text-slate-700 mb-4">For Students</h3>
           <p class="text-base text-gray-500 mb-5 leading-relaxed">
             Empower your learning journey with tools designed to help you succeed academically and personally.
           </p>
@@ -92,13 +162,13 @@
 
       <!-- Teachers Card -->
       <div
-          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border border-white/30 transition-all duration-300 flex flex-col md:flex-row-reverse gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
+          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border  transition-all duration-300 flex flex-col md:flex-row-reverse gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
         <div
-            class="w-full md:w-[650px] h-52 md:h-auto rounded-3xl md:rounded-[45px] bg-gradient-to-br from-emerald-400 to-teal-300 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
+            class="w-full md:w-[650px] h-52 md:h-auto  bg-gradient-to-br from-emerald-400 to-teal-300 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
           <img src="../assets/teacher.svg" alt="Teacher SVG" width="400" class="max-w-full max-h-full"/>
         </div>
         <div class="flex-1 p-6 md:p-10 flex flex-col justify-center">
-          <h3 class="font-fancy text-3xl md:text-6xl text-slate-700 mb-4">For Teachers</h3>
+          <h3 class="font-fancy text-3xl md:text-5xl text-slate-700 mb-4">For Teachers</h3>
           <p class="text-base text-gray-500 mb-5 leading-relaxed">
             Streamline your teaching process with comprehensive classroom management and educational tools.
           </p>
@@ -130,13 +200,13 @@
 
       <!-- Parents Card -->
       <div
-          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border border-white/30 transition-all duration-300 flex flex-col md:flex-row gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
+          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border  transition-all duration-300 flex flex-col md:flex-row gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
         <div
-            class="w-full md:w-[650px] h-52 md:h-auto rounded-3xl md:rounded-[45px] bg-gradient-to-br from-pink-400 to-yellow-300 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
+            class="w-full md:w-[650px] h-52 md:h-auto  bg-gradient-to-br from-pink-400 to-yellow-300 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
           <img src="../assets/parent.svg" alt="Parent SVG" width="600" class="max-w-full max-h-full"/>
         </div>
         <div class="flex-1 p-6 md:p-10 flex flex-col justify-center">
-          <h3 class="font-fancy text-3xl md:text-6xl text-slate-700 mb-4">For Parents</h3>
+          <h3 class="font-fancy text-3xl md:text-5xl text-slate-700 mb-4">For Parents</h3>
           <p class="text-base text-gray-500 mb-5 leading-relaxed">
             Stay connected with your child's educational journey and support their growth every step of the way.
           </p>
@@ -168,13 +238,13 @@
 
       <!-- Administrators Card -->
       <div
-          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border border-white/30 transition-all duration-300 flex flex-col md:flex-row-reverse gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
+          class="bg-white/95 rounded-3xl md:rounded-[45px] backdrop-blur-sm border  transition-all duration-300 flex flex-col md:flex-row-reverse gap-0 items-stretch overflow-hidden min-h-[300px] mb-16 md:mb-25 shadow-lg">
         <div
-            class="w-full md:w-[650px] h-52 md:h-auto rounded-3xl md:rounded-[45px] bg-gradient-to-br from-teal-200 to-pink-200 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
+            class="w-full md:w-[650px] h-52 md:h-auto  bg-gradient-to-br from-teal-200 to-pink-200 flex items-center justify-center text-white text-lg font-bold text-center flex-shrink-0">
           <img src="../assets/org.svg" alt="Organization SVG" width="600" class="max-w-full max-h-full"/>
         </div>
         <div class="flex-1 p-6 md:p-10 flex flex-col justify-center">
-          <h3 class="font-fancy text-3xl md:text-6xl text-slate-700 mb-4">For Administrators</h3>
+          <h3 class="font-fancy text-3xl md:text-5xl text-slate-700 mb-4">For Administrators</h3>
           <p class="text-base text-gray-500 mb-5 leading-relaxed">
             Manage your educational institution efficiently with powerful administrative tools and insights.
           </p>
@@ -225,7 +295,14 @@
 import Logo from "@/components/partials/Logo.vue";
 import {WarpBackground} from "@/components/ui/warp-background/index.js";
 import {Button} from "@/components/ui/button/index.js";
+import {ChevronDownIcon, LogInIcon} from "lucide-vue-next";
+import {ref} from "vue";
+const showLoginMenu = ref(false)
 
+
+const closeAllDropdowns = () => {
+  showLoginMenu.value = false
+}
 const handleGetStarted = () => {
   alert('Welcome to GrowWise! Sign up to get started.');
 };

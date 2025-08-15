@@ -44,38 +44,14 @@
             </div>
           </div>
         </div>
-
-        <!-- <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              🎯 Today's Habits
-            </h2>
-            <router-link
-              to="/student/habit"
-              class="text-blue-600 hover:text-blue-800 font-semibold"
-            >
-              View All
-            </router-link>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ActivityCard
-              v-for="habit in habits"
-              :key="habit.habit_id"
-              :activity="{
-                id: habit.habit_id,
-                emoji: '📌', // you can map categories to emojis if you want
-                title: habit.name,
-                description: habit.description,
-                category: habit.category,
-                xp: habit.habit_xp,
-                completed: false // replace if you track completion
-              }"
-              @toggle="toggleHabit(habit.habit_id)"
-            />
-          </div>
-        </div> -->
-
+        
+        <!-- NEW Stats Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard icon="✨" label="Total XP" :value="studentProfile.xp_points" />
+          <StatCard icon="🏅" label="Badges Earned" :value="studentProfile.badge_count" :loading="isBadgeCountLoading" />
+          <StatCard icon="🎯" label="Total Habits" :value="studentProfile.habit_count" />
+          <StatCard icon="✅" label="Activities Completed" :value="studentProfile.activity_points" :loading="isCompletedSkillsLoading" unit="this week" />
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div class="bg-white rounded-3xl p-8 shadow-md">
@@ -233,6 +209,7 @@
 <script setup>
 import { clearAuthData } from '@/utils/auth';
 import { computed, onMounted, ref } from 'vue';
+import StatCard from './StatCard.vue';
 import { useRouter } from 'vue-router';
 
 // Import smaller, reusable components (assuming they are created)
@@ -244,7 +221,7 @@ const router = useRouter();
 const habits = ref([])
 const studentProfile = ref({});
 const isLoading = ref(true);
-const xpPoints = ref(0);
+const xpPoints = ref();
 const error = ref(null);
 
 const isComplete = ref(false);
@@ -421,9 +398,9 @@ const fetchSkills = async () => {
 // Dynamic data fetched from API
 const lessonUpdates = ref([]);
 const badgeCount = ref(0);
-const isBadgeCountLoading = ref(true);
+const isBadgeCountLoading = ref();
 const completedSkillsCount = ref(0);
-const isCompletedSkillsLoading = ref(true);
+const isCompletedSkillsLoading = ref();
 
 const toggleActivity = (activityId) => {
   const activity = todaysActivities.value.find((a) => a.id === activityId);

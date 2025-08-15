@@ -208,7 +208,7 @@
       <div class="text-center mt-12 p-6 md:p-10 bg-white/80 rounded-xl backdrop-blur-sm">
         <h2 class="font-fancy text-3xl md:text-4xl text-slate-700 mb-5">Ready to Transform Education?</h2>
         <p class="text-lg text-gray-500 mb-8 max-w-4xl mx-auto">
-          Join thousands of schools, teachers, students, and parents who trust CoolKids for their educational needs.
+          Join thousands of schools, teachers, students, and parents who trust GrowWise for their educational needs.
         </p>
         <button
             class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none px-8 md:px-10 py-3 md:py-4 rounded-full text-lg font-bold cursor-pointer transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl"
@@ -227,7 +227,7 @@ import {WarpBackground} from "@/components/ui/warp-background/index.js";
 import {Button} from "@/components/ui/button/index.js";
 
 const handleGetStarted = () => {
-  alert('Welcome to CoolKids! Sign up to get started.');
+  alert('Welcome to GrowWise! Sign up to get started.');
 };
 </script>
 

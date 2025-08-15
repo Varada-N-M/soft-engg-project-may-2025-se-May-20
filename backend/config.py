@@ -31,7 +31,7 @@ class Config:
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME") or 'hari.backup0007@gmail.com'
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD") or 'zncn koyo ntek amjj'
 
-    MAIL_DEFAULT_SENDER = ('CoolKids', 'hari.backup0007@gmail.com')
+    MAIL_DEFAULT_SENDER = ('GrowWise', 'hari.backup0007@gmail.com')
 
 
 class DevelopmentConfig(Config):

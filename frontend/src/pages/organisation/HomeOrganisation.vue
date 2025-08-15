@@ -41,10 +41,6 @@
                   <SelectItem value="1y">Last year</SelectItem>
                 </SelectContent>
               </Select>
-              <Button @click="exportReports" class="bg-blue-600 hover:bg-blue-700">
-                <Download class="w-4 h-4 mr-2"/>
-                Export Reports
-              </Button>
             </div>
           </div>
         </div>
@@ -341,10 +337,7 @@ const childReports = ref([
   }
 ])
 
-const exportReports = () => {
-  // Implementation for exporting reports
-  console.log('Exporting reports for time range:', selectedTimeRange.value)
-}
+
 
 onMounted(() => {
   // Load dashboard data

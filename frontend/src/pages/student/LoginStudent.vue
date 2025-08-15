@@ -129,7 +129,7 @@
         <!-- Footer text -->
         <div class="text-center mt-6">
           <p class="text-white text-sm opacity-80">
-            Learning is fun when you're with CoolKids! 🌈
+            Learning is fun when you're with GrowWise! 🌈
           </p>
         </div>
       </div>

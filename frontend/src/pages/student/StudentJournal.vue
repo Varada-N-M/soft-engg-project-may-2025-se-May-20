@@ -70,11 +70,15 @@
         </div>
 
         <div v-else-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="entry in journalEntries" :key="entry.id" @click="openEditModal(entry)"
+          <div v-for="entry in journalEntries" :key="entry.id" @click="openViewModal(entry)"
             class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-102 cursor-pointer flex flex-col justify-between">
             <div>
               <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>
               <p class="text-sm text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
+            </div>
+            <div class="flex justify-end mt-4">
+              <button @click.stop="openEditModal(entry)" class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2">Edit</button>
+              <button @click.stop="openViewModal(entry)" class="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">View</button>
             </div>
           </div>
         </div>
@@ -127,6 +131,31 @@
         </form>
       </div>
     </div>
+  <!-- View Journal Modal -->
+    <div v-if="showViewModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-2xl font-bold text-gray-800">
+            Journal Entry
+          </h3>
+          <button @click="closeViewModal" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div v-if="viewingEntry">
+          <h4 class="font-bold text-gray-800 text-lg mb-2">{{ formatDate(viewingEntry.date) }}</h4>
+          <p class="text-gray-700 whitespace-pre-wrap">{{ viewingEntry.content }}</p>
+        </div>
+        <div class="flex justify-end mt-6">
+          <button @click="closeViewModal"
+            class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -140,7 +169,9 @@ const router = useRouter();
 
 // --- Reactive Data ---
 const showModal = ref(false);
+const showViewModal = ref(false);
 const editingEntry = ref(null);
+const viewingEntry = ref(null);
 const journalEntries = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
@@ -288,6 +319,16 @@ const openEditModal = (entry) => {
   editingEntry.value = entry;
   journalForm.value = { ...entry };
   showModal.value = true;
+};
+
+const openViewModal = (entry) => {
+  viewingEntry.value = entry;
+  showViewModal.value = true;
+};
+
+const closeViewModal = () => {
+  showViewModal.value = false;
+  viewingEntry.value = null;
 };
 
 const closeModal = () => {

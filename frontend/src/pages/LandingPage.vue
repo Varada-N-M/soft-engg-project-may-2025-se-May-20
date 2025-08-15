@@ -281,7 +281,7 @@
           Join thousands of schools, teachers, students, and parents who trust GrowWise for their educational needs.
         </p>
         <button
-            class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none px-8 md:px-10 py-3 md:py-4 rounded-full text-lg font-bold cursor-pointer transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl"
+            class="bg-gradient-to-br  border bg-green-500 px-8 md:px-10 py-3 md:py-4 rounded-full text-lg font-bold cursor-pointer transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl"
             @click="handleGetStarted">
           Get Started Today
         </button>
@@ -297,14 +297,17 @@ import {WarpBackground} from "@/components/ui/warp-background/index.js";
 import {Button} from "@/components/ui/button/index.js";
 import {ChevronDownIcon, LogInIcon} from "lucide-vue-next";
 import {ref} from "vue";
+import {useRouter} from "vue-router";
 const showLoginMenu = ref(false)
 
 
 const closeAllDropdowns = () => {
   showLoginMenu.value = false
 }
+const router = useRouter()
 const handleGetStarted = () => {
-  alert('Welcome to GrowWise! Sign up to get started.');
+  router.push('/student/login')
+
 };
 </script>
 

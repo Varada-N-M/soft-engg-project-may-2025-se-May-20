@@ -9,7 +9,7 @@
               <h1 class="text-2xl font-black  font-fancy  text-gray-800">
                 <logo/>
               </h1>
-              <p class="text-xs text-gray-500 -mt-1">Learning Made Fun!</p>
+              <p class="text-xs text-gray-600 -mt-1">Learning Made Fun!</p>
             </div>
           </router-link>
         </div>

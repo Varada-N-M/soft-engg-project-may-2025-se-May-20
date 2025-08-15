@@ -1,7 +1,7 @@
 <template>
   <div>
     <GuestNavbar />
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <Card class="w-full max-w-md">
         <CardHeader class="space-y-1 text-center">
           <Logo class="text-3xl mb-2" />

@@ -146,8 +146,11 @@
                 v-if="skillsChartData.length > 0"
                 :data="skillsChartData"
                 index="skill_name"
-                category="learned_count"
+                :category="'learned_count'"
                 :height="300"
+                type="pie"
+                :colors="['#63b2ff', '#ff81c4', '#bfff6e', '#ffcc93', '#F0E6FF', '#E6FFF3', '#FFE6E6', '#E6E6FF', '#F3F3E6', '#E6F0FF']"
+
             />
             <p v-else class="text-gray-500 text-center py-8">No skills data available</p>
           </Card>
@@ -164,19 +167,22 @@
                 index="category"
                 category="count"
                 :height="300"
+                :colors="['#E6F3FF', '#FFE6F3', '#F3FFE6', '#FFF3E6', '#F0E6FF', '#E6FFF3', '#FFE6E6', '#E6E6FF', '#F3F3E6', '#E6F0FF']"
             />
             <p v-else class="text-gray-500 text-center py-8">No habit data available</p>
           </Card>
 
           <!-- Gender Distribution -->
-          <Card class="p-6">
+          <Card class="p-6 pb-12">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Gender Distribution</h3>
             <DonutChart
                 v-if="genderChartData.length > 0"
                 :data="genderChartData"
-                index="gender"
                 category="count"
-                :height="300"
+                index="gender"
+                type="pie"
+                :show-legend="true"
+                :show-tooltip="true"
             />
             <p v-else class="text-gray-500 text-center py-8">No gender data available</p>
           </Card>

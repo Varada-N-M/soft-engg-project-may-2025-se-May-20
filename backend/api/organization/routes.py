@@ -271,10 +271,10 @@ class OrganizationStats(Resource):
         """
         try:
             current_user_id = get_jwt_identity()
-            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.ORGANIZATION).first()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True, role_type=UserRole.PRINCIPAL).first()
 
             if not user:
-                return {'error': 'User not found or inactive'}, 404
+                return {'error': 'Unauthorized access'}, 403
 
             stats = get_overview_dashboard()
             return stats, 200

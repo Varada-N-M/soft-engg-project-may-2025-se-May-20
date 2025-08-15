@@ -57,8 +57,8 @@
         </div>
 
         <div v-else-if="todos.length > 0" class="space-y-4">
-          <div v-for="todo in todos" :key="todo.id" @click="openEditModal(todo)"
-            class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer flex items-center justify-between"
+          <div v-for="todo in todos" :key="todo.id"
+            class="bg-white rounded-3xl p-6 shadow-lg border-2 flex items-center justify-between"
             :class="{ 'border-green-400 bg-green-50': todo.is_completed, 'border-gray-200': !todo.is_completed }">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
@@ -75,9 +75,13 @@
               <p class="text-xs text-gray-400 mt-1">Created: {{ formatDate(todo.created_at) }}</p>
             </div>
 
-            <div class="flex-shrink-0 ml-4">
-              <div v-if="todo.is_completed" class="text-2xl text-green-600 font-bold">✅</div>
-              <div v-else class="text-2xl text-yellow-500 font-bold">⏳</div>
+            <div class="flex-shrink-0 ml-4 flex items-center space-x-2">
+                <button @click="openEditModal(todo)" class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Edit</button>
+                <button @click="toggleComplete(todo)" class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        :class="todo.is_completed ? 'bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-500' : 'bg-green-500 hover:bg-green-600 focus:ring-green-500'">
+                    {{ todo.is_completed ? 'Mark as Incomplete' : 'Mark as Complete' }}
+                </button>
+                <button @click="deleteTodoById(todo.id, todo.task_name)" class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Delete</button>
             </div>
           </div>
         </div>
@@ -118,33 +122,13 @@
               placeholder="Add details about the task..." rows="3" required></textarea>
           </div>
 
-          <div class="flex items-center">
-            <input id="is-daily" type="checkbox" v-model="todoForm.is_daily"
-              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <label for="is-daily" class="ml-2 block text-sm text-gray-900">
-              Recurring daily task
-            </label>
-          </div>
-
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Due Date (Optional)</label>
             <input v-model="todoForm.completion_date" type="date"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
           </div>
 
-          <div v-if="editingTodo" class="flex items-center">
-            <input id="completed-checkbox" type="checkbox" v-model="todoForm.is_completed"
-              class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-            <label for="completed-checkbox" class="ml-2 block text-sm text-gray-900">
-              Mark as Completed
-            </label>
-          </div>
-
           <div class="flex space-x-3 pt-4">
-            <button v-if="editingTodo" type="button" @click="deleteTodo"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
-              Delete
-            </button>
             <button type="button" @click="closeModal"
               class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
               Cancel
@@ -311,21 +295,52 @@ const updateTodo = async () => {
   }
 };
 
-// --- Delete To-Do ---
-const deleteTodo = async () => {
-  const confirmed = confirm(`Are you sure you want to delete "${editingTodo.value.task_name}"?`);
-  if (!confirmed || !editingTodo.value?.id) return;
+// --- Delete To-Do by ID ---
+const deleteTodoById = async (todoId, todoName) => {
+  const confirmed = confirm(`Are you sure you want to delete "${todoName}"?`);
+  if (!confirmed) return;
 
   const token = localStorage.getItem('access_token');
   try {
-    await api.delete(`/api/todos/${editingTodo.value.id}`, {
+    await api.delete(`/api/todos/${todoId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    todos.value = todos.value.filter(t => t.id !== editingTodo.value.id);
-    closeModal();
+    todos.value = todos.value.filter(t => t.id !== todoId);
   } catch (err) {
     error.value = err.response?.data?.error || 'Failed to delete task.';
     console.error('Delete Error:', err);
+  }
+};
+
+// --- Toggle Complete ---
+const toggleComplete = async (todo) => {
+  const token = localStorage.getItem('access_token');
+  if (!token) return;
+
+  const newCompletedStatus = !todo.is_completed;
+
+  try {
+    await api.put(`/api/todos/${todo.id}`, {
+      to_do: todo.task_name,
+      description: todo.description,
+      is_daily: todo.is_daily,
+      is_done: newCompletedStatus,
+      completion_date: newCompletedStatus ? new Date().toISOString() : todo.completion_date
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // Update local list
+    const index = todos.value.findIndex(t => t.id === todo.id);
+    if (index !== -1) {
+      todos.value[index].is_completed = newCompletedStatus;
+      if (newCompletedStatus) {
+        todos.value[index].completion_date = new Date().toISOString();
+      }
+    }
+  } catch (err) {
+    error.value = err.response?.data?.error || 'Failed to update task.';
+    console.error('Update Error:', err);
   }
 };
 

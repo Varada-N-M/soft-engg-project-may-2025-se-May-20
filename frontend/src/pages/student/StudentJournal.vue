@@ -1,73 +1,90 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
-    <!-- Header Section -->
-    <header class="max-w-4xl mx-auto mb-8 text-center">
-      <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Dashboard
-      </router-link>
-      <h1 class="text-4xl font-extrabold text-gray-900 mb-2">My Learning Journal 📝</h1>
-      <p class="text-lg text-gray-600 font-medium">
-        Reflect on your progress and capture your thoughts.
-      </p>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto">
-      <!-- Show "New Entry" button only if logged in -->
-      <div v-if="isLoggedIn" class="flex justify-center mb-8">
-        <button
-          @click="openCreateModal"
-          class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center"
-        >
-          <span class="text-xl mr-2">➕</span>
-          New Journal Entry
-        </button>
+  <div class="min-h-screen flex">
+    <aside
+      class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
+      <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 font-playfair">My Dashboard</h2>
       </div>
-
-      <!-- Loading, Error, or Content -->
-      <div v-if="isLoading" class="text-center py-20">
-        <p class="text-lg text-gray-600">Loading journal entries...</p>
-      </div>
-
-      <div v-else-if="error" class="text-center py-20">
-        <p class="text-lg text-red-500 font-medium">{{ error }}</p>
-      </div>
-
-      <!-- Show entries if logged in and has data -->
-      <div v-else-if="!isLoggedIn" class="text-center py-20">
-        <div class="text-6xl mb-4">🔒</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">You Need to Log In</h2>
-        <p class="text-gray-600 mb-4">Please log in to access your learning journal and start writing entries.</p>
-        <router-link
-          to="/login"
-          class="inline-block mt-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-        >
-          Go to Login
+      <nav class="space-y-3">
+        <router-link v-for="link in navLinks" :key="link.name" :to="link.path"
+          class="flex items-center gap-4 py-2 px-2 rounded-xl text-gray-700 hover:text-yellow-600 transition-colors duration-200 font-medium font-playfair">
+          <span class="text-xl">{{ link.icon }}</span> {{ link.name }}
         </router-link>
-      </div>
+      </nav>
+    </aside>
 
-      <div v-else-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="entry in journalEntries"
-          :key="entry.id"
-          @click="openEditModal(entry)"
-          class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-105 cursor-pointer flex flex-col justify-between"
-        >
-          <div>
-            <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>
-            <p class="text-sm text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
+    <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
+      <div class="max-w-7xl ml-3">
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-6">
+            <!-- Greeting Text (Left Side) -->
+            <div class="flex-1 min-w-max font-playfair">
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My Learning Journal 📝</h1>
+              <p class="text-lg text-gray-600 font-medium">
+                Reflect on your progress and capture your thoughts.
+              </p>
+            </div>
+
+            <!-- Buttons (Right Side - Horizontal Row) -->
+            <div class="flex space-x-4 min-w-fit font-playfair">
+              <router-link to="/student/profile"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
+                Profile
+              </router-link>
+
+              <button @click="logout"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Empty journal (logged in but no entries) -->
-      <div v-else class="text-center py-20">
-        <div class="text-6xl mb-4">📖</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Journal is Empty</h2>
-        <p class="text-gray-600">Start writing to capture your thoughts and ideas!</p>
+        <!-- Show "New Entry" button only if logged in -->
+        <div v-if="isLoggedIn" class="flex justify-center mb-8">
+          <button @click="openCreateModal"
+            class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-101 transition-all duration-200 flex items-center">
+            <span class="text-xl mr-2">➕</span>
+            New Journal Entry
+          </button>
+        </div>
+
+        <!-- Loading, Error, or Content -->
+        <div v-if="isLoading" class="text-center py-20">
+          <p class="text-lg text-gray-600">Loading journal entries...</p>
+        </div>
+
+        <div v-else-if="error" class="text-center py-20">
+          <p class="text-lg text-red-500 font-medium">{{ error }}</p>
+        </div>
+
+        <!-- Show entries if logged in and has data -->
+        <div v-else-if="!isLoggedIn" class="text-center py-20">
+          <div class="text-6xl mb-4">🔒</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">You Need to Log In</h2>
+          <p class="text-gray-600 mb-4">Please log in to access your learning journal and start writing entries.</p>
+          <router-link to="/login"
+            class="inline-block mt-2 px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+            Go to Login
+          </router-link>
+        </div>
+
+        <div v-else-if="journalEntries.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="entry in journalEntries" :key="entry.id" @click="openEditModal(entry)"
+            class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 transform transition-transform hover:scale-102 cursor-pointer flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-gray-800 text-lg mb-2">Journal Entry on {{ formatDate(entry.date) }}</h3>
+              <p class="text-sm text-gray-600 mb-4 line-clamp-4">{{ entry.content }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty journal (logged in but no entries) -->
+        <div v-else class="text-center py-20">
+          <div class="text-6xl mb-4">📖</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Journal is Empty</h2>
+          <p class="text-gray-600">Start writing to capture your thoughts and ideas!</p>
+        </div>
       </div>
     </main>
 
@@ -88,35 +105,22 @@
         <form @submit.prevent="saveEntry" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Your Journal Entry</label>
-            <textarea
-              v-model="journalForm.content"
+            <textarea v-model="journalForm.content"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="What are you grateful for today? What did you learn?"
-              rows="8"
-              required
-            ></textarea>
+              placeholder="What are you grateful for today? What did you learn?" rows="8" required></textarea>
           </div>
 
           <div class="flex space-x-3 pt-4">
-            <button
-              v-if="editingEntry"
-              type="button"
-              @click="deleteEntry"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors"
-            >
+            <button v-if="editingEntry" type="button" @click="deleteEntry"
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
               Delete
             </button>
-            <button
-              type="button"
-              @click="closeModal"
-              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
+            <button type="button" @click="closeModal"
+              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <button type="submit"
+              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
               {{ editingEntry ? 'Update Entry' : 'Save Entry' }}
             </button>
           </div>
@@ -129,12 +133,33 @@
 <script setup>
 import api from '@/plugins/axios.ts';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { clearAuthData } from '@/utils/auth';
+
+const router = useRouter();
+
 // --- Reactive Data ---
 const showModal = ref(false);
 const editingEntry = ref(null);
 const journalEntries = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
+
+const navLinks = ref([
+  { name: 'Home', path: '/student/home', icon: '🏠' },
+  { name: 'Lesson Updates', path: '/student/lesson-updates', icon: '📚' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
+  { name: 'Habits', path: '/student/habit', icon: '🎯' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
+  { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },
+  { name: 'Badges', path: '/student/badges', icon: '🏅' },
+]);
+
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
 
 const journalForm = ref({
   id: null,

@@ -1,66 +1,79 @@
 <!-- LifeLessonCard.vue -->
 <template>
-  <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 flex flex-col transform hover:scale-101 transition-all duration-300 ease-in-out">
-    <div class="p-5 flex-grow">
-      <h3 class="text-xl font-bold text-gray-900 mb-2">{{ lesson.title }}</h3>
-      <p class="text-gray-700 text-sm mb-4 flex-grow">{{ lesson.description }}</p>
+  <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:scale-101">
+    <!-- Lesson Title -->
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-gray-900 leading-tight">
+        {{ lesson.skill_name || lesson.title }}
+      </h3>
     </div>
-    <div class="p-5 bg-gray-50 border-t border-gray-200 flex flex-col space-y-3">
-      <a
-        :href="lesson.youtubeLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3">
+      <!-- Watch Lesson Button -->
+      <button 
+        @click="watchLesson"
+        class="flex-1 bg-blue-500 text-white px-4 py-2.5 rounded-[15px] font-medium hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center gap-2"
+        :disabled="!lesson.video_url"
+        :class="{ 'opacity-50 cursor-not-allowed': !lesson.video_url }"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+          <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
         </svg>
         Watch Lesson
-      </a>
-      <button
-        @click="markComplete"
-        :disabled="lesson.completed"
-        class="w-full px-4 py-2 rounded-xl shadow-md transition-colors duration-200 text-sm font-medium"
-        :class="{
-          'bg-green-600 text-white hover:bg-green-700': !lesson.completed,
-          'bg-green-600 text-white cursor-not-allowed': lesson.completed
-        }"
-      >
-        {{ lesson.completed ? 'Lesson Completed!' : 'Mark as Complete' }}
       </button>
+
+      <!-- Mark Complete Button -->
+      <button 
+        @click="toggleComplete"
+        class="px-4 py-2.5 rounded-[15px] font-medium transition-colors duration-200 flex items-center justify-center"
+        :class="lesson.completed 
+          ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+          : 'bg-green-500 text-white hover:bg-green-600'"
+      >
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- No Video Warning -->
+    <div v-if="!lesson.video_url" class="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+      <p class="text-yellow-700 text-xs text-center">No video available for this lesson</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from 'vue'
 
+// Props
 const props = defineProps({
   lesson: {
     type: Object,
-    required: true,
-    validator: (value) => {
-      return (
-        typeof value.id === 'number' &&
-        typeof value.title === 'string' &&
-        typeof value.description === 'string' &&
-        typeof value.youtubeLink === 'string' &&
-        typeof value.completed === 'boolean'
-      );
-    },
-  },
-});
-
-const emit = defineEmits(['lesson-completed']);
-
-const markComplete = () => {
-  if (!props.lesson.completed) {
-    emit('lesson-completed', props.lesson.id);
+    required: true
   }
-};
+})
+
+// Emits
+const emit = defineEmits(['lesson-completed'])
+
+// Methods
+const watchLesson = () => {
+  if (props.lesson.video_url) {
+    // Open video in new tab
+    window.open(props.lesson.video_url, '_blank')
+  } else {
+    alert('No video available for this lesson')
+  }
+}
+
+const toggleComplete = () => {
+  emit('lesson-completed', props.lesson.id)
+}
 </script>
 
 <style scoped>
-/* Scoped styles specific to the card if needed, otherwise Tailwind handles most of it. */
+/* Additional custom styles if needed */
 </style>

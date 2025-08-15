@@ -5,7 +5,7 @@
     @click="$emit('toggle', activity.id)"
   >
     <div class="flex items-start justify-between mb-2">
-      <div class="text-2xl">{{ activity.emoji }}</div>
+      <!-- <div class="text-2xl">{{ activity.emoji }}</div> -->
       <div class="text-xl" :class="activity.completed ? 'text-green-500' : 'text-gray-400'">
         {{ activity.completed ? '✅' : '⭕' }}
       </div>

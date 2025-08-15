@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import type { BaseChartProps } from "."
 import { Donut } from "@unovis/ts"
-import { VisDonut, VisSingleContainer } from "@unovis/vue"
+import { VisDonut, VisSingleContainer, VisTooltip } from "@unovis/vue"
 import { useMounted } from "@vueuse/core"
-import { type Component, computed, ref } from "vue"
+import { type Component, computed, ref, createApp } from "vue"
 import { cn } from "@/lib/utils"
-import { ChartSingleTooltip, defaultColors } from '@/components/ui/chart'
+import { ChartLegend, ChartTooltip, defaultColors } from '@/components/ui/chart'
 
 const props = withDefaults(defineProps<Pick<BaseChartProps<T>, "data" | "colors" | "index" | "margin" | "showLegend" | "showTooltip" | "filterOpacity"> & {
   /**
@@ -48,36 +48,74 @@ const index = computed(() => props.index as KeyOfT)
 const isMounted = useMounted()
 const activeSegmentKey = ref<string>()
 const colors = computed(() => props.colors?.length ? props.colors : defaultColors(props.data.filter(d => d[props.category]).filter(Boolean).length))
-const legendItems = computed(() => props.data.map((item, i) => ({
+const legendItems = ref(props.data.map((item, i) => ({
   name: item[props.index],
   color: colors.value[i],
   inactive: false,
+  hidden: false,
 })))
 
 const totalValue = computed(() => props.data.reduce((prev, curr) => {
   return prev + curr[props.category]
 }, 0))
+
+// Use weakmap to store reference to each datapoint for Tooltip
+const wm = new WeakMap()
+
+// Styled tooltip template function
+function createStyledTooltip(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
+  if (!d?.data) return null
+  
+  const data = d.data
+  if (wm.has(data)) {
+    return wm.get(data)
+  }
+  
+  const style = getComputedStyle(elements[i])
+  const tooltipData = [{
+    name: data[props.index],
+    value: valueFormatter(data[props.category]),
+    color: style.fill || colors.value[i] || '#000'
+  }]
+  
+  const componentDiv = document.createElement('div')
+  const TooltipComponent = props.customTooltip ?? ChartTooltip
+  createApp(TooltipComponent, { 
+    data: tooltipData 
+  }).mount(componentDiv)
+  
+  wm.set(data, componentDiv.innerHTML)
+  return componentDiv.innerHTML
+}
+
+// Tooltip triggers for proper @unovis implementation with styling
+const tooltipTriggers = computed(() => ({
+  [Donut.selectors.segment]: createStyledTooltip
+}))
+
+function handleLegendItemClick() {
+  // Legend click handling - for future interactivity
+}
 </script>
 
 <template>
-  <div :class="cn('w-full h-48 flex flex-col items-end', $attrs.class ?? '')">
+  <div :class="cn('w-full h-48 flex flex-col', $attrs.class ?? '')">
     <VisSingleContainer :style="{ height: isMounted ? '100%' : 'auto' }" :margin="{ left: 20, right: 20 }" :data="data">
-      <ChartSingleTooltip
-        :selector="Donut.selectors.segment"
-        :index="category"
-        :items="legendItems"
-        :value-formatter="valueFormatter"
-        :custom-tooltip="customTooltip"
+      <VisTooltip
+          v-if="showTooltip"
+          :horizontal-shift="20"
+          :vertical-shift="20"
+          :triggers="tooltipTriggers"
       />
 
       <VisDonut
-        :value="(d: Data) => d[category]"
-        :sort-function="sortFunction"
-        :color="colors"
-        :arc-width="type === 'donut' ? 20 : 0"
-        :show-background="false"
-        :central-label="type === 'donut' ? valueFormatter(totalValue) : ''"
-        :events="{
+          :value="(d: Data) => d[category]"
+          :sort-function="sortFunction"
+          :color="colors"
+          :arc-width="type === 'donut' ? 20 : 0"
+          :show-background="false"
+          :central-label="type === 'donut' ? valueFormatter(totalValue) : ''"
+          :events="{
           [Donut.selectors.segment]: {
             click: (d: Data, ev: PointerEvent, i: number, elements: HTMLElement[]) => {
               if (d?.data?.[index] === activeSegmentKey) {
@@ -96,5 +134,12 @@ const totalValue = computed(() => props.data.reduce((prev, curr) => {
 
       <slot />
     </VisSingleContainer>
+
+    <ChartLegend
+        v-if="showLegend"
+        v-model:items="legendItems"
+        @legend-item-click.prevent="handleLegendItemClick"
+        class="mt-3 justify-center"
+    />
   </div>
 </template>

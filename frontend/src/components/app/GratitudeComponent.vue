@@ -263,8 +263,3 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.font-fancy {
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-}
-</style>

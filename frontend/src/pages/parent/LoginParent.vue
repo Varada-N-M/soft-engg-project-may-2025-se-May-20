@@ -1,34 +1,18 @@
 <template>
-  <div class="bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-300">
+  <div class="min-h-screen bg-gray-50">
     <GuestNavbar/>
-  <div
-      class="min-h-screen  flex items-center justify-center p-4">
-    <!-- Floating decorative elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-20 left-10 w-16 h-16 bg-yellow-300 rounded-full opacity-60 animate-bounce"></div>
-      <div class="absolute top-40 right-20 w-12 h-12 bg-green-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 0.5s"></div>
-      <div class="absolute bottom-32 left-20 w-20 h-20 bg-blue-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 1s"></div>
-      <div class="absolute bottom-20 right-10 w-14 h-14 bg-red-300 rounded-full opacity-60 animate-bounce"
-           style="animation-delay: 1.5s"></div>
-    </div>
-
-    <div class="w-full max-w-md">
-      <!-- Main login card -->
-      <Card class="bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-        <!-- Decorative top wave -->
-        <div
-            class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-3xl"></div>
-
-        <!-- App logo and title -->
-        <div class="relative z-10 text-center  pt-4">
-          <div
-              class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <HeartIcon class="w-10 h-10 text-white"/>
+    <div class="flex items-center justify-center p-4 pt-16">
+      <div class="w-full max-w-md">
+        <!-- Main login card -->
+        <Card class="bg-white border shadow-sm p-8">
+          <!-- App logo and title -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-slate-900 rounded-lg mx-auto mb-4 flex items-center justify-center">
+              <HeartIcon class="w-8 h-8 text-white"/>
+            </div>
+            <h1 class="text-2xl font-semibold text-gray-900 mb-2">Parent Portal</h1>
+            <p class="text-gray-600 text-sm">Sign in to your account</p>
           </div>
-          <p class="text-gray-600 text-sm">Parent Login - Welcome back!</p>
-        </div>
 
         <!-- Response Alert -->
         <div v-if="response" class="mb-6 p-4 rounded-lg border-2" :class="alertClasses">
@@ -44,34 +28,34 @@
         <form @submit.prevent="handleLogin" class="space-y-6">
           <div class="space-y-4">
             <!-- Email field -->
-            <div class="relative">
-              <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                📧 Email Address
+            <div class="space-y-2">
+              <label for="email" class="block text-sm font-medium text-gray-700">
+                Email Address
               </label>
-              <input
+              <Input
                   id="email"
                   v-model="formData.email"
                   type="email"
                   placeholder="Enter your email"
-                  class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400"
+                  class="w-full h-10"
                   :class="getInputClasses('email')"
                   required
               />
-              <p v-if="errors.email" class="text-xs text-red-500 mt-1">{{ errors.email }}</p>
+              <p v-if="errors.email" class="text-xs text-red-500">{{ errors.email }}</p>
             </div>
 
             <!-- Password field -->
-            <div class="relative">
-              <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                🔒 Password
+            <div class="space-y-2">
+              <label for="password" class="block text-sm font-medium text-gray-700">
+                Password
               </label>
               <div class="relative">
-                <input
+                <Input
                     id="password"
                     v-model="formData.password"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Enter your password"
-                    class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-colors text-gray-800 placeholder-gray-400 pr-12"
+                    class="w-full h-10 pr-10"
                     :class="getInputClasses('password')"
                     required
                 />
@@ -80,11 +64,11 @@
                     @click="showPassword = !showPassword"
                     class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  <EyeIcon v-if="showPassword" class="w-5 h-5"/>
-                  <EyeOffIcon v-else class="w-5 h-5"/>
+                  <EyeIcon v-if="showPassword" class="w-4 h-4"/>
+                  <EyeOffIcon v-else class="w-4 h-4"/>
                 </button>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
+              <p v-if="errors.password" class="text-xs text-red-500">{{ errors.password }}</p>
             </div>
           </div>
 
@@ -92,40 +76,35 @@
           <div class="flex justify-end">
             <router-link 
               to="/user/password/reset" 
-              class="text-sm text-pink-600 hover:text-pink-800 font-medium transition-colors"
+              class="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
             >
               Forgot your password?
             </router-link>
           </div>
 
           <!-- Login button -->
-          <button
+          <Button
               type="submit"
               :disabled="isLoading"
-              class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-4 rounded-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              class="w-full bg-slate-900 text-white font-medium py-2.5 px-4 rounded-md hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span v-if="!isLoading" class="flex items-center justify-center">
-              💝 Sign In as Parent
+              Sign In
             </span>
             <span v-else class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                   viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Signing In...
+              <Loader class="animate-spin mr-2 w-4 h-4"/>
+              Signing in...
             </span>
-          </button>
+          </Button>
         </form>
 
         <!-- Sign up link -->
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
-            Don't have a parent account?
+            Don't have an account?
             <router-link
                 to="/parent/register"
-                class="font-semibold text-pink-600 hover:text-pink-800 transition-colors"
+                class="font-medium text-slate-900 hover:text-slate-700 transition-colors"
             >
               Create one here
             </router-link>
@@ -134,30 +113,27 @@
 
         <!-- Other login types -->
         <sign-in-links active-link="parent"/>
-
-        <!-- Fun characters at bottom -->
-        <EmojiBounceAnimation :emojis="['👨‍👩‍👧‍👦','💕','📚','🌟']"/>
       </Card>
 
       <!-- Footer text -->
       <div class="text-center mt-6">
-        <p class="text-white text-sm opacity-80">
-          Supporting your child's learning journey every step of the way
+        <p class="text-gray-600 text-sm">
+          Supporting your child's learning journey
         </p>
       </div>
     </div>
   </div>
   </div>
-
 </template>
 
 <script setup>
 import {ref, computed, watch} from 'vue'
 import {useRouter} from 'vue-router'
-import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon} from 'lucide-vue-next'
+import {HeartIcon, EyeIcon, EyeOffIcon, CheckCircleIcon, AlertCircleIcon, Loader} from 'lucide-vue-next'
 import axios from '@/plugins/axios.js'
 import SignInLinks from "@/components/partials/SignInLinks.vue";
-import EmojiBounceAnimation from "@/components/partials/EmojiBounceAnimation.vue";
+import {Input} from "@/components/ui/input/index.js";
+import {Button} from "@/components/ui/button/index.js";
 import {Card} from "@/components/ui/card/index.js";
 import GuestNavbar from "@/components/app/GuestNavbar.vue";
 
@@ -186,8 +162,8 @@ const alertClasses = computed(() => {
 
 // Methods
 const getInputClasses = (field) => {
-  const baseClasses = 'focus:border-pink-400'
-  const errorClasses = errors.value[field] ? 'border-red-400' : 'border-gray-200'
+  const baseClasses = 'focus:border-slate-400 focus:ring-slate-400'
+  const errorClasses = errors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
   return `${baseClasses} ${errorClasses}`
 }
 
@@ -284,15 +260,3 @@ const clearErrors = () => {
 // Watch for form changes to clear errors
 watch(formData, clearErrors, {deep: true})
 </script>
-
-<style scoped>
-
-
-.transition-colors {
-  transition-property: color, background-color, border-color;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-
-</style>

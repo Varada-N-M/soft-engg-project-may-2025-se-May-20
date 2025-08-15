@@ -208,11 +208,15 @@ const fetchHabits = async () => {
 
     const today = new Date().toISOString().split('T')[0];
 
-    habits.value = response.data.habits_created.map(habit => {
-      const isCompletedToday = response.data.completed_habits.some(
-        c => c.habit_id === habit.habit_id && c.completion_date && c.completion_date.startsWith(today)
-      );
+    if (!response.data.habits_created) {
+      habits.value = [];
+      return;
+    }
 
+    habits.value = response.data.habits_created.map(habit => {
+      const isCompletedToday = response.data.completed_habits?.some(
+        c => c.habit_id === habit.habit_id && c.completion_date?.startsWith(today)
+      );
       return {
         ...habit,
         id: habit.habit_id,
@@ -220,12 +224,13 @@ const fetchHabits = async () => {
       };
     });
   } catch (err) {
-    error.value = 'Failed to load habits. Please log in and try again.';
     console.error('API Error:', err);
+    error.value = 'Could not load your habits. Please try again.';
   } finally {
     isLoading.value = false;
   }
 };
+
 
 const completeHabit = async (habitId) => {
   const token = localStorage.getItem('access_token');

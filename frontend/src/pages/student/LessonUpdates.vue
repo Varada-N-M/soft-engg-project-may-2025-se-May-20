@@ -1,189 +1,144 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-4">
-            <!-- Back Arrow -->
-            <button
-              @click="goHome"
-              class="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-100"
-            >
-              <ArrowLeftIcon class="w-6 h-6" />
-            </button>
-            <h1 class="text-xl font-bold text-gray-800 font-fancy">📚 Lesson Updates</h1>
-          </div>
-          <div class="flex items-center space-x-6">
-            <div class="text-center">
-              <p class="text-2xl font-bold text-blue-600">{{ lessons.length }}</p>
-              <p class="text-xs text-gray-600">Updates</p>
+  <div class="min-h-screen flex">
+    <aside
+      class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
+      <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 font-playfair">My Dashboard</h2>
+      </div>
+      <nav class="space-y-3">
+        <router-link v-for="link in navLinks" :key="link.name" :to="link.path"
+          class="flex items-center gap-4 py-2 px-2 rounded-xl text-gray-700 hover:text-yellow-600 transition-colors duration-200 font-medium font-playfair">
+          <span class="text-xl">{{ link.icon }}</span> {{ link.name }}
+        </router-link>
+      </nav>
+    </aside>
+
+    <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
+      <div class="max-w-7xl ml-3">
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-6">
+            <!-- Greeting Text (Left Side) -->
+            <div class="flex-1 min-w-max font-playfair">
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                Lesson Updates 📚
+              </h1>
+              <p class="text-lg text-gray-600 font-medium">
+                You have <span class="text-blue-500 font-bold">{{ lessons.length }}</span> updates from
+                <span class="text-green-500 font-bold">{{ uniqueTeachers.length }}</span> teachers.
+              </p>
             </div>
-            <div class="text-center">
-              <p class="text-2xl font-bold text-green-600">{{ uniqueTeachers.length }}</p>
-              <p class="text-xs text-gray-600">Teachers</p>
+
+            <!-- Buttons (Right Side - Horizontal Row) -->
+            <div class="flex space-x-4 min-w-fit font-playfair">
+              <router-link to="/student/profile"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
+                Profile
+              </router-link>
+
+              <button @click="logout"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
+                Logout
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Overview Section -->
-      <div class="mb-8" v-if="!isLoading && !errorMessage">
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
-          <div class="flex flex-col md:flex-row items-center justify-between mb-6">
-            <div>
-              <h2 class="text-2xl font-bold text-gray-800 mb-2">Recent Lesson Updates</h2>
-              <p class="text-gray-600" v-if="lessons.length > 0">{{ lessons.length }} lesson updates from your teachers</p>
-              <p class="text-gray-600" v-else>No lesson updates available</p>
-            </div>
-            <div class="text-6xl animate-bounce">📚</div>
-          </div>
-          
-          <!-- Teachers and Subjects Info -->
-          <div v-if="lessons.length > 0">
-            <div class="mb-4">
-              <h3 class="text-sm font-semibold text-gray-700 mb-2">Teachers:</h3>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="teacher in uniqueTeachers" :key="teacher" class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                  👨‍🏫 {{ teacher }}
-                </span>
-              </div>
-            </div>
-            
-            <div>
-              <h3 class="text-sm font-semibold text-gray-700 mb-2">Subjects Covered:</h3>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="subject in uniqueSubjects" :key="subject" class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
-                  {{ subject }}
-                </span>
-              </div>
-            </div>
-          </div>
+        <!-- Loading State -->
+        <div v-if="isLoading" class="text-center py-20">
+          <p class="text-lg text-gray-600">Loading lesson updates...</p>
         </div>
-      </div>
 
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-16">
-        <div class="text-6xl mb-4 animate-spin">🔄</div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Loading lesson updates...</h3>
-        <p class="text-gray-600">Please wait while we fetch your lesson updates</p>
-      </div>
+        <!-- Error State -->
+        <div v-else-if="errorMessage" class="text-center py-20">
+          <p class="text-lg text-red-500 font-medium">{{ errorMessage }}</p>
+          <button @click="fetchLessonUpdates()"
+            class="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-102 transition-all duration-200 flex items-center mx-auto">
+            🔄 Try Again
+          </button>
+        </div>
 
-      <!-- Error State -->
-      <div v-else-if="errorMessage" class="text-center py-16">
-        <div class="text-6xl mb-4">❌</div>
-        <h3 class="text-xl font-bold text-red-600 mb-2">Oops! Something went wrong</h3>
-        <p class="text-gray-600 mb-6">{{ errorMessage }}</p>
-        <button
-          @click="fetchLessonUpdates()"
-          class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
-        >
-          🔄 Try Again
-        </button>
-      </div>
+        <!-- Empty State -->
+        <div v-else-if="lessons.length === 0" class="text-center py-20">
+          <div class="text-6xl mb-4">✨</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">No Lesson Updates Yet!</h2>
+          <p class="text-gray-600">Your teachers haven’t posted any updates. Check back soon!</p>
+        </div>
 
-      <!-- Lessons Grid -->
-      <div v-else-if="lessons.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="lesson in lessons"
-          :key="lesson.lesson_id"
-          class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 relative overflow-hidden"
-        >
-          <!-- Decorative Icon -->
-          <div class="absolute -top-4 -right-4 text-5xl opacity-20 select-none pointer-events-none">
-            <span v-if="lesson.subject === 'Math'">🧮</span>
-            <span v-else-if="lesson.subject === 'English'">📖</span>
-            <span v-else-if="lesson.subject === 'Science'">🔬</span>
-            <span v-else-if="lesson.subject === 'Social Studies'">🌍</span>
-            <span v-else-if="lesson.subject === 'Technology'">💻</span>
-            <span v-else>📚</span>
-          </div>
-          <div class="relative z-10">
-            <!-- Header with day and subject -->
-            <div class="flex items-center mb-3">
-              <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold mr-2">{{ lesson.day }}</span>
-              <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">{{ lesson.subject }}</span>
+        <div v-if="!isLoading && !errorMessage && lessons.length > 0"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="lesson in lessons" :key="lesson.lesson_id"
+            class="bg-white rounded-3xl p-6 shadow-lg border-2 border-gray-200 transition-transform hover:scale-102 cursor-default">
+            <!-- Header -->
+            <div class="flex items-center mb-4">
+              <div class="text-3xl mr-3">{{ getEmojiForSubject(lesson.subject) }}</div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-lg">{{ lesson.lesson }}</h3>
+                <p class="text-sm text-gray-600">{{ lesson.teacher_name || 'Teacher' }}</p>
+              </div>
             </div>
-            
-            <!-- Lesson title -->
-            <h3 class="font-bold text-gray-800 mb-2 text-lg leading-tight">{{ lesson.lesson }}</h3>
-            
+
             <!-- Summary -->
-            <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ lesson.summary || 'No summary provided' }}</p>
-            
-            <!-- Teacher and date info -->
-            <div class="border-t border-gray-200 pt-3 mt-4">
-              <div class="flex items-center justify-between text-xs text-gray-500">
-                <span v-if="lesson.teacher_name" class="flex items-center">
-                  👨‍🏫 {{ lesson.teacher_name }}
-                </span>
-                <span v-else class="flex items-center">
-                  👨‍🏫 Teacher
-                </span>
-                <span>{{ formatDate(lesson.created_at) }}</span>
+            <p class="text-gray-700 mb-4 text-sm leading-relaxed">{{ lesson.summary || 'No summary provided.' }}</p>
+
+            <!-- Footer -->
+            <div class="flex justify-between items-center text-xs">
+              <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
+                {{ lesson.day }}
+              </div>
+              <div class="text-gray-500">
+                {{ formatDate(lesson.created_at) }}
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="text-center py-16">
-        <div class="text-6xl mb-4">📚</div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">No lesson updates yet</h3>
-        <p class="text-gray-600 mb-4">Your teachers haven't posted any lesson updates yet.</p>
-        <p class="text-sm text-gray-500">Check back later for updates from your teachers!</p>
       </div>
     </main>
-
-    <!-- Floating decorative elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute top-20 left-10 w-8 h-8 bg-yellow-300 rounded-full opacity-20 animate-bounce"></div>
-      <div class="absolute top-40 right-20 w-6 h-6 bg-pink-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 0.5s"></div>
-      <div class="absolute bottom-32 left-20 w-10 h-10 bg-orange-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 1s"></div>
-      <div class="absolute bottom-20 right-10 w-7 h-7 bg-cyan-300 rounded-full opacity-20 animate-bounce" style="animation-delay: 1.5s"></div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeftIcon } from 'lucide-vue-next'
-import api from '../../plugins/axios'
+import api from '@/plugins/axios'
+import { clearAuthData } from '@/utils/auth';
 
 const router = useRouter()
-const goHome = () => {
-  router.push('/student/home')
-}
-
-// Reactive data
 const lessons = ref([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-// API function to fetch lesson updates
+const navLinks = ref([
+  { name: 'Home', path: '/student/home', icon: '🏠' },
+  { name: 'Lesson Updates', path: '/student/lesson-updates', icon: '📚' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
+  { name: 'Habits', path: '/student/habit', icon: '🎯' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
+  { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },
+  { name: 'Badges', path: '/student/badges', icon: '🏅' },
+]);
+
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
+
+// Fetch lesson updates
 const fetchLessonUpdates = async () => {
   isLoading.value = true
   errorMessage.value = ''
 
   try {
     const response = await api.get('/api/child/lesson-updates')
-    
+
     if (response.data.lesson_updates) {
-      // Transform backend data to match frontend structure
       lessons.value = response.data.lesson_updates.map(update => ({
         lesson_id: update.lesson_id,
         lesson: update.lesson,
         summary: update.summary,
         created_at: update.created_at,
         teacher_name: update.teacher_name,
-        // Extract day from created_at date
         day: getDayFromDate(update.created_at),
-        // Extract subject from lesson name (simple heuristic)
         subject: getSubjectFromLesson(update.lesson)
       }))
     } else {
@@ -191,19 +146,14 @@ const fetchLessonUpdates = async () => {
     }
   } catch (error) {
     console.error('Error fetching lesson updates:', error)
-    if (error.response && error.response.data && error.response.data.message) {
-      // Handle case where no teachers are linked to child
-      errorMessage.value = error.response.data.message
-    } else {
-      errorMessage.value = 'Failed to load lesson updates. Please try again.'
-    }
+    errorMessage.value = error.response?.data?.message || 'Failed to load lesson updates. Please try again.'
     lessons.value = []
   } finally {
     isLoading.value = false
   }
 }
 
-// Helper function to get day from date string
+// Helpers
 const getDayFromDate = (dateString) => {
   try {
     const date = new Date(dateString)
@@ -214,25 +164,16 @@ const getDayFromDate = (dateString) => {
   }
 }
 
-// Helper function to determine subject from lesson name
 const getSubjectFromLesson = (lessonName) => {
   const lesson = lessonName.toLowerCase()
-  if (lesson.includes('math') || lesson.includes('fraction') || lesson.includes('number') || lesson.includes('arithmetic')) {
-    return 'Math'
-  } else if (lesson.includes('english') || lesson.includes('grammar') || lesson.includes('writing') || lesson.includes('reading')) {
-    return 'English'
-  } else if (lesson.includes('science') || lesson.includes('experiment') || lesson.includes('biology') || lesson.includes('chemistry') || lesson.includes('physics')) {
-    return 'Science'
-  } else if (lesson.includes('social') || lesson.includes('history') || lesson.includes('geography') || lesson.includes('community')) {
-    return 'Social Studies'
-  } else if (lesson.includes('computer') || lesson.includes('technology') || lesson.includes('coding')) {
-    return 'Technology'
-  } else {
-    return 'General'
-  }
+  if (lesson.includes('math') || lesson.includes('fraction') || lesson.includes('number')) return 'Math'
+  if (lesson.includes('english') || lesson.includes('grammar') || lesson.includes('reading')) return 'English'
+  if (lesson.includes('science') || lesson.includes('biology') || lesson.includes('chemistry')) return 'Science'
+  if (lesson.includes('social') || lesson.includes('history') || lesson.includes('geography')) return 'Social Studies'
+  if (lesson.includes('computer') || lesson.includes('technology') || lesson.includes('coding')) return 'Technology'
+  return 'General'
 }
 
-// Helper function to format date
 const formatDate = (dateString) => {
   try {
     const date = new Date(dateString)
@@ -240,37 +181,36 @@ const formatDate = (dateString) => {
     const yesterday = new Date(today)
     yesterday.setDate(today.getDate() - 1)
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today'
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday'
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }
+    if (date.toDateString() === today.toDateString()) return 'Today'
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday'
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   } catch (error) {
     return 'Unknown'
   }
 }
 
-// Computed properties
+const getEmojiForSubject = (subject) => {
+  switch (subject) {
+    case 'Math': return '🧮'
+    case 'English': return '📖'
+    case 'Science': return '🔬'
+    case 'Social Studies': return '🌍'
+    case 'Technology': return '💻'
+    default: return '📚'
+  }
+}
+
+// Computed
 const uniqueSubjects = computed(() => {
-  const set = new Set(lessons.value.map(l => l.subject))
-  return Array.from(set)
+  return Array.from(new Set(lessons.value.map(l => l.subject)))
 })
 
 const uniqueTeachers = computed(() => {
-  const set = new Set(lessons.value.filter(l => l.teacher_name).map(l => l.teacher_name))
-  return Array.from(set)
+  return Array.from(new Set(lessons.value.filter(l => l.teacher_name).map(l => l.teacher_name)))
 })
 
-// Mount lifecycle
+// Lifecycle
 onMounted(async () => {
   await fetchLessonUpdates()
 })
 </script>
-
-<style scoped>
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-</style>

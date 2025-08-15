@@ -1,12 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex page-font">
+  <div class="min-h-screen bg-gray-100 page-font">
     <!-- Parent Navbar -->
     <ParentNavbar :page-title="getPageTitle()" />
 
     <!-- Main Content -->
-    <div class="flex-1 lg:ml-64">
-      <!-- Mobile Header Spacing -->
-      <div class="h-16 lg:h-0"></div>
+    <div class="pt-0">
 
       <!-- Page Content -->
       <div class="p-6">

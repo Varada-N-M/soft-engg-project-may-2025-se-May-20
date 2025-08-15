@@ -1,73 +1,92 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
-    <header class="max-w-4xl mx-auto mb-8 text-center">
-      <router-link to="/student/home" class="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Dashboard
-      </router-link>
-      <h1 class="text-4xl font-extrabold text-gray-900 mb-2">My To-Do List ✅</h1>
-      <p class="text-lg text-gray-600 font-medium">
-        You have <span class="text-blue-500 font-bold">{{ todos.length }}</span> tasks on your list.
-      </p>
-    </header>
-
-    <main class="max-w-6xl mx-auto">
-      <div class="flex justify-center mb-8">
-        <button
-          @click="openCreateModal"
-          class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center"
-        >
-          <span class="text-xl mr-2">➕</span>
-          Add New Task
-        </button>
+  <div class="min-h-screen flex">
+    <aside
+      class="w-64 bg-opacity-90 backdrop-blur-sm p-6 fixed left-5 top-3 bottom-3 rounded-[20px] overflow-y-auto z-50 shadow-[0_0_10px_rgba(0,0,0,0.14)] flex flex-col">
+      <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 font-playfair">My Dashboard</h2>
       </div>
+      <nav class="space-y-3">
+        <router-link v-for="link in navLinks" :key="link.name" :to="link.path"
+          class="flex items-center gap-4 py-2 px-2 rounded-xl text-gray-700 hover:text-yellow-600 transition-colors duration-200 font-medium font-playfair">
+          <span class="text-xl">{{ link.icon }}</span> {{ link.name }}
+        </router-link>
+      </nav>
+    </aside>
 
-      <div v-if="isLoading" class="text-center py-20">
-        <p class="text-lg text-gray-600">Loading tasks...</p>
-      </div>
-
-      <div v-else-if="error" class="text-center py-20">
-        <p class="text-lg text-red-500 font-medium">{{ error }}</p>
-      </div>
-
-      <div v-else-if="todos.length > 0" class="space-y-4">
-        <div
-          v-for="todo in todos"
-          :key="todo.id"
-          @click="openEditModal(todo)"
-          class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer flex items-center justify-between"
-          :class="{'border-green-400 bg-green-50': todo.is_completed, 'border-gray-200': !todo.is_completed}"
-        >
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1">
-              <h3
-                class="font-bold text-gray-800 text-lg"
-                :class="{'line-through text-gray-500': todo.is_completed}"
-              >
-                {{ todo.task_name }}
-              </h3>
-              <span v-if="todo.is_daily" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">🔁 Daily</span>
+    <main class="flex-1 ml-64 p-8 overflow-y-auto bg-gray-50">
+      <div class="max-w-7xl ml-3">
+        <div class="bg-white rounded-3xl p-8 mb-8 shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-6">
+            <!-- Greeting Text (Left Side) -->
+            <div class="flex-1 min-w-max font-playfair">
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">My To-Do List ✅</h1>
+              <p class="text-lg text-gray-600 font-medium">
+                You have <span class="text-blue-500 font-bold">{{ todos.length }}</span> tasks on your list.
+              </p>
             </div>
-            <p class="text-sm text-gray-600 mb-1">{{ todo.description }}</p>
-            <p v-if="todo.completion_date" class="text-xs text-gray-500">
-              Due: {{ formatDate(todo.completion_date) }}
-            </p>
-            <p class="text-xs text-gray-400 mt-1">Created: {{ formatDate(todo.created_at) }}</p>
-          </div>
 
-          <div class="flex-shrink-0 ml-4">
-            <div v-if="todo.is_completed" class="text-2xl text-green-600 font-bold">✅</div>
-            <div v-else class="text-2xl text-yellow-500 font-bold">⏳</div>
+            <!-- Buttons (Right Side - Horizontal Row) -->
+            <div class="flex space-x-4 min-w-fit font-playfair">
+              <router-link to="/student/profile"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-200 font-medium">
+                Profile
+              </router-link>
+
+              <button @click="logout"
+                class="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-colors duration-200 font-medium">
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div v-else class="text-center py-20">
-        <div class="text-6xl mb-4">✨</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">No Tasks Yet!</h2>
-        <p class="text-gray-600">Click the button above to add your first task.</p>
+        <div class="flex justify-center mb-8">
+          <button @click="openCreateModal"
+            class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center">
+            <span class="text-xl mr-2">➕</span>
+            Add New Task
+          </button>
+        </div>
+
+        <div v-if="isLoading" class="text-center py-20">
+          <p class="text-lg text-gray-600">Loading tasks...</p>
+        </div>
+
+        <div v-else-if="error" class="text-center py-20">
+          <p class="text-lg text-red-500 font-medium">{{ error }}</p>
+        </div>
+
+        <div v-else-if="todos.length > 0" class="space-y-4">
+          <div v-for="todo in todos" :key="todo.id" @click="openEditModal(todo)"
+            class="bg-white rounded-3xl p-6 shadow-lg border-2 transition-transform hover:scale-105 cursor-pointer flex items-center justify-between"
+            :class="{ 'border-green-400 bg-green-50': todo.is_completed, 'border-gray-200': !todo.is_completed }">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-gray-800 text-lg"
+                  :class="{ 'line-through text-gray-500': todo.is_completed }">
+                  {{ todo.task_name }}
+                </h3>
+                <span v-if="todo.is_daily" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">🔁 Daily</span>
+              </div>
+              <p class="text-sm text-gray-600 mb-1">{{ todo.description }}</p>
+              <p v-if="todo.completion_date" class="text-xs text-gray-500">
+                Due: {{ formatDate(todo.completion_date) }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Created: {{ formatDate(todo.created_at) }}</p>
+            </div>
+
+            <div class="flex-shrink-0 ml-4">
+              <div v-if="todo.is_completed" class="text-2xl text-green-600 font-bold">✅</div>
+              <div v-else class="text-2xl text-yellow-500 font-bold">⏳</div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="text-center py-20">
+          <div class="text-6xl mb-4">✨</div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">No Tasks Yet!</h2>
+          <p class="text-gray-600">Click the button above to add your first task.</p>
+        </div>
       </div>
     </main>
 
@@ -87,33 +106,21 @@
         <form @submit.prevent="saveTodo" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Task Name</label>
-            <input
-              v-model="todoForm.task_name"
-              type="text"
+            <input v-model="todoForm.task_name" type="text"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Finish science project"
-              required
-            >
+              placeholder="e.g., Finish science project" required>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="todoForm.description"
+            <textarea v-model="todoForm.description"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Add details about the task..."
-              rows="3"
-              required
-            ></textarea>
+              placeholder="Add details about the task..." rows="3" required></textarea>
           </div>
 
           <div class="flex items-center">
-            <input
-              id="is-daily"
-              type="checkbox"
-              v-model="todoForm.is_daily"
-              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            >
+            <input id="is-daily" type="checkbox" v-model="todoForm.is_daily"
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <label for="is-daily" class="ml-2 block text-sm text-gray-900">
               Recurring daily task
             </label>
@@ -121,45 +128,29 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Due Date (Optional)</label>
-            <input
-              v-model="todoForm.completion_date"
-              type="date"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
+            <input v-model="todoForm.completion_date" type="date"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
           </div>
 
           <div v-if="editingTodo" class="flex items-center">
-            <input
-              id="completed-checkbox"
-              type="checkbox"
-              v-model="todoForm.is_completed"
-              class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-            >
+            <input id="completed-checkbox" type="checkbox" v-model="todoForm.is_completed"
+              class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
             <label for="completed-checkbox" class="ml-2 block text-sm text-gray-900">
               Mark as Completed
             </label>
           </div>
 
           <div class="flex space-x-3 pt-4">
-            <button
-              v-if="editingTodo"
-              type="button"
-              @click="deleteTodo"
-              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors"
-            >
+            <button v-if="editingTodo" type="button" @click="deleteTodo"
+              class="flex-1 py-3 px-4 rounded-xl border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors">
               Delete
             </button>
-            <button
-              type="button"
-              @click="closeModal"
-              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
+            <button type="button" @click="closeModal"
+              class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
-              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
+            <button type="submit"
+              class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200">
               {{ editingTodo ? 'Update Task' : 'Add Task' }}
             </button>
           </div>
@@ -172,6 +163,10 @@
 <script setup>
 import api from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { clearAuthData } from '@/utils/auth';
+
+const router = useRouter();
 
 // --- Reactive Data ---
 const showModal = ref(false);
@@ -179,6 +174,22 @@ const editingTodo = ref(null);
 const todos = ref([]);
 const isLoading = ref(true);
 const error = ref(null);
+
+const navLinks = ref([
+  { name: 'Home', path: '/student/home', icon: '🏠' },
+  { name: 'Lesson Updates', path: '/student/lesson-updates', icon: '📚' },
+  { name: 'To-do List', path: '/student/todolist', icon: '✔️' },
+  { name: 'Habits', path: '/student/habit', icon: '🎯' },
+  { name: 'Life Lessons', path: '/student/life-lessons', icon: '📖' },
+  { name: 'Journal', path: '/student/journal', icon: '✍️' },
+  { name: 'AI Companion', path: '/student/ai-companion', icon: '🤖' },
+  { name: 'Badges', path: '/student/badges', icon: '🏅' },
+]);
+
+const logout = () => {
+  clearAuthData();
+  router.push('/');
+};
 
 const todoForm = ref({
   id: null,

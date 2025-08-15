@@ -686,3 +686,329 @@ class GetSchools(Resource):
 
         except Exception as e:
             return {"error": str(e)}, 500
+
+
+class StudentProgressAPI(Resource):
+    @jwt_required()
+    def get(self, student_id):
+        """
+        Get comprehensive progress data for a specific student.
+        Only accessible by teachers linked to the student.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            # Verify teacher is linked to the student
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {'error': 'Student is not linked to this teacher'}, 404
+
+            student = Child.query.get(student_id)
+            if not student:
+                return {'error': 'Student not found'}, 404
+
+            # Get student basic info
+            student_info = {
+                'student_id': student.child_id,
+                'first_name': student.user.first_name,
+                'last_name': student.user.last_name,
+                'email': student.user.email,
+                'xp_points': student.xp_points,
+                'streak': student.streak,
+                'class_': student.class_,
+                'school_name': student.school_name
+            }
+
+            # Get skills progress
+            skills = db.session.query(CommonSkill, SkillCompleted).outerjoin(
+                SkillCompleted, (CommonSkill.id == SkillCompleted.skill_id) & 
+                (SkillCompleted.child_id == student_id)
+            ).all()
+            
+            skills_data = []
+            for skill, completion in skills:
+                skills_data.append({
+                    'skill_id': skill.id,
+                    'skill_name': skill.skill_name,
+                    'skill_type': skill.skill_type,
+                    'skill_xp': skill.skill_xp,
+                    'is_completed': completion.is_learned if completion else False,
+                    'completion_date': completion.completion_date.isoformat() if completion and completion.completion_date else None
+                })
+
+            # Get badges
+            badges = Badge.query.filter_by(child_id=student_id, is_earned=True).all()
+            badges_data = []
+            for badge in badges:
+                badges_data.append({
+                    'badge_id': badge.badge_id,
+                    'badge': badge.badge,
+                    'level': badge.level,
+                    'badge_xp': badge.badge_xp,
+                    'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+                })
+
+            # Get habits
+            habits = Habit.query.filter_by(child_id=student_id).all()
+            habits_data = []
+            for habit in habits:
+                # Get recent completions (last 30 days)
+                recent_completions = HabitCompletion.query.filter(
+                    HabitCompletion.habit_id == habit.habit_id,
+                    HabitCompletion.completion_date >= (datetime.now() - timedelta(days=30))
+                ).count()
+                
+                habits_data.append({
+                    'habit_id': habit.habit_id,
+                    'name': habit.name,
+                    'description': habit.description,
+                    'category': habit.category,
+                    'habit_xp': habit.habit_xp,
+                    'recent_completions': recent_completions
+                })
+
+            return {
+                'student': student_info,
+                'skills': skills_data,
+                'badges': badges_data,
+                'habits': habits_data,
+                'total_skills': len(skills_data),
+                'completed_skills': len([s for s in skills_data if s['is_completed']]),
+                'total_badges': len(badges_data)
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class StudentHabitsAPI(Resource):
+    @jwt_required()
+    def get(self, student_id):
+        """
+        Get detailed habits data for a specific student.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            # Verify teacher is linked to the student
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {'error': 'Student is not linked to this teacher'}, 404
+
+            habits = Habit.query.filter_by(child_id=student_id).all()
+            habits_data = []
+            
+            for habit in habits:
+                # Get completion history
+                completions = HabitCompletion.query.filter_by(habit_id=habit.habit_id).order_by(
+                    HabitCompletion.completion_date.desc()
+                ).limit(30).all()
+                
+                completion_history = []
+                for completion in completions:
+                    completion_history.append({
+                        'completion_date': completion.completion_date.date().isoformat(),
+                        'is_done': completion.is_done
+                    })
+                
+                habits_data.append({
+                    'habit_id': habit.habit_id,
+                    'name': habit.name,
+                    'description': habit.description,
+                    'category': habit.category,
+                    'habit_xp': habit.habit_xp,
+                    'completion_history': completion_history,
+                    'total_completions': len([c for c in completion_history if c['is_done']])
+                })
+
+            return {'habits': habits_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class StudentSkillsAPI(Resource):
+    @jwt_required()
+    def get(self, student_id):
+        """
+        Get detailed skills data for a specific student.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            # Verify teacher is linked to the student
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {'error': 'Student is not linked to this teacher'}, 404
+
+            # Get all skills with completion status
+            skills = db.session.query(CommonSkill, SkillCompleted).outerjoin(
+                SkillCompleted, (CommonSkill.id == SkillCompleted.skill_id) & 
+                (SkillCompleted.child_id == student_id)
+            ).all()
+            
+            skills_by_type = {}
+            for skill, completion in skills:
+                if skill.skill_type not in skills_by_type:
+                    skills_by_type[skill.skill_type] = []
+                
+                skills_by_type[skill.skill_type].append({
+                    'skill_id': skill.id,
+                    'skill_name': skill.skill_name,
+                    'skill_xp': skill.skill_xp,
+                    'video_url': skill.video_url,
+                    'is_completed': completion.is_learned if completion else False,
+                    'completion_date': completion.completion_date.isoformat() if completion and completion.completion_date else None
+                })
+
+            return {'skills_by_type': skills_by_type}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class StudentBadgesAPI(Resource):
+    @jwt_required()
+    def get(self, student_id):
+        """
+        Get badges earned by a specific student.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            # Verify teacher is linked to the student
+            link = TeacherChild.query.filter_by(
+                teacher_id=teacher.teacher_id, child_id=student_id
+            ).first()
+            if not link:
+                return {'error': 'Student is not linked to this teacher'}, 404
+
+            badges = Badge.query.filter_by(child_id=student_id, is_earned=True).order_by(
+                Badge.earned_at.desc()
+            ).all()
+            
+            badges_data = []
+            for badge in badges:
+                badges_data.append({
+                    'badge_id': badge.badge_id,
+                    'badge': badge.badge,
+                    'level': badge.level,
+                    'badge_xp': badge.badge_xp,
+                    'earned_at': badge.earned_at.isoformat() if badge.earned_at else None
+                })
+
+            return {'badges': badges_data}, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500
+
+
+class ClassAnalyticsAPI(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Get analytics for all students linked to the teacher.
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            user = Users.query.filter_by(user_id=current_user_id, is_active=True).first()
+            if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
+                return {'error': 'Only active teacher/principal users can access this'}, 403
+
+            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+            if not teacher:
+                return {'error': 'Teacher profile not found'}, 404
+
+            # Get all linked students
+            links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
+            student_ids = [link.child_id for link in links]
+
+            if not student_ids:
+                return {
+                    'total_students': 0,
+                    'class_overview': {},
+                    'top_performers': [],
+                    'skills_summary': {}
+                }, 200
+
+            # Class overview
+            students = Child.query.filter(Child.child_id.in_(student_ids)).all()
+            total_xp = sum([s.xp_points for s in students])
+            avg_xp = total_xp / len(students) if students else 0
+
+            # Top performers (by XP)
+            top_performers = sorted(students, key=lambda x: x.xp_points, reverse=True)[:5]
+            top_performers_data = []
+            for student in top_performers:
+                top_performers_data.append({
+                    'student_id': student.child_id,
+                    'name': f"{student.user.first_name} {student.user.last_name}",
+                    'xp_points': student.xp_points,
+                    'streak': student.streak
+                })
+
+            # Skills summary
+            skills_summary = db.session.query(
+                CommonSkill.skill_type,
+                func.count(SkillCompleted.skill_id).label('completed_count'),
+                func.count(CommonSkill.id).label('total_skills')
+            ).outerjoin(
+                SkillCompleted, (CommonSkill.id == SkillCompleted.skill_id) & 
+                (SkillCompleted.child_id.in_(student_ids)) & (SkillCompleted.is_learned == True)
+            ).group_by(CommonSkill.skill_type).all()
+
+            skills_data = {}
+            for skill_type, completed, total in skills_summary:
+                skills_data[skill_type] = {
+                    'completed': completed,
+                    'total': total * len(students),  # Total possible completions
+                    'completion_rate': (completed / (total * len(students))) * 100 if total > 0 else 0
+                }
+
+            return {
+                'total_students': len(students),
+                'class_overview': {
+                    'total_xp': total_xp,
+                    'average_xp': round(avg_xp, 2),
+                    'total_badges': Badge.query.filter(Badge.child_id.in_(student_ids), Badge.is_earned == True).count()
+                },
+                'top_performers': top_performers_data,
+                'skills_summary': skills_data
+            }, 200
+
+        except Exception as e:
+            return {'error': 'Internal server error', 'details': str(e)}, 500

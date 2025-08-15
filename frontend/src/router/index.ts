@@ -34,6 +34,10 @@ import TeachersList from "../pages/organisation/TeachersList.vue";
 import TeacherDashboard from "../pages/teacher/Dashboard.vue";
 import TeacherProfile from "../pages/teacher/TeacherProfile.vue";
 import TeacherStudents from "../pages/teacher/TeacherStudents.vue";
+import StudentProgress from "../pages/teacher/StudentProgress.vue";
+import ClassAnalytics from "../pages/teacher/ClassAnalytics.vue";
+import ChildProgress from "../pages/parent/ChildProgress.vue";
+import Achievements from "../pages/parent/Achievements.vue";
 import NotFound from "../pages/NotFound.vue";
 import ChangePassword from '../pages/ChangePassword.vue';
 import ResetPassword from '../pages/ResetPassword.vue';
@@ -80,6 +84,8 @@ const routes = [
     {path: '/parent/lesson-updates', component: ParentLessonUpdates},
     {path: '/parent/link-child', component: LinkChild},
     {path: '/parent/children', component: LinkedChildren},
+    {path: '/parent/child-progress/:childId', component: ChildProgress},
+    {path: '/parent/achievements/:childId', component: Achievements},
     // END PARENT SECTION
 
 
@@ -93,6 +99,8 @@ const routes = [
     {path: '/teacher/survey-report', component: SurveyReport},
     {path: '/teacher/lesson-updates', component: TeacherLessonUpdates},
     {path: '/teacher/add-student', component: AddStudent},
+    {path: '/teacher/student-progress/:studentId', component: StudentProgress},
+    {path: '/teacher/class-analytics', component: ClassAnalytics},
     // END TEACHER SECTION
 
     // 404 Catch-all route - must be last

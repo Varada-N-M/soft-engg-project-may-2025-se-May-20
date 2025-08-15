@@ -6,7 +6,9 @@ from api.auth.routes import (ChangePassword, ForgotPassword, Login,
                              SignupTeacher)
 from api.organization.routes import OrganizationStats
 from api.parent.routes import (GetLinkedChildren, LinkChildToParent,
-                               ParentChildrenLessonUpdates, ParentProfile)
+                               ParentChildrenLessonUpdates, ParentProfile,
+                               ChildHabitsAPI, ChildSkillsAPI, ChildBadgesAPI,
+                               ChildTodosAPI, ChildWeeklyReportAPI)
 from api.student.routes import (AnalyzeWriting, BadgeCountAPI,
                                 CompletedSkillsCountAPI, CompleteHabit,
                                 CompleteSkill, GrammarCheck, GratitudeEntry,
@@ -19,7 +21,10 @@ from api.teacher.routes import (AddStudent, CreateSchool, GetLinkedStudents,
                                 TeacherLessonUpdateDetail,
                                 TeacherLessonUpdates, TeacherProfile,
                                 UnlinkStudentFromTeacher,PrincipalTeacher,
-                                PrincipalTeacherManagement, GetSchools)
+                                PrincipalTeacherManagement, GetSchools,
+                                StudentProgressAPI, StudentHabitsAPI,
+                                StudentSkillsAPI, StudentBadgesAPI,
+                                ClassAnalyticsAPI)
 
 api = Api()
 
@@ -65,6 +70,11 @@ api.add_resource(LinkChildToParent, '/api/parent/link-child', '/api/parent/unlin
 api.add_resource(ParentProfile, '/api/parent/profile')
 api.add_resource(GetLinkedChildren, '/api/parent/linked-children')
 api.add_resource(ParentChildrenLessonUpdates, '/api/parent/children/lesson-updates')
+api.add_resource(ChildHabitsAPI, '/api/parent/children/<int:child_id>/habits')
+api.add_resource(ChildSkillsAPI, '/api/parent/children/<int:child_id>/skills')
+api.add_resource(ChildBadgesAPI, '/api/parent/children/<int:child_id>/badges')
+api.add_resource(ChildTodosAPI, '/api/parent/children/<int:child_id>/todos')
+api.add_resource(ChildWeeklyReportAPI, '/api/parent/children/<int:child_id>/weekly-report')
 
 # Teacher
 api.add_resource(AddStudent, '/api/teacher/add-student')
@@ -75,6 +85,11 @@ api.add_resource(LinkStudentToTeacher, '/api/teacher/link-student')
 api.add_resource(UnlinkStudentFromTeacher, '/api/teacher/unlink-student/<int:student_id>')
 api.add_resource(TeacherProfile, '/api/teacher/profile')
 api.add_resource(GetLinkedStudents, '/api/teacher/linked-students')
+api.add_resource(StudentProgressAPI, '/api/teacher/students/<int:student_id>/progress')
+api.add_resource(StudentHabitsAPI, '/api/teacher/students/<int:student_id>/habits')
+api.add_resource(StudentSkillsAPI, '/api/teacher/students/<int:student_id>/skills')
+api.add_resource(StudentBadgesAPI, '/api/teacher/students/<int:student_id>/badges')
+api.add_resource(ClassAnalyticsAPI, '/api/teacher/class/analytics')
 api.add_resource(PrincipalTeacher, "/principal/teachers")
 api.add_resource(PrincipalTeacherManagement, "/principal/teachers/<int:teacher_id>")
 

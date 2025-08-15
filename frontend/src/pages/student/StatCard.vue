@@ -10,7 +10,6 @@
       </div>
       <div class="text-4xl">{{ icon }}</div>
     </div>
-    <p v-if="unit" class="text-gray-500 text-sm">{{ unit }}</p>
   </div>
 </template>
 

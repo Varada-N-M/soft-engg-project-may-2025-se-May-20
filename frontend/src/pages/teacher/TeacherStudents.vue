@@ -131,9 +131,12 @@
               </div>
               
               <div class="flex space-x-2 pt-2">
-                <button class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+                <router-link 
+                  :to="`/teacher/student-progress/${student.student_id}`"
+                  class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium text-center block"
+                >
                   📊 View Progress
-                </button>
+                </router-link>
                 <button 
                   @click="confirmRemoveStudent(student)"
                   class="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"

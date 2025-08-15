@@ -5,7 +5,7 @@
         <!-- Logo and Brand -->
         <div class="flex items-center space-x-4">
           <router-link to="/teacher/dashboard" class="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-lg">
+            <div class="w-10 h-10 border-2 border-gray-600 rounded-full flex items-center justify-center shadow-sm">
               <span class="text-white text-lg font-bold">👨‍🏫</span>
             </div>
             <div class="hidden sm:block">
@@ -52,7 +52,7 @@
                   class="flex items-center space-x-1 text-gray-700 hover:text-green-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-green-50"
                   :class="{ 'text-green-600 bg-green-50': $route.path.includes('/teacher/student-progress') || $route.path.includes('/teacher/class-analytics') }"
               >
-                <span>📈 Progress</span>
+                <span>📈 Reports</span>
                 <ChevronDownIcon class="w-4 h-4" />
               </button>
 
@@ -68,6 +68,14 @@
                     @click="showProgressMenu = false"
                 >
                   📊 Class Analytics
+                </router-link>
+                <router-link
+                    v-if="isPrincipal"
+                    to="/teacher/principal-reports"
+                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
+                    @click="showProgressMenu = false"
+                >
+                  📈 Admin Reports
                 </router-link>
                 <div class="px-4 py-2 text-xs text-gray-500 border-t border-gray-100 mt-1">
                   Individual student progress available from student list
@@ -190,6 +198,16 @@
             📈 Class Analytics
           </router-link>
 
+          <router-link
+              v-if="isPrincipal"
+              to="/teacher/principal-reports"
+              class="block px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+              :class="{ 'text-green-600 bg-green-50': $route.path === '/teacher/principal-reports' }"
+              @click="showMobileMenu = false"
+          >
+            📊 Admin Reports
+          </router-link>
+
         </div>
 
         <!-- Mobile User Section -->
@@ -274,6 +292,7 @@ const showUserMenu = ref(false)
 const showProgressMenu = ref(false)
 const notificationCount = ref(2)
 const isLoadingUser = ref(true)
+const isPrincipal = ref(false)
 
 // Dynamic user data loaded from API
 const currentUser = ref({
@@ -366,9 +385,16 @@ const handleClickOutside = (event) => {
   }
 }
 
+// Check if user is principal
+const checkUserRole = () => {
+  const userType = localStorage.getItem('user_type')
+  isPrincipal.value = userType === 'principal'
+}
+
 // Lifecycle hooks
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  checkUserRole()
   fetchTeacherProfile()
 })
 

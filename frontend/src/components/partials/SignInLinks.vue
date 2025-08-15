@@ -23,13 +23,6 @@
       >
         👨‍🏫 Teacher
       </router-link>
-      <router-link
-          v-if="activeLink!=='org'"
-          to="/org/login"
-          class="text-xs text-blue-600 hover:text-blue-800 transition-colors"
-      >
-        🏢 Organisation
-      </router-link>
     </div>
   </div>
 </template>

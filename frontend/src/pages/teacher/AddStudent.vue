@@ -1,69 +1,78 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-400 via-blue-400 to-purple-300">
+  <div class="min-h-screen ">
     <!-- Navbar -->
-    <TeacherNavbar />
-    
+    <TeacherNavbar/>
+
     <div class="flex items-center justify-center p-4 pt-8">
-      <FloatingDecorativeElements />
-      <div class="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20">
-      <div class="text-center">
-        <h2 class="text-3xl font-bold text-gray-800">Add Student</h2>
-        <p class="mt-2 text-gray-600">Enter the student's email to add them to your class.</p>
-      </div>
+      <div
+          class="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border ">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-gray-800">Add Student</h2>
+          <p class="mt-2 text-gray-600">Enter the student's email to add them to your class.</p>
+        </div>
 
-      <div v-if="message" :class="['p-4 rounded-xl text-center', messageClass]">
-        {{ message }}
-      </div>
+        <div v-if="message" :class="['p-4 rounded-xl text-center', messageClass]">
+          {{ message }}
+        </div>
 
-      <form @submit.prevent="addStudent" class="space-y-6">
-        <div>
-          <label for="student-email" class="text-sm font-medium text-gray-700 sr-only">Student's Email</label>
-          <div class="relative">
-            <input
-              id="student-email"
-              v-model="studentEmail"
-              type="email"
-              required
-              class="w-full px-4 py-3 text-lg text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all"
-              placeholder="student@example.com"
-            />
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+        <form @submit.prevent="addStudent" class="space-y-6">
+          <div>
+            <label for="student-email" class="text-sm font-medium text-gray-700 sr-only">Student's Email</label>
+            <div class="relative">
+              <input
+                  id="student-email"
+                  v-model="studentEmail"
+                  type="email"
+                  required
+                  class="w-full px-4 py-3 text-lg text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all"
+                  placeholder="student@example.com"
+              />
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
-        <div>
-          <button
-            type="submit"
-            class="w-full px-4 py-3 font-bold text-white bg-gradient-to-r from-green-500 to-blue-600 rounded-xl hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-105 transition-all duration-200 shadow-lg"
-            :disabled="isLoading"
-          >
-            <span v-if="isLoading" class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <div>
+            <Button
+                type="submit"
+                size="lg"
+                class="w-full  text-white transform hover:scale-105 transition-all duration-200"
+                :disabled="isLoading"
+            >
+              <Link class="mr-2"/>
+              <span v-if="isLoading" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                   viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Processing...
             </span>
-            <span v-else class="text-lg">Add Student</span>
-          </button>
+              <span v-else>Add Student</span>
+            </Button>
+          </div>
+        </form>
+        <div class="text-center mt-4">
+          <router-link to="/teacher/dashboard" class="text-sm text-gray-600 hover:text-blue-500 transition-colors">Back
+            to Dashboard
+          </router-link>
         </div>
-      </form>
-      <div class="text-center mt-4">
-        <router-link to="/teacher/dashboard" class="text-sm text-gray-600 hover:text-blue-500 transition-colors">Back to Dashboard</router-link>
-      </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import FloatingDecorativeElements from "@/components/partials/FloatingDecorativeElements.vue";
+import {ref} from 'vue';
+import {Link} from 'lucide-vue-next'
 import TeacherNavbar from '@/components/app/TeacherNavbar.vue';
 import axios from '@/plugins/axios.js';
+import {Button} from "@/components/ui/button/index.js";
 
 const studentEmail = ref('');
 const isLoading = ref(false);
@@ -81,8 +90,8 @@ const addStudent = async () => {
   message.value = '';
 
   try {
-    const response = await axios.post('/api/teacher/add-student', { 
-      student_email: studentEmail.value 
+    const response = await axios.post('/api/teacher/add-student', {
+      student_email: studentEmail.value
     });
 
     if (response.status === 201) {

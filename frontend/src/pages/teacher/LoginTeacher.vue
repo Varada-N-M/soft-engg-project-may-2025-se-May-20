@@ -239,9 +239,13 @@ const handleLogin = async () => {
         message: apiResponse.data.message || 'Welcome back, educator! Ready to inspire? 🎓'
       }
 
-      // Redirect to teacher dashboard after a short delay
+      // Redirect based on role after a short delay
       setTimeout(() => {
-        router.push('/teacher/dashboard')
+        if (formData.value.role === 'principal') {
+          router.push('/teacher/principal-reports')
+        } else {
+          router.push('/teacher/dashboard')
+        }
       }, 500)
     }
   } catch (error) {

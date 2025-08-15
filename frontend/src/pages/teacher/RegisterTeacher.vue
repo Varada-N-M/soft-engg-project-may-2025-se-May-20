@@ -68,7 +68,7 @@
                     :class="getInputClasses('first_name')"
                     required
                 />
-                <p v-if="errors.first_name" class="text-xs text-red-500">{{ errors.first_name }}</p>
+                <p v-if="allErrors.first_name" class="text-xs text-red-500">{{ allErrors.first_name }}</p>
               </div>
 
               <div class="space-y-2">
@@ -84,7 +84,7 @@
                     :class="getInputClasses('last_name')"
                     required
                 />
-                <p v-if="errors.last_name" class="text-xs text-red-500">{{ errors.last_name }}</p>
+                <p v-if="allErrors.last_name" class="text-xs text-red-500">{{ allErrors.last_name }}</p>
               </div>
             </div>
 
@@ -103,7 +103,7 @@
                   required
               />
               <p class="text-xs text-gray-500">This will be your login email</p>
-              <p v-if="errors.email" class="text-xs text-red-500">{{ errors.email }}</p>
+              <p v-if="allErrors.email" class="text-xs text-red-500">{{ allErrors.email }}</p>
             </div>
 
             <!-- Subject and School -->
@@ -132,7 +132,7 @@
                     <SelectItem value="Physical Education">Physical Education</SelectItem>
                   </SelectContent>
                 </Select>
-                <p v-if="errors.subject" class="text-xs text-red-500">{{ errors.subject }}</p>
+                <p v-if="allErrors.subject" class="text-xs text-red-500">{{ allErrors.subject }}</p>
               </div>
 
               <div class="space-y-2">
@@ -197,8 +197,8 @@
                 
                 <p v-if="formData.role === 'teacher'" class="text-xs text-gray-500">Select the school you work at</p>
                 <p v-else class="text-xs text-gray-500">Enter the name of your school to create it</p>
-                <p v-if="errors.school_id" class="text-xs text-red-500">{{ errors.school_id }}</p>
-                <p v-if="errors.school_name" class="text-xs text-red-500">{{ errors.school_name }}</p>
+                <p v-if="allErrors.school_id" class="text-xs text-red-500">{{ allErrors.school_id }}</p>
+                <p v-if="allErrors.school_name" class="text-xs text-red-500">{{ allErrors.school_name }}</p>
               </div>
             </div>
 
@@ -226,7 +226,7 @@
                   <EyeOffIcon v-else class="w-4 h-4"/>
                 </button>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500">{{ errors.password }}</p>
+              <p v-if="allErrors.password" class="text-xs text-red-500">{{ allErrors.password }}</p>
 
               <!-- Password strength indicator -->
               <div v-if="formData.password" class="mt-2">
@@ -379,22 +379,63 @@ const passwordStrengthTextColor = computed(() => {
   return colors[strength] || colors[0]
 })
 
+// Real-time validation errors
+const realTimeErrors = computed(() => {
+  const errors = {}
+  
+  if (formData.value.email && !/\S+@\S+\.\S+/.test(formData.value.email)) {
+    errors.email = 'Email is invalid'
+  }
+  
+  if (formData.value.password && formData.value.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
+  }
+  
+  // Role-specific validation
+  if (formData.value.role === 'teacher') {
+    if (formData.value.school_id && (formData.value.school_id === 'loading' || formData.value.school_id === 'no-schools')) {
+      errors.school_id = 'Please select a valid school'
+    }
+  } else {
+    if (formData.value.school_name && formData.value.school_name.length === 0) {
+      errors.school_name = 'School name is required'
+    }
+  }
+  
+  return errors
+})
+
+// Combined errors (server errors + real-time errors)
+const allErrors = computed(() => {
+  return { ...errors.value, ...realTimeErrors.value }
+})
+
 const isFormValid = computed(() => {
-  const baseValid = formData.value.first_name &&
+  // Check if all required fields are filled
+  const hasAllFields = formData.value.first_name &&
       formData.value.last_name &&
       formData.value.email &&
       formData.value.subject &&
-      formData.value.password &&
-      passwordStrength.value >= 2 &&
-      Object.keys(errors.value).length === 0
+      formData.value.password
   
+  if (!hasAllFields) return false
+  
+  // Check password strength
+  if (passwordStrength.value < 2) return false
+  
+  // Check password length
+  if (formData.value.password.length < 6) return false
+  
+  // Check email validity
+  if (!/\S+@\S+\.\S+/.test(formData.value.email)) return false
+  
+  // Role-specific validation
   if (formData.value.role === 'teacher') {
-    return baseValid &&
-        formData.value.school_id &&
+    return formData.value.school_id &&
         formData.value.school_id !== 'loading' &&
         formData.value.school_id !== 'no-schools'
   } else {
-    return baseValid && formData.value.school_name
+    return formData.value.school_name && formData.value.school_name.length > 0
   }
 })
 
@@ -417,7 +458,7 @@ const getPasswordStrengthColor = (index) => {
 
 const getInputClasses = (field) => {
   const baseClasses = 'focus:border-slate-400 focus:ring-slate-400'
-  const errorClasses = errors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
+  const errorClasses = allErrors.value[field] ? 'border-red-400 focus:border-red-400 focus:ring-red-400' : 'border-gray-300'
   return `${baseClasses} ${errorClasses}`
 }
 
@@ -518,6 +559,8 @@ watch(formData, (newData, oldData) => {
   Object.keys(newData).forEach(key => {
     if (newData[key] !== oldData[key] && errors.value[key]) {
       delete errors.value[key]
+      // Force reactivity update
+      errors.value = { ...errors.value }
     }
   })
 }, {deep: true})

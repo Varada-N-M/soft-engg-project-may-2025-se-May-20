@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+  <div class="min-h-screen ">
     <!-- Navbar -->
     <TeacherNavbar />
 
@@ -7,7 +7,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Welcome Section -->
       <div class="mb-8">
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-md border ">
           <div class="flex flex-col md:flex-row items-center justify-between">
             <div>
               <h2 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Your Dashboard</h2>
@@ -20,7 +20,7 @@
 
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md border ">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-3xl font-bold text-blue-600">{{ stats.totalLessons }}</p>
@@ -30,7 +30,7 @@
           </div>
         </div>
         
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md border ">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-3xl font-bold text-green-600">{{ stats.totalStudents }}</p>
@@ -40,7 +40,7 @@
           </div>
         </div>
         
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md border ">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-3xl font-bold text-purple-600">{{ stats.uniqueSubjects }}</p>
@@ -50,7 +50,7 @@
           </div>
         </div>
         
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md border ">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-3xl font-bold text-orange-600">{{ stats.thisWeekLessons }}</p>
@@ -63,10 +63,9 @@
 
       <!-- Principal School Profile Section -->
       <div v-if="isPrincipal" class="mb-8">
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-md border ">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-              <span class="text-3xl mr-3">👑</span>
               School Profile
             </h3>
             <div class="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold">
@@ -158,7 +157,7 @@
       <!-- Navigation Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <!-- Lesson Updates -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/lesson-updates')">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border  transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/lesson-updates')">
           <div class="flex items-center justify-between mb-4">
             <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📝</div>
             <div class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
@@ -176,7 +175,7 @@
         </div>
 
         <!-- Add Students -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20 transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/students')">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border  transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/students')">
           <div class="flex items-center justify-between mb-4">
             <div class="text-5xl group-hover:scale-110 transition-transform duration-300">👥</div>
             <div class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
@@ -187,6 +186,24 @@
           <p class="text-gray-600 mb-4">Add new students to your classes and manage your student roster.</p>
           <div class="flex items-center text-green-600 font-semibold group-hover:text-green-700">
             <span>Manage Students</span>
+            <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Principal Reports (Only for Principals) -->
+        <div v-if="isPrincipal" class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border  transform transition-all duration-300 hover:scale-105 group cursor-pointer" @click="navigateTo('/teacher/principal-reports')">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📊</div>
+            <div class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">
+              Principal
+            </div>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Organization Reports</h3>
+          <p class="text-gray-600 mb-4">View comprehensive statistics and analytics for your organization.</p>
+          <div class="flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
+            <span>View Reports</span>
             <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
@@ -258,13 +275,7 @@
       <!-- Empty State -->
     </main>
 
-    <!-- Floating decorative elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute top-20 left-10 w-8 h-8 bg-blue-200 rounded-full opacity-20 animate-bounce"></div>
-      <div class="absolute top-40 right-20 w-6 h-6 bg-purple-200 rounded-full opacity-20 animate-bounce" style="animation-delay: 0.5s"></div>
-      <div class="absolute bottom-32 left-20 w-10 h-10 bg-green-200 rounded-full opacity-20 animate-bounce" style="animation-delay: 1s"></div>
-      <div class="absolute bottom-20 right-10 w-7 h-7 bg-orange-200 rounded-full opacity-20 animate-bounce" style="animation-delay: 1.5s"></div>
-    </div>
+
   </div>
 </template>
 

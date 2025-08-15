@@ -1,5 +1,5 @@
 <template>
-  <header class="backdrop-blur-lg bg-opacity-40  sticky top-3 z-10 mx-auto max-w-7xl rounded-[35px]">
+  <header class="backdrop-blur-lg border border-b-slate-300 shadow-xs bg-opacity-40  sticky top-3 z-10 mx-auto max-w-7xl rounded-[35px]">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo and Brand -->
@@ -86,19 +86,6 @@
                     </div>
                   </router-link>
 
-                  <router-link
-                      to="/org/login"
-                      class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      @click="showLoginMenu = false"
-                  >
-                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mr-3">
-                      <span class="text-white text-xs font-bold">🏢</span>
-                    </div>
-                    <div>
-                      <p class="font-medium">Organization Login</p>
-                      <p class="text-xs text-gray-500">School & institution access</p>
-                    </div>
-                  </router-link>
                 </div>
               </div>
             </div>
@@ -210,19 +197,6 @@
               </div>
             </router-link>
 
-            <router-link
-                to="/login/organization"
-                class="flex items-center px-3 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
-                @click="showMobileMenu = false"
-            >
-              <div class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mr-3">
-                <span class="text-white text-xs">🏢</span>
-              </div>
-              <div>
-                <p class="font-medium">Organization</p>
-                <p class="text-xs text-gray-500">School & institution</p>
-              </div>
-            </router-link>
           </div>
 
           <!-- Mobile Get Started Button -->

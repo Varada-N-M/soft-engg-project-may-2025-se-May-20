@@ -1,24 +1,60 @@
 openapi: 3.0.0
 info:
   title: GrowWise API
-  description: API documentation for the GrowWise application, which includes user authentication, child-parent linking, student habits, gratitude entries, and organization statistics.
-  version: "1.0"
+  description: API documentation for the GrowWise application, which includes user
+    authentication, child-parent linking, student habits, gratitude entries, AI-powered features and organization statistics.
+  version: '2.0'
 tags:
-  - name: Auth
-    description: Authentication and user management
-  - name: Parent
-    description: Parent-specific operations
-  - name: Student
-    description: Student-specific operations
-  - name: Teacher
-    description: Teacher-specific operations
-  - name: Organization
-    description: Organization-specific operations
+- name: Auth
+  description: Authentication and user management
+- name: Parent
+  description: Parent-specific operations
+- name: Student
+  description: Student-specific operations
+- name: Teacher
+  description: Teacher-specific operations
+- name: Organization
+  description: Organization-specific operations
+- name: AI
+  description: AI-powered features for students
 paths:
-  /api/auth/signup/child:
+  /api/login:
     post:
       tags:
-        - Auth
+      - Auth
+      summary: User login
+      description: Authenticates a user and returns an access and refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                role_type:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+  /api/refresh-token:
+    post:
+      tags:
+      - Auth
+      summary: Refresh access token
+      description: Returns a new access token for the user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+  /api/child/register:
+    post:
+      tags:
+      - Auth
       summary: Register a new child user
       description: Creates a new user with the 'child' role.
       requestBody:
@@ -48,10 +84,10 @@ paths:
       responses:
         '201':
           description: Child registered successfully
-  /api/auth/signup/parent:
+  /api/parent/register:
     post:
       tags:
-        - Auth
+      - Auth
       summary: Register a new parent user
       description: Creates a new user with the 'parent' role.
       requestBody:
@@ -74,12 +110,13 @@ paths:
       responses:
         '201':
           description: Parent registered successfully
-  /api/auth/signup/organization:
+  /api/organization/register:
     post:
       tags:
-        - Auth
+      - Auth
       summary: Register a new organization
-      description: Creates a new user with the 'organization' role and an associated organization.
+      description: Creates a new user with the 'organization' role and an associated
+        organization.
       requestBody:
         required: true
         content:
@@ -104,10 +141,10 @@ paths:
       responses:
         '201':
           description: Organization registered successfully
-  /api/auth/signup/teacher:
+  /api/teacher/register:
     post:
       tags:
-        - Auth
+      - Auth
       summary: Register a new teacher user
       description: Creates a new user with the 'teacher' or 'principal' role.
       requestBody:
@@ -132,12 +169,12 @@ paths:
       responses:
         '201':
           description: Teacher registered successfully
-  /api/auth/login:
+  /api/admin/register:
     post:
       tags:
-        - Auth
-      summary: User login
-      description: Authenticates a user and returns an access and refresh token.
+      - Auth
+      summary: Register a new admin user
+      description: Creates a new user with the 'admin' role.
       requestBody:
         required: true
         content:
@@ -149,28 +186,21 @@ paths:
                   type: string
                 password:
                   type: string
+                first_name:
+                  type: string
+                last_name:
+                  type: string
       responses:
-        '200':
-          description: Login successful
-  /api/auth/refresh:
+        '201':
+          description: Admin registered successfully
+  /api/admin/add-school:
     post:
       tags:
-        - Auth
-      summary: Refresh access token
-      description: Returns a new access token for the user.
+      - Teacher
+      summary: Create a new school
+      description: Creates a new school. Only accessible by principal.
       security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Token refreshed successfully
-  /api/parent/link-child:
-    post:
-      tags:
-        - Parent
-      summary: Link a child to a parent
-      description: Links a child to the logged-in parent using the child's unique key.
-      security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -178,36 +208,92 @@ paths:
             schema:
               type: object
               properties:
-                child_key:
+                name:
+                  type: string
+                phone_number:
+                  type: string
+                address:
                   type: string
       responses:
         '201':
-          description: Child linked successfully
-  /api/parent/unlink-child/{child_id}:
-    put:
+          description: School created successfully
+  /api/schools:
+    get:
       tags:
-        - Parent
-      summary: Unlink a child from a parent
-      description: Unlinks a child from the logged-in parent.
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: child_id
-          required: true
-          schema:
-            type: integer
+      - Teacher
+      summary: Get all schools
+      description: Get all available schools for registration.
       responses:
         '200':
-          description: Child unlinked successfully
-  /api/student/gratitude:
+          description: A list of schools
+  /api/auth/forgot-password:
     post:
       tags:
-        - Student
+      - Auth
+      summary: Forgot password
+      description: Sends a password reset link to the user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: If the email exists, a reset link has been sent.
+  /api/auth/reset-password:
+    post:
+      tags:
+      - Auth
+      summary: Reset password
+      description: Resets the user's password using a token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                new_password:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successfully
+  /api/auth/change-password:
+    post:
+      tags:
+      - Auth
+      summary: Change password
+      description: Changes the password of the logged-in user.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+      responses:
+        '200':
+          description: Password changed successfully
+  /api/child/gratitude:
+    post:
+      tags:
+      - Student
       summary: Create a gratitude entry
       description: Creates a new gratitude entry for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -222,40 +308,40 @@ paths:
           description: Gratitude entry created successfully
     get:
       tags:
-        - Student
+      - Student
       summary: Get gratitude entries
       description: Retrieves gratitude entries for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: query
-          name: date
-          schema:
-            type: string
-            format: date
-          description: "Filter by date (DD-MM-YY)"
-        - in: query
-          name: days
-          schema:
-            type: integer
-          description: "Filter by last N days"
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        description: Filter by date (DD-MM-YY)
+      - in: query
+        name: days
+        schema:
+          type: integer
+        description: Filter by last N days
       responses:
         '200':
           description: A list of gratitude entries
-  /api/student/gratitude/{entry_id}:
+  /api/child/gratitude/{entry_id}:
     put:
       tags:
-        - Student
+      - Student
       summary: Update a gratitude entry
       description: Updates a specific gratitude entry for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: entry_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: entry_id
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -270,28 +356,28 @@ paths:
           description: Gratitude entry updated successfully
     delete:
       tags:
-        - Student
+      - Student
       summary: Delete a gratitude entry
       description: Deletes a specific gratitude entry for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: entry_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: entry_id
+        required: true
+        schema:
+          type: integer
       responses:
         '200':
           description: Gratitude entry deleted successfully
-  /api/student/habits:
+  /api/child/habit:
     post:
       tags:
-        - Student
+      - Student
       summary: Create a new habit
       description: Creates a new habit for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -312,28 +398,28 @@ paths:
           description: Habit created successfully
     get:
       tags:
-        - Student
+      - Student
       summary: Get all habits
       description: Retrieves all habits for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       responses:
         '200':
           description: A list of habits
-  /api/student/habits/{habit_id}:
+  /api/child/habit/{habit_id}:
     put:
       tags:
-        - Student
+      - Student
       summary: Update a habit
       description: Updates a specific habit for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: habit_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: habit_id
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -354,45 +440,45 @@ paths:
           description: Habit updated successfully
     delete:
       tags:
-        - Student
+      - Student
       summary: Delete a habit
       description: Deletes a specific habit for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: habit_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: habit_id
+        required: true
+        schema:
+          type: integer
       responses:
         '200':
           description: Habit deleted successfully
-  /api/student/habits/{habit_id}/complete:
+  /api/child/habit/{habit_id}/complete:
     post:
       tags:
-        - Student
+      - Student
       summary: Complete a habit
       description: Marks a habit as complete for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: habit_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: habit_id
+        required: true
+        schema:
+          type: integer
       responses:
         '200':
           description: Habit marked as complete
-  /api/student/todos:
+  /api/todos:
     post:
       tags:
-        - Student
+      - Student
       summary: Create a to-do item
       description: Creates a new to-do item for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -406,10 +492,7 @@ paths:
                   type: string
                 is_daily:
                   type: boolean
-                start_date:
-                  type: string
-                  format: date-time
-                due_date:
+                completion_date:
                   type: string
                   format: date-time
       responses:
@@ -417,43 +500,28 @@ paths:
           description: To-do item created successfully
     get:
       tags:
-        - Student
+      - Student
       summary: Get to-do items
       description: Retrieves to-do items for the logged-in child.
       security:
-        - bearerAuth: []
-      parameters:
-        - in: query
-          name: is_done
-          schema:
-            type: boolean
-        - in: query
-          name: is_daily
-          schema:
-            type: boolean
-        - in: query
-          name: date
-          schema:
-            type: string
-            format: date
-          description: "Filter by date (DD-MM-YY)"
+      - bearerAuth: []
       responses:
         '200':
           description: A list of to-do items
-  /api/student/todos/{todo_id}:
+  /api/todos/{todo_id}:
     put:
       tags:
-        - Student
+      - Student
       summary: Update a to-do item
       description: Updates a specific to-do item for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: todo_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: todo_id
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -469,33 +537,443 @@ paths:
                   type: boolean
                 is_done:
                   type: boolean
+                completion_date:
+                  type: string
+                  format: date-time
       responses:
         '200':
           description: To-do item updated successfully
     delete:
       tags:
-        - Student
+      - Student
       summary: Delete a to-do item
       description: Deletes a specific to-do item for the logged-in child.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: todo_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: todo_id
+        required: true
+        schema:
+          type: integer
       responses:
         '200':
           description: To-do item deleted successfully
+  /api/child/lesson-updates:
+    get:
+      tags:
+      - Student
+      summary: Get lesson updates
+      description: Get all lesson updates for the logged-in child user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of lesson updates
+  /api/child/skills:
+    get:
+      tags:
+      - Student
+      summary: Get all skills
+      description: Get all skills for the logged-in child user, including completed
+        skills.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of skills
+    post:
+      tags:
+      - Student
+      summary: Add a new skill
+      description: Add a new skill to the common skills list.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skill_name:
+                  type: string
+                video_url:
+                  type: string
+                skill_xp:
+                  type: integer
+      responses:
+        '201':
+          description: Skill added successfully
+  /api/child/skills/{skill_id}:
+    put:
+      tags:
+      - Student
+      summary: Update a skill
+      description: Update an existing skill.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: skill_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skill_name:
+                  type: string
+                video_url:
+                  type: string
+                skill_xp:
+                  type: integer
+      responses:
+        '200':
+          description: Skill updated successfully
+    delete:
+      tags:
+      - Student
+      summary: Delete a skill
+      description: Delete a skill.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: skill_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Skill deleted successfully
+  /api/child/skills/{skill_id}/complete:
+    post:
+      tags:
+      - Student
+      summary: Complete a skill
+      description: Mark a skill as learned by the logged-in child user.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: skill_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Skill marked as learned successfully
+  /api/child/profile:
+    get:
+      tags:
+      - Student
+      summary: Get student profile
+      description: Get the profile of the logged-in child user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: The student's profile
+  /api/child/badge/count:
+    get:
+      tags:
+      - Student
+      summary: Get badge count
+      description: Get the total number of badges for the logged-in child user.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: query
+        name: earned
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: The number of badges
+  /api/child/skills/completed/count:
+    get:
+      tags:
+      - Student
+      summary: Get completed skills count
+      description: Get the total number of completed (learned) skills for the logged-in
+        child user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: The number of completed skills
+  /api/child/badges/earned:
+    get:
+      tags:
+      - Student
+      summary: Get earned badges
+      description: Get all earned badges for the logged-in child user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of earned badges
+  /api/child/improve-sentence:
+    post:
+      tags:
+      - AI
+      summary: Improve a sentence
+      description: Improve a sentence using AI - child-friendly version.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sentence:
+                  type: string
+      responses:
+        '200':
+          description: The improved sentence
+  /api/child/analyze-writing:
+    post:
+      tags:
+      - AI
+      summary: Analyze writing
+      description: Analyze longer writing pieces - child-friendly version
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                type:
+                  type: string
+      responses:
+        '200':
+          description: The analysis of the writing
+  /api/child/grammar-check:
+    post:
+      tags:
+      - AI
+      summary: Grammar check
+      description: Kid-friendly grammar check with AI enhancement
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '200':
+          description: The grammar check results
+  /api/child/vocabulary-suggestions:
+    post:
+      tags:
+      - AI
+      summary: Vocabulary suggestions
+      description: Kid-friendly vocabulary improvement suggestions
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '200':
+          description: A list of vocabulary suggestions
+  /api/child/story-starter:
+    get:
+      tags:
+      - AI
+      summary: Story starter
+      description: Get fun story starters for kids
+      responses:
+        '200':
+          description: A story starter
+  /api/parent/link-child:
+    post:
+      tags:
+      - Parent
+      summary: Link a child to a parent
+      description: Links a child to the logged-in parent using the child's unique
+        key.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                child_key:
+                  type: string
+      responses:
+        '201':
+          description: Child linked successfully
+  /api/parent/unlink-child/{child_id}:
+    put:
+      tags:
+      - Parent
+      summary: Unlink a child from a parent
+      description: Unlinks a child from the logged-in parent.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Child unlinked successfully
+  /api/parent/profile:
+    get:
+      tags:
+      - Parent
+      summary: Get parent profile
+      description: Get the profile of the logged-in parent user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: The parent's profile
+  /api/parent/linked-children:
+    get:
+      tags:
+      - Parent
+      summary: Get linked children
+      description: Get all children linked to the current parent.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of linked children
+  /api/parent/children/lesson-updates:
+    get:
+      tags:
+      - Parent
+      summary: Get children's lesson updates
+      description: Get lesson updates for all children linked to the current parent.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of lesson updates
+  /api/parent/children/{child_id}/habits:
+    get:
+      tags:
+      - Parent
+      summary: Get child's habits
+      description: Get detailed habits data for a specific child.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of habits
+  /api/parent/children/{child_id}/skills:
+    get:
+      tags:
+      - Parent
+      summary: Get child's skills
+      description: Get detailed skills data for a specific child.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of skills
+  /api/parent/children/{child_id}/badges:
+    get:
+      tags:
+      - Parent
+      summary: Get child's badges
+      description: Get badges earned by a specific child.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of badges
+  /api/parent/children/{child_id}/todos:
+    get:
+      tags:
+      - Parent
+      summary: Get child's to-dos
+      description: Get todos for a specific child.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of to-dos
+  /api/parent/children/{child_id}/weekly-report:
+    get:
+      tags:
+      - Parent
+      summary: Get child's weekly report
+      description: Get weekly progress report for a specific child.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: child_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: The weekly report
   /api/teacher/add-student:
     post:
       tags:
-        - Teacher
+      - Teacher
       summary: Add a student to a teacher's class
-      description: Adds a student to the logged-in teacher's class using the student's email.
+      description: Adds a student to the logged-in teacher's class using the student's
+        email.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -511,28 +989,28 @@ paths:
   /api/teacher/remove-student/{student_id}:
     delete:
       tags:
-        - Teacher
+      - Teacher
       summary: Remove a student from a teacher's class
       description: Removes a student from the logged-in teacher's class.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       parameters:
-        - in: path
-          name: student_id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
       responses:
         '200':
           description: Student removed successfully
-  /api/teacher/lesson-update:
+  /api/teacher/lesson-updates:
     post:
       tags:
-        - Teacher
+      - Teacher
       summary: Create a lesson update
       description: Creates a new lesson update for the logged-in teacher's class.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -540,59 +1018,273 @@ paths:
             schema:
               type: object
               properties:
+                day:
+                  type: string
+                subject:
+                  type: string
                 lesson:
                   type: string
-                summary:
+                activity:
                   type: string
+                class_:
+                  type: integer
       responses:
         '201':
           description: Lesson update created successfully
+    get:
+      tags:
+      - Teacher
+      summary: Get lesson updates
+      description: Get all lesson updates for the logged-in teacher user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of lesson updates
+  /api/teacher/lesson-updates/{lesson_id}:
+    put:
+      tags:
+      - Teacher
+      summary: Update a lesson update
+      description: Update a specific lesson update by ID.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: lesson_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                day:
+                  type: string
+                subject:
+                  type: string
+                lesson:
+                  type: string
+                activity:
+                  type: string
+                class_:
+                  type: integer
+      responses:
+        '200':
+          description: Lesson update updated successfully
+    delete:
+      tags:
+      - Teacher
+      summary: Delete a lesson update
+      description: Delete a specific lesson update by ID.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: lesson_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Lesson update deleted successfully
+  /api/teacher/link-student:
+    post:
+      tags:
+      - Teacher
+      summary: Link a student to a teacher
+      description: Link a student to a teacher using the student's email.
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                student_email:
+                  type: string
+      responses:
+        '201':
+          description: Student linked successfully
+  /api/teacher/unlink-student/{student_id}:
+    delete:
+      tags:
+      - Teacher
+      summary: Unlink a student from a teacher
+      description: Unlink a student from a teacher.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Student unlinked successfully
+  /api/teacher/profile:
+    get:
+      tags:
+      - Teacher
+      summary: Get teacher profile
+      description: Get the profile of the logged-in teacher user.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: The teacher's profile
+  /api/teacher/linked-students:
+    get:
+      tags:
+      - Teacher
+      summary: Get linked students
+      description: Get all students linked to the logged-in teacher.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of linked students
+  /api/teacher/students/{student_id}/progress:
+    get:
+      tags:
+      - Teacher
+      summary: Get student progress
+      description: Get comprehensive progress data for a specific student.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: The student's progress
+  /api/teacher/students/{student_id}/habits:
+    get:
+      tags:
+      - Teacher
+      summary: Get student's habits
+      description: Get detailed habits data for a specific student.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of habits
+  /api/teacher/students/{student_id}/skills:
+    get:
+      tags:
+      - Teacher
+      summary: Get student's skills
+      description: Get detailed skills data for a specific student.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of skills
+  /api/teacher/students/{student_id}/badges:
+    get:
+      tags:
+      - Teacher
+      summary: Get student's badges
+      description: Get badges earned by a specific student.
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: student_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: A list of badges
+  /api/teacher/class/analytics:
+    get:
+      tags:
+      - Teacher
+      summary: Get class analytics
+      description: Get analytics for all students linked to the teacher.
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: The class analytics
+  /principal/teachers:
+    get:
+      tags:
+      - Teacher
+      summary: Get all teachers in principal's school
+      description: List all teachers in principal's school (except themselves).
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: A list of teachers
+  /principal/teachers/{teacher_id}:
+    get:
+      tags:
+      - Teacher
+      summary: Get a single teacher
+      description: Get a single teacher (if in school).
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: teacher_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: The teacher's information
+    delete:
+      tags:
+      - Teacher
+      summary: Remove a teacher
+      description: Remove a teacher (not themselves).
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: teacher_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Teacher removed successfully
   /api/organization/stats:
     get:
       tags:
-        - Organization
+      - Organization
       summary: Get organization statistics
-      description: Retrieves anonymized student data and school performance metrics for the logged-in organization.
+      description: Retrieves anonymized student data and school performance metrics
+        for the logged-in organization.
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       responses:
         '200':
           description: A JSON object with organization statistics.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  anonymized_student_data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        student_id:
-                          type: integer
-                        xp_points:
-                          type: integer
-                        streak:
-                          type: integer
-                        habits_completed:
-                          type: integer
-                        badges_earned:
-                          type: integer
-                        skills_learned:
-                          type: integer
-                  school_performance:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        school_id:
-                          type: integer
-                        school_name:
-                          type: string
-                        number_of_students:
-                          type: integer
-                        average_xp_per_student:
-                          type: number
 components:
   securitySchemes:
     bearerAuth:

@@ -1246,7 +1246,8 @@ class CommunicationHelper:
             You are helping a child aged 8-14 improve their writing. Be encouraging, positive, and use simple language.
             
             Please help improve this sentence: "{sentence}"
-            
+
+            if there is no enough child safety elements then
             Provide:
             1. An improved version that keeps their original idea
             2. A simple, encouraging explanation of what you changed (use kid-friendly language)
@@ -1474,7 +1475,8 @@ class AnalyzeWriting(Resource):
                 You are helping a child aged 8-14 improve their {writing_type}. Be very encouraging and positive!
                 
                 Here's what they wrote: "{text}"
-                
+
+                if there is no enough child safety elements then
                 Please provide feedback that:
                 1. Starts with genuine praise for what they did well (be specific!)
                 2. Gives 2-3 gentle suggestions for improvement using simple, friendly language
@@ -1543,7 +1545,8 @@ class GrammarCheck(Resource):
                 You are a friendly grammar helper for children aged 8-14. Please analyze this text for grammar issues and provide helpful suggestions.
                 
                 Text to check: "{text}"
-                
+
+                if there is no enough child safety elements then
                 Please provide:
                 1. A corrected version of the text (if needed)
                 2. A list of grammar issues you found, explained in simple, kid-friendly language

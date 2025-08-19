@@ -129,24 +129,24 @@
             </button>
 
             <div v-if="writingResults" class="results">
-              <div class="stats">
-                <div class="stat-item">
-                  <div class="stat-number">{{ writingResults.analysis?.word_count || 0 }}</div>
-                  <div class="stat-label">Words</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ writingResults.analysis?.sentence_count || 0 }}</div>
-                  <div class="stat-label">Sentences</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ Math.round(writingResults.analysis?.avg_sentence_length || 0) }}</div>
-                  <div class="stat-label">Avg Words/Sentence</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ writingResults.readability_score || 'N/A' }}</div>
-                  <div class="stat-label">Readability</div>
-                </div>
-              </div>
+<!--              <div class="stats">-->
+<!--                <div class="stat-item">-->
+<!--                  <div class="stat-number">{{ writingResults.analysis?.word_count || 0 }}</div>-->
+<!--                  <div class="stat-label">Words</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item">-->
+<!--                  <div class="stat-number">{{ writingResults.analysis?.sentence_count || 0 }}</div>-->
+<!--                  <div class="stat-label">Sentences</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item">-->
+<!--                  <div class="stat-number">{{ Math.round(writingResults.analysis?.avg_sentence_length || 0) }}</div>-->
+<!--                  <div class="stat-label">Avg Words/Sentence</div>-->
+<!--                </div>-->
+<!--                <div class="stat-item">-->
+<!--                  <div class="stat-number">{{ writingResults.readability_score || 'N/A' }}</div>-->
+<!--                  <div class="stat-label">Readability</div>-->
+<!--                </div>-->
+<!--              </div>-->
 
               <div class="result-section">
                 <h3>🤖 AI Feedback</h3>
@@ -166,7 +166,7 @@
                 <h3>💡 Suggestions</h3>
                 <ul class="tips-list">
                   <li v-for="suggestion in writingResults.analysis.suggestions.slice(0, 5)" :key="suggestion">
-                    {{ 
+                    {{
                     suggestion }}
                   </li>
                 </ul>

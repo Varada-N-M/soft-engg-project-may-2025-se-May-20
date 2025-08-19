@@ -1,0 +1,343 @@
+# GrowWise Application User Guide
+
+## Table of Contents
+1. Application Setup
+2. User Credentials & Login
+3. User Flows by Role
+4. Key Features Overview
+5. Complete URL Reference
+6. Troubleshooting
+
+================================================================================
+## 1. APPLICATION SETUP
+
+### How to Run the Application:
+1. Open terminal in project root directory
+2. Make script executable (first time only):
+   ```
+   chmod +x run_all.sh
+   ```
+3. Run the application:
+   ```
+   ./run_all.sh
+   ```
+
+### Access URLs:
+- Frontend Application: http://localhost:5173
+- Backend API: http://127.0.0.1:5000
+- API Documentation: http://127.0.0.1:5000/static/swagger.html
+
+### Database Setup:
+- The application uses SQLite database
+- Run `python backend/migrate.py` to seed the database with test data
+- Database file: `backend/database.db`
+
+================================================================================
+## 2. USER CREDENTIALS & LOGIN
+
+### Available User Types:
+- **Admin/Organization** - System administration
+- **Principal** - School principal management
+- **Teacher** - Classroom management and student tracking
+- **Student** - Learning activities and progress tracking
+- **Parent** - Child monitoring and progress viewing
+
+### Default Login Credentials:
+
+#### Admin
+- URL: http://localhost:5173/org/login
+- Email: admin@school.edu
+- Password: admin123
+
+#### Principal
+- URL: http://localhost:5173/teacher/login
+- Email: mariah.jace@school.edu
+- Password: teacher123
+
+#### Teachers
+- URL: http://localhost:5173/teacher/login
+- Sarah Johnson (Math): sarah.johnson@school.edu / teacher123
+- Mike Davis (English): mike.davis@school.edu / teacher123
+- Lisa Wang (Science): lisa.wang@school.edu / teacher123
+
+#### Students
+- URL: http://localhost:5173/student/login
+- Emma Brown: emma.brown@student.edu / student123
+- Noah Wilson: noah.wilson@student.edu / student123
+- Sophia Garcia: sophia.garcia@student.edu / student123
+- Liam Martinez: liam.martinez@student.edu / student123
+- Olivia Lee: olivia.lee@student.edu / student123
+- Ethan Taylor: ethan.taylor@student.edu / student123
+
+#### Parents
+- URL: http://localhost:5173/parent/login
+- Jennifer Brown: parent1@example.com / parent123
+- Robert Wilson: parent2@example.com / parent123
+
+================================================================================
+## 3. USER FLOWS BY ROLE
+
+### ADMIN/ORGANIZATION FLOW
+
+1. **Login**
+   - Go to: http://localhost:5173/org/login
+   - Enter admin credentials
+   - Redirected to: http://localhost:5173/org/home
+
+2. **Organization Dashboard**
+   - View system overview and statistics
+   - Access organization management tools
+   - Monitor overall platform usage
+
+3. **Manage Teachers**
+   - Go to: http://localhost:5173/org/add-teacher
+   - Add new teachers to the system
+   - View teachers list: http://localhost:5173/org/teachers
+   - Manage teacher accounts and permissions
+
+4. **View Reports**
+   - Access system-wide reports
+   - Monitor platform usage and analytics
+   - Generate organization reports
+
+### TEACHER/PRINCIPAL FLOW
+
+1. **Login**
+   - Go to: http://localhost:5173/teacher/login
+   - Enter teacher credentials
+   - Redirected to: http://localhost:5173/teacher/dashboard
+
+2. **Teacher Dashboard**
+   - View class overview and student statistics
+   - Access quick actions for common tasks
+   - Monitor recent student activities
+
+3. **Manage Students**
+   - View students: http://localhost:5173/teacher/students
+   - Add student: http://localhost:5173/teacher/add-student
+   - View individual student progress: http://localhost:5173/teacher/student-progress/:studentId
+
+4. **Create Lesson Updates**
+   - Go to: http://localhost:5173/teacher/lesson-updates
+   - Create and manage lesson plans
+   - Share updates with students and parents
+
+5. **View Analytics**
+   - Class analytics: http://localhost:5173/teacher/class-analytics
+   - Principal reports: http://localhost:5173/teacher/principal-reports
+   - Survey reports: http://localhost:5173/teacher/survey-report
+
+6. **Profile Management**
+   - Teacher profile: http://localhost:5173/teacher/profile
+   - Update personal information and settings
+
+### STUDENT FLOW
+
+1. **Login**
+   - Go to: http://localhost:5173/student/login
+   - Enter student credentials
+   - Redirected to: http://localhost:5173/student/home
+
+2. **Student Home Dashboard**
+   - View daily activities and progress
+   - Access quick links to learning modules
+   - Check upcoming tasks and deadlines
+
+3. **Learning Activities**
+   - Lesson updates: http://localhost:5173/student/lesson-updates
+   - Life lessons: http://localhost:5173/student/life-lessons
+   - AI companion: http://localhost:5173/student/ai-companion
+
+4. **Progress Tracking**
+   - Badges: http://localhost:5173/student/badges
+   - Habits: http://localhost:5173/student/habit
+   - Weekly report: http://localhost:5173/student/weekly-report
+
+5. **Personal Tools**
+   - Todo list: http://localhost:5173/student/todolist
+   - Journal: http://localhost:5173/student/journal
+   - Profile: http://localhost:5173/student/profile
+
+6. **Assessments**
+   - Survey: http://localhost:5173/student/survey
+
+### PARENT FLOW
+
+1. **Login**
+   - Go to: http://localhost:5173/parent/login
+   - Enter parent credentials
+   - Redirected to: http://localhost:5173/parent/home
+
+2. **Parent Dashboard**
+   - View connected children overview
+   - Access child monitoring tools
+   - Check recent updates and notifications
+
+3. **Link Children**
+   - Link child: http://localhost:5173/parent/link-child
+   - View linked children: http://localhost:5173/parent/children
+   - Manage child connections
+
+4. **Monitor Child Progress**
+   - Child progress: http://localhost:5173/parent/child-progress/:childId
+   - Achievements: http://localhost:5173/parent/achievements/:childId
+   - View detailed progress reports
+
+5. **View Updates**
+   - Lesson updates: http://localhost:5173/parent/lesson-updates
+   - Teacher communications and class updates
+
+================================================================================
+## 4. KEY FEATURES OVERVIEW
+
+### Authentication & Security
+- JWT-based authentication
+- Role-based access control
+- Password reset functionality
+- Session management
+
+### Student Features
+- Interactive learning modules
+- Progress tracking with XP points
+- Habit formation tools
+- AI-powered learning companion
+- Digital journal and reflection tools
+- Badge and achievement system
+
+### Teacher Features
+- Student management system
+- Lesson planning and updates
+- Progress monitoring and analytics
+- Survey and assessment tools
+- Class-wide reporting
+- Parent communication tools
+
+### Parent Features
+- Child linking and monitoring
+- Progress visibility
+- Achievement tracking
+- Communication with teachers
+- Lesson update notifications
+
+### Organization Features
+- Teacher management
+- System-wide analytics
+- User administration
+- Platform oversight
+
+### Common Skills System
+- Time Management
+- Self Awareness
+- Anger Management
+- Financial Literacy
+- Practical life skills (cooking, gardening, coding)
+
+================================================================================
+## 5. COMPLETE URL REFERENCE
+
+### Public Routes (No Authentication Required)
+- Landing Page: http://localhost:5173/
+- Password Change: http://localhost:5173/user/password/change
+- Password Reset: http://localhost:5173/user/password/reset
+
+### Student Routes
+- Login: http://localhost:5173/student/login
+- Register: http://localhost:5173/student/register
+- Home: http://localhost:5173/student/home
+- Badges: http://localhost:5173/student/badges
+- Habits: http://localhost:5173/student/habit
+- Lesson Updates: http://localhost:5173/student/lesson-updates
+- Survey: http://localhost:5173/student/survey
+- Journal: http://localhost:5173/student/journal
+- Weekly Report: http://localhost:5173/student/weekly-report
+- AI Companion: http://localhost:5173/student/ai-companion
+- Todo List: http://localhost:5173/student/todolist
+- Life Lessons: http://localhost:5173/student/life-lessons
+- Profile: http://localhost:5173/student/profile
+
+### Teacher Routes
+- Login: http://localhost:5173/teacher/login
+- Register: http://localhost:5173/teacher/register
+- Dashboard: http://localhost:5173/teacher/dashboard
+- Home: http://localhost:5173/teacher/home
+- Profile: http://localhost:5173/teacher/profile
+- Students: http://localhost:5173/teacher/students
+- Survey Report: http://localhost:5173/teacher/survey-report
+- Lesson Updates: http://localhost:5173/teacher/lesson-updates
+- Add Student: http://localhost:5173/teacher/add-student
+- Student Progress: http://localhost:5173/teacher/student-progress/:studentId
+- Class Analytics: http://localhost:5173/teacher/class-analytics
+- Principal Reports: http://localhost:5173/teacher/principal-reports
+
+### Parent Routes
+- Login: http://localhost:5173/parent/login
+- Register: http://localhost:5173/parent/register
+- Home: http://localhost:5173/parent/home
+- Lesson Updates: http://localhost:5173/parent/lesson-updates
+- Link Child: http://localhost:5173/parent/link-child
+- Children: http://localhost:5173/parent/children
+- Child Progress: http://localhost:5173/parent/child-progress/:childId
+- Achievements: http://localhost:5173/parent/achievements/:childId
+
+### Organization Routes
+- Login: http://localhost:5173/org/login
+- Register: http://localhost:5173/org/register
+- Home: http://localhost:5173/org/home
+- Survey Report: http://localhost:5173/org/survey-report
+- Add Teacher: http://localhost:5173/org/add-teacher
+- Teachers: http://localhost:5173/org/teachers
+
+================================================================================
+## 6. TROUBLESHOOTING
+
+### Common Issues:
+
+1. **Cannot Access Application**
+   - Ensure both backend and frontend servers are running
+   - Check if ports 5000 and 5173 are available
+   - Verify run_all.sh script has execute permissions
+
+2. **Login Issues**
+   - Verify credentials match those in migrate.py
+   - Check if database has been seeded properly
+   - Clear browser localStorage if authentication is stuck
+
+3. **Database Issues**
+   - Run `python backend/migrate.py` to recreate database
+   - Ensure database.db file exists in backend directory
+   - Check if all required dependencies are installed
+
+4. **Route Access Issues**
+   - Authentication is required for most routes
+   - Users can only access routes for their role type
+   - Check if user is logged in with correct role
+
+5. **CORS Issues**
+   - Backend is configured for localhost:5173
+   - If using different port, update CORS settings in main.py
+
+### Navigation Tips:
+- Use browser back button carefully with authentication
+- Logout properly to clear session data
+- Each user type has specific home page after login
+- Protected routes automatically redirect to appropriate login page
+
+================================================================================
+## QUICK START GUIDE
+
+1. Run `./run_all.sh` to start the application
+2. Go to http://localhost:5173
+3. Choose user type and click appropriate login link
+4. Use default credentials to log in
+5. Explore role-specific features
+6. Use navigation menu to access different sections
+
+For development testing, the database comes pre-populated with:
+- 2 schools (Springfield Elementary, Riverside High School)
+- 13 users across all roles
+- 3 teachers with subject assignments
+- 6 students with class assignments
+- 2 parents with child links
+- Sample lesson updates and skills data
+
+This covers all the main functionality and user flows in the GrowWise application.

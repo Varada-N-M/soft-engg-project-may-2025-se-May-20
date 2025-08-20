@@ -750,7 +750,7 @@ class StudentProgressAPI(Resource):
             badges_data = []
             for badge in badges:
                 badges_data.append({
-                    'badge_id': badge.badge_id,
+                    'badge_id': badge.id,
                     'badge': badge.badge,
                     'level': badge.level,
                     'badge_xp': badge.badge_xp,
@@ -924,7 +924,7 @@ class StudentBadgesAPI(Resource):
             badges_data = []
             for badge in badges:
                 badges_data.append({
-                    'badge_id': badge.badge_id,
+                    'badge_id': badge.id,
                     'badge': badge.badge,
                     'level': badge.level,
                     'badge_xp': badge.badge_xp,

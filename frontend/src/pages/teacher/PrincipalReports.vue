@@ -95,9 +95,9 @@
                 <CheckCircle class="w-5 h-5 text-blue-600"/>
               </div>
               <p class="text-2xl font-bold text-blue-900">{{ statsData.engagement_metrics.habit_completion_rate }}%</p>
-              <p class="text-sm text-blue-700">{{
-                  statsData.engagement_metrics.total_habit_completions.toLocaleString()
-                }} of {{ statsData.engagement_metrics.total_habits.toLocaleString() }}</p>
+              <p class="text-sm text-blue-700">Based on last 7 days activity ({{
+                  statsData.engagement_metrics.total_habits.toLocaleString()
+                }} active habits)</p>
             </div>
 
             <div class="bg-green-50 rounded-lg p-4">
@@ -140,18 +140,19 @@
           </Card>
 
           <!-- Popular Skills Chart -->
-          <Card class="p-6">
+          <Card class="p-6 pb-8">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Popular Skills</h3>
-            <DonutChart
-                v-if="skillsChartData.length > 0"
-                :data="skillsChartData"
-                index="skill_name"
-                :category="'learned_count'"
-                :height="300"
-                type="pie"
-                :colors="['#63b2ff', '#ff81c4', '#bfff6e', '#ffcc93', '#F0E6FF', '#E6FFF3', '#FFE6E6', '#E6E6FF', '#F3F3E6', '#E6F0FF']"
+            <div class="h-80"   v-if="skillsChartData.length > 0">
+              <DonutChart
 
-            />
+                  :data="skillsChartData"
+                  index="skill_name"
+                  :category="'learned_count'"
+                  type="pie"
+                  :colors="['#63b2ff', '#ff81c4', '#bfff6e', '#ffcc93', '#F0E6FF', '#E6FFF3', '#FFE6E6', '#E6E6FF', '#F3F3E6', '#E6F0FF']"
+                  class="h-full"
+              />
+            </div>
             <p v-else class="text-gray-500 text-center py-8">No skills data available</p>
           </Card>
         </div>
@@ -167,7 +168,7 @@
                 index="category"
                 category="count"
                 :height="300"
-                :colors="['#E6F3FF', '#FFE6F3', '#F3FFE6', '#FFF3E6', '#F0E6FF', '#E6FFF3', '#FFE6E6', '#E6E6FF', '#F3F3E6', '#E6F0FF']"
+                :colors="['#2563eb', '#dc2626', '#16a34a', '#ea580c', '#7c3aed', '#0891b2', '#c2410c', '#9333ea', '#059669', '#0f766e']"
             />
             <p v-else class="text-gray-500 text-center py-8">No habit data available</p>
           </Card>

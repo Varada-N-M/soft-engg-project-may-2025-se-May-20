@@ -325,19 +325,19 @@ class ChildHabitsAPI(Resource):
             for habit in habits:
                 # Get completion history (last 30 days)
                 completions = HabitCompletion.query.filter(
-                    HabitCompletion.habit_id == habit.habit_id,
+                    HabitCompletion.habit_id == habit.id,
                     HabitCompletion.completion_date >= (datetime.now() - timedelta(days=30))
                 ).order_by(HabitCompletion.completion_date.desc()).all()
                 
                 completion_history = []
                 for completion in completions:
                     completion_history.append({
-                        'completion_date': completion.completion_date.date().isoformat(),
+                        'completion_date': completion.completion_date.isoformat(),
                         'is_done': completion.is_done
                     })
                 
                 habits_data.append({
-                    'habit_id': habit.habit_id,
+                    'habit_id': habit.id,
                     'name': habit.name,
                     'description': habit.description,
                     'category': habit.category,
@@ -528,7 +528,7 @@ class ChildWeeklyReportAPI(Resource):
             # Get weekly stats
             habits_completed_this_week = HabitCompletion.query.filter(
                 HabitCompletion.habit_id.in_(
-                    [h.habit_id for h in Habit.query.filter_by(child_id=child_id).all()]
+                    [h.id for h in Habit.query.filter_by(child_id=child_id).all()]
                 ),
                 HabitCompletion.completion_date >= week_start,
                 HabitCompletion.completion_date <= week_end,

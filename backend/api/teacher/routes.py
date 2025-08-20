@@ -95,8 +95,8 @@ class TeacherLessonUpdates(Resource):
     @jwt_required()
     def get(self):
         """
-        Get all lesson updates for the logged-in teacher user.
-        Returns lesson updates created by this teacher.
+        Get all lesson updates for the logged-in teacher/principal user.
+        Teachers see their own lessons, principals see all lessons.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -104,15 +104,25 @@ class TeacherLessonUpdates(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
+            if user.role_type == UserRole.PRINCIPAL:
+                # Principal sees all lesson updates
+                lesson_updates = LessonUpdates.query.order_by(LessonUpdates.created_at.desc()).all()
+            else:
+                # Teacher sees only their lesson updates
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
-
-            lesson_updates = LessonUpdates.query.filter_by(teacher_id=teacher.teacher_id).order_by(LessonUpdates.created_at.desc()).all()
+                lesson_updates = LessonUpdates.query.filter_by(teacher_id=teacher.teacher_id).order_by(LessonUpdates.created_at.desc()).all()
 
             result = []
             for lesson in lesson_updates:
+                # Get teacher name for display
+                teacher_info = Teacher.query.get(lesson.teacher_id)
+                teacher_name = "Unknown"
+                if teacher_info and teacher_info.user:
+                    teacher_name = f"{teacher_info.user.first_name} {teacher_info.user.last_name}"
+                
                 result.append({
                     'id': lesson.id,
                     'day': lesson.day,
@@ -120,6 +130,7 @@ class TeacherLessonUpdates(Resource):
                     'lesson': lesson.lesson,
                     'activity': lesson.activity,
                     'class': lesson.class_,
+                    'teacher_name': teacher_name,
                     'created_at': lesson.created_at.isoformat(),
                 })
 
@@ -463,8 +474,8 @@ class TeacherProfile(Resource):
     @jwt_required()
     def get(self):
         """
-        Get the profile of the logged-in teacher user.
-        Returns basic information about the teacher user.
+        Get the profile of the logged-in teacher/principal user.
+        Returns basic information about the teacher/principal user.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -472,23 +483,36 @@ class TeacherProfile(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            if not user:
-                return {'error': 'Only active teacher users can view their profile'}, 403
+            if user.role_type == UserRole.PRINCIPAL:
+                # Principal doesn't need a Teacher record
+                return {
+                    'user_id': user.user_id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'role_type': user.role_type.value,
+                    'school_id': None,  # Principal may oversee multiple schools
+                    'teacher_id': None,
+                    'subject': 'Administration',
+                    'created_at': user.created_at.isoformat(),
+                }, 200
+            else:
+                # Teacher needs a Teacher record
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
-
-            return {
-                'user_id': user.user_id,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'school_id': teacher.school_id,
-                'teacher_id': teacher.teacher_id,
-                'subject': teacher.subject,
-                'created_at': user.created_at.isoformat(),
-            }, 200
+                return {
+                    'user_id': user.user_id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'role_type': user.role_type.value,
+                    'school_id': teacher.school_id,
+                    'teacher_id': teacher.teacher_id,
+                    'subject': teacher.subject,
+                    'created_at': user.created_at.isoformat(),
+                }, 200
 
         except Exception as e:
             return {'error': 'Internal server error', 'details': str(e)}, 500
@@ -498,8 +522,8 @@ class GetLinkedStudents(Resource):
     @jwt_required()
     def get(self):
         """
-        Get all students linked to the logged-in teacher.
-        Returns a list of students linked to this teacher.
+        Get all students linked to the logged-in teacher/principal.
+        Teachers see their linked students, principals see all students.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -507,24 +531,43 @@ class GetLinkedStudents(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            if not user:
-                return {'error': 'Only active teacher users can view linked students'}, 403
+            if user.role_type == UserRole.PRINCIPAL:
+                # Principal sees all students
+                all_students = Child.query.all()
+                students = []
+                for student in all_students:
+                    if student.user:
+                        students.append({
+                            'student_id': student.child_id,
+                            'first_name': student.user.first_name,
+                            'last_name': student.user.last_name,
+                            'email': student.user.email,
+                            'class_': student.class_,
+                            'school_name': student.school_name,
+                            'xp_points': student.xp_points,
+                            'streak': student.streak
+                        })
+            else:
+                # Teacher sees only linked students
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
-
-            links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
-            students = []
-            for link in links:
-                student = Child.query.get(link.child_id)
-                if student:
-                    students.append({
-                        'student_id': student.child_id,
-                        'first_name': student.user.first_name,
-                        'last_name': student.user.last_name,
-                        'email': student.user.email,
-                    })
+                links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
+                students = []
+                for link in links:
+                    student = Child.query.get(link.child_id)
+                    if student and student.user:
+                        students.append({
+                            'student_id': student.child_id,
+                            'first_name': student.user.first_name,
+                            'last_name': student.user.last_name,
+                            'email': student.user.email,
+                            'class_': student.class_,
+                            'school_name': student.school_name,
+                            'xp_points': student.xp_points,
+                            'streak': student.streak
+                        })
 
             return {'students': students}, 200
 
@@ -693,7 +736,7 @@ class StudentProgressAPI(Resource):
     def get(self, student_id):
         """
         Get comprehensive progress data for a specific student.
-        Only accessible by teachers linked to the student.
+        Accessible by teachers linked to the student or principals (who can see all students).
         """
         try:
             current_user_id = get_jwt_identity()
@@ -701,20 +744,23 @@ class StudentProgressAPI(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
-
-            # Verify teacher is linked to the student
-            link = TeacherChild.query.filter_by(
-                teacher_id=teacher.teacher_id, child_id=student_id
-            ).first()
-            if not link:
-                return {'error': 'Student is not linked to this teacher'}, 404
-
             student = Child.query.get(student_id)
             if not student:
                 return {'error': 'Student not found'}, 404
+
+            if user.role_type == UserRole.TEACHER:
+                # Teachers can only see students they're linked to
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
+
+                # Verify teacher is linked to the student
+                link = TeacherChild.query.filter_by(
+                    teacher_id=teacher.teacher_id, child_id=student_id
+                ).first()
+                if not link:
+                    return {'error': 'Student is not linked to this teacher'}, 404
+            # Principals can see all students, no additional checks needed
 
             # Get student basic info
             student_info = {
@@ -763,12 +809,12 @@ class StudentProgressAPI(Resource):
             for habit in habits:
                 # Get recent completions (last 30 days)
                 recent_completions = HabitCompletion.query.filter(
-                    HabitCompletion.habit_id == habit.habit_id,
+                    HabitCompletion.habit_id == habit.id,
                     HabitCompletion.completion_date >= (datetime.now() - timedelta(days=30))
                 ).count()
                 
                 habits_data.append({
-                    'habit_id': habit.habit_id,
+                    'habit_id': habit.id,
                     'name': habit.name,
                     'description': habit.description,
                     'category': habit.category,
@@ -795,6 +841,7 @@ class StudentHabitsAPI(Resource):
     def get(self, student_id):
         """
         Get detailed habits data for a specific student.
+        Accessible by teachers linked to the student or principals (who can see all students).
         """
         try:
             current_user_id = get_jwt_identity()
@@ -802,35 +849,38 @@ class StudentHabitsAPI(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
+            if user.role_type == UserRole.TEACHER:
+                # Teachers can only see students they're linked to
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            # Verify teacher is linked to the student
-            link = TeacherChild.query.filter_by(
-                teacher_id=teacher.teacher_id, child_id=student_id
-            ).first()
-            if not link:
-                return {'error': 'Student is not linked to this teacher'}, 404
+                # Verify teacher is linked to the student
+                link = TeacherChild.query.filter_by(
+                    teacher_id=teacher.teacher_id, child_id=student_id
+                ).first()
+                if not link:
+                    return {'error': 'Student is not linked to this teacher'}, 404
+            # Principals can see all students, no additional checks needed
 
             habits = Habit.query.filter_by(child_id=student_id).all()
             habits_data = []
             
             for habit in habits:
                 # Get completion history
-                completions = HabitCompletion.query.filter_by(habit_id=habit.habit_id).order_by(
+                completions = HabitCompletion.query.filter_by(habit_id=habit.id).order_by(
                     HabitCompletion.completion_date.desc()
                 ).limit(30).all()
                 
                 completion_history = []
                 for completion in completions:
                     completion_history.append({
-                        'completion_date': completion.completion_date.date().isoformat(),
+                        'completion_date': completion.completion_date.isoformat(),
                         'is_done': completion.is_done
                     })
                 
                 habits_data.append({
-                    'habit_id': habit.habit_id,
+                    'habit_id': habit.id,
                     'name': habit.name,
                     'description': habit.description,
                     'category': habit.category,
@@ -850,6 +900,7 @@ class StudentSkillsAPI(Resource):
     def get(self, student_id):
         """
         Get detailed skills data for a specific student.
+        Accessible by teachers linked to the student or principals (who can see all students).
         """
         try:
             current_user_id = get_jwt_identity()
@@ -857,16 +908,19 @@ class StudentSkillsAPI(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
+            if user.role_type == UserRole.TEACHER:
+                # Teachers can only see students they're linked to
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            # Verify teacher is linked to the student
-            link = TeacherChild.query.filter_by(
-                teacher_id=teacher.teacher_id, child_id=student_id
-            ).first()
-            if not link:
-                return {'error': 'Student is not linked to this teacher'}, 404
+                # Verify teacher is linked to the student
+                link = TeacherChild.query.filter_by(
+                    teacher_id=teacher.teacher_id, child_id=student_id
+                ).first()
+                if not link:
+                    return {'error': 'Student is not linked to this teacher'}, 404
+            # Principals can see all students, no additional checks needed
 
             # Get all skills with completion status
             skills = db.session.query(CommonSkill, SkillCompleted).outerjoin(
@@ -899,6 +953,7 @@ class StudentBadgesAPI(Resource):
     def get(self, student_id):
         """
         Get badges earned by a specific student.
+        Accessible by teachers linked to the student or principals (who can see all students).
         """
         try:
             current_user_id = get_jwt_identity()
@@ -906,16 +961,19 @@ class StudentBadgesAPI(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
+            if user.role_type == UserRole.TEACHER:
+                # Teachers can only see students they're linked to
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            # Verify teacher is linked to the student
-            link = TeacherChild.query.filter_by(
-                teacher_id=teacher.teacher_id, child_id=student_id
-            ).first()
-            if not link:
-                return {'error': 'Student is not linked to this teacher'}, 404
+                # Verify teacher is linked to the student
+                link = TeacherChild.query.filter_by(
+                    teacher_id=teacher.teacher_id, child_id=student_id
+                ).first()
+                if not link:
+                    return {'error': 'Student is not linked to this teacher'}, 404
+            # Principals can see all students, no additional checks needed
 
             badges = Badge.query.filter_by(child_id=student_id, is_earned=True).order_by(
                 Badge.earned_at.desc()
@@ -941,7 +999,7 @@ class ClassAnalyticsAPI(Resource):
     @jwt_required()
     def get(self):
         """
-        Get analytics for all students linked to the teacher.
+        Get analytics for all students linked to the teacher or for all students if principal.
         """
         try:
             current_user_id = get_jwt_identity()
@@ -949,13 +1007,19 @@ class ClassAnalyticsAPI(Resource):
             if not user or user.role_type not in [UserRole.TEACHER, UserRole.PRINCIPAL]:
                 return {'error': 'Only active teacher/principal users can access this'}, 403
 
-            teacher = Teacher.query.filter_by(user_id=user.user_id).first()
-            if not teacher:
-                return {'error': 'Teacher profile not found'}, 404
+            if user.role_type == UserRole.PRINCIPAL:
+                # Principal sees all students in organization
+                students = Child.query.all()
+                student_ids = [s.child_id for s in students]
+            else:
+                # Teacher sees only linked students
+                teacher = Teacher.query.filter_by(user_id=user.user_id).first()
+                if not teacher:
+                    return {'error': 'Teacher profile not found'}, 404
 
-            # Get all linked students
-            links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
-            student_ids = [link.child_id for link in links]
+                # Get all linked students
+                links = TeacherChild.query.filter_by(teacher_id=teacher.teacher_id).all()
+                student_ids = [link.child_id for link in links]
 
             if not student_ids:
                 return {

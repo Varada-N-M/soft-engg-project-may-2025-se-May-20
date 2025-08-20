@@ -5,7 +5,7 @@ import {BACKEND_BASE_URL} from '../constants'
 // Axios instance
 const api = axios.create({
     baseURL: BACKEND_BASE_URL,
-    timeout: 10000,
+    // timeout: 10000,
     withCredentials: true,
 })
 

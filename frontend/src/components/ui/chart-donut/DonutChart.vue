@@ -99,8 +99,9 @@ function handleLegendItemClick() {
 </script>
 
 <template>
-  <div :class="cn('w-full h-48 flex flex-col', $attrs.class ?? '')">
-    <VisSingleContainer :style="{ height: isMounted ? '100%' : 'auto' }" :margin="{ left: 20, right: 20 }" :data="data">
+  <div :class="cn('w-full flex flex-col', $attrs.class ?? '')">
+    <div class="min-h-48 flex-1">
+      <VisSingleContainer :style="{ height: isMounted ? '100%' : 'auto' }" :margin="{ left: 20, right: 20 }" :data="data">
       <VisTooltip
           v-if="showTooltip"
           :horizontal-shift="20"
@@ -132,8 +133,9 @@ function handleLegendItemClick() {
         }"
       />
 
-      <slot />
-    </VisSingleContainer>
+        <slot />
+      </VisSingleContainer>
+    </div>
 
     <ChartLegend
         v-if="showLegend"

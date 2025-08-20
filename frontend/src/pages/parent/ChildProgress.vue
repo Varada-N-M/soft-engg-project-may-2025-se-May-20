@@ -17,7 +17,9 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Child Progress</h1>
+          <h1 class="text-2xl font-bold text-gray-800">
+            {{ childData?.child ? `${childData.child.name}'s Progress` : 'Child Progress' }}
+          </h1>
           <p class="text-gray-600">Detailed progress tracking and learning journey</p>
         </div>
       </div>

@@ -13,3 +13,5 @@ venv
 .DS_store
 
 endpoint.txt
+script.txt
+guide.txt

@@ -50,7 +50,7 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="analyticsData" class="space-y-6">
+    <div v-else-if="analyticsData" class="space-y-6 p-5 mx-10">
       <!-- Class Overview Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">

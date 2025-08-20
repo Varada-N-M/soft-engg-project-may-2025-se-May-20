@@ -17,7 +17,9 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Achievements & Badges</h1>
+          <h1 class="text-2xl font-bold text-gray-800">
+            {{ achievementsData?.child ? `${achievementsData.child.name}'s Achievements` : 'Achievements & Badges' }}
+          </h1>
           <p class="text-gray-600">Celebrate your child's learning milestones</p>
         </div>
       </div>

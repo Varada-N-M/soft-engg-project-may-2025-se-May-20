@@ -169,7 +169,7 @@ def create_seed_data():
     print("👪 Creating parent-child relationships...")
     parent_child_links = [
         {"parent_idx": 0, "child_idx": 0},  # Jennifer Brown -> Emma Brown
-        {"parent_idx": 1, "child_idx": 1},  # Robert Wilson -> Noah Wilson
+        {"parent_idx": 0, "child_idx": 1},  # Robert Wilson -> Noah Wilson
     ]
     
     for link_data in parent_child_links:

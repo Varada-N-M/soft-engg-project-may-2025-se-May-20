@@ -197,7 +197,16 @@ def get_overview_dashboard():
             })
         
         # Completion rates
-        habit_completion_rate = (total_habit_completions / max(total_habits, 1)) * 100
+        # Calculate recent habit completion rate (last 7 days) for meaningful percentage
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        recent_habit_completions = HabitCompletion.query.filter(
+            and_(HabitCompletion.completion_date >= seven_days_ago.date(), HabitCompletion.is_done == True)
+        ).count()
+        
+        # Get total possible completions (active habits × 7 days)
+        total_possible_recent = total_habits * 7
+        habit_completion_rate = (recent_habit_completions / max(total_possible_recent, 1)) * 100
+        
         skill_completion_rate = (total_skills_learned / max(total_skills, 1)) * 100
         todo_completion_rate = (total_todos_completed / max(total_todos, 1)) * 100
         

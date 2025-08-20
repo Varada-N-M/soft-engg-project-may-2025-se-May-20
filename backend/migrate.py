@@ -35,14 +35,12 @@ def create_seed_data():
     # Create Users
     print("👥 Creating users with authentication...")
     users_data = [
-        # Admin
-        {"email": "admin@school.edu", "password": "admin123", "first_name": "Admin", "last_name": "User", "role": UserRole.ADMIN},
-        
+
         # Teachers
-        {"email": "mariah.jace@school.edu", "password": "teacher123", "first_name": "Mariah", "last_name": "Jace", "role": UserRole.PRINCIPAL},
-        {"email": "sarah.johnson@school.edu", "password": "teacher123", "first_name": "Sarah", "last_name": "Johnson", "role": UserRole.TEACHER},
-        {"email": "mike.davis@school.edu", "password": "teacher123", "first_name": "Mike", "last_name": "Davis", "role": UserRole.TEACHER},
-        {"email": "lisa.wang@school.edu", "password": "teacher123", "first_name": "Lisa", "last_name": "Wang", "role": UserRole.TEACHER},
+        {"email": "principal@school.edu", "password": "teacher123", "first_name": "Mariah", "last_name": "Jace", "role": UserRole.PRINCIPAL},
+        {"email": "teacher1@school.edu", "password": "teacher123", "first_name": "Sarah", "last_name": "Johnson", "role": UserRole.TEACHER},
+        {"email": "teacher2@school.edu", "password": "teacher123", "first_name": "Mike", "last_name": "Davis", "role": UserRole.TEACHER},
+        {"email": "teacher3@school.edu", "password": "teacher123", "first_name": "Lisa", "last_name": "Wang", "role": UserRole.TEACHER},
         
         # Students
         {"email": "emma.brown@student.edu", "password": "student123", "first_name": "Emma", "last_name": "Brown", "role": UserRole.CHILD},
@@ -80,9 +78,10 @@ def create_seed_data():
     # Create Teacher Profiles
     print("🎓 Creating teacher profiles...")
     teachers_data = [
+        {"user_idx": 0, "subject": "Administration", "school_idx": 0},  # Principal Mariah Jace
         {"user_idx": 1, "subject": "Mathematics", "school_idx": 0},  # Sarah Johnson
         {"user_idx": 2, "subject": "English Literature", "school_idx": 0},  # Mike Davis  
-        {"user_idx": 3, "subject": "Science", "school_idx": 1},  # Lisa Wang
+        {"user_idx": 3, "subject": "Science", "school_idx": 0},  # Lisa Wang
     ]
     
     teachers = []
@@ -101,9 +100,9 @@ def create_seed_data():
         {"user_idx": 4, "dob": date(2018, 3, 15), "class_": 1, "school": "Springfield Elementary", "gender": "Female"},  # Emma Brown
         {"user_idx": 5, "dob": date(2016, 7, 22), "class_": 3, "school": "Springfield Elementary", "gender": "Male"},    # Noah Wilson
         {"user_idx": 6, "dob": date(2014, 11, 8), "class_": 5, "school": "Springfield Elementary", "gender": "Female"}, # Sophia Garcia
-        {"user_idx": 7, "dob": date(2012, 1, 30), "class_": 7, "school": "Riverside High School", "gender": "Male"},    # Liam Martinez
-        {"user_idx": 8, "dob": date(2010, 9, 12), "class_": 9, "school": "Riverside High School", "gender": "Female"}, # Olivia Lee
-        {"user_idx": 9, "dob": date(2008, 5, 18), "class_": 11, "school": "Riverside High School", "gender": "Male"},  # Ethan Taylor
+        {"user_idx": 7, "dob": date(2012, 1, 30), "class_": 7, "school": "Springfield Elementary", "gender": "Male"},    # Liam Martinez
+        {"user_idx": 8, "dob": date(2010, 9, 12), "class_": 9, "school": "Springfield Elementary", "gender": "Female"}, # Olivia Lee
+        {"user_idx": 9, "dob": date(2008, 5, 18), "class_": 8, "school": "Springfield Elementary", "gender": "Male"},  # Ethan Taylor
     ]
     
     students = []
@@ -125,8 +124,8 @@ def create_seed_data():
     # Create Parent Profiles
     print("👨‍👩‍👧‍👦 Creating parent profiles...")
     parents_data = [
-        {"user_idx": 10, "phone_number": "+1-555-0201"},  # Jennifer Brown
-        {"user_idx": 11, "phone_number": "+1-555-0202"},  # Robert Wilson
+        {"user_idx": 10, "phone_number": "5550201"},  # Jennifer Brown
+        {"user_idx": 11, "phone_number": "5550202"},  # Robert Wilson
     ]
     
     parents = []
@@ -144,19 +143,19 @@ def create_seed_data():
     print("🔗 Creating teacher-student relationships...")
     teacher_student_links = [
         # Sarah Johnson (Math) - Elementary students
-        {"teacher_idx": 0, "student_idx": 0},  # Emma (Class 1)
-        {"teacher_idx": 0, "student_idx": 1},  # Noah (Class 3)  
-        {"teacher_idx": 0, "student_idx": 2},  # Sophia (Class 5)
+        {"teacher_idx": 1, "student_idx": 0},  # Emma (Class 1)
+        {"teacher_idx": 1, "student_idx": 1},  # Noah (Class 3)  
+        {"teacher_idx": 1, "student_idx": 2},  # Sophia (Class 5)
         
         # Mike Davis (English) - High school students
-        {"teacher_idx": 1, "student_idx": 3},  # Liam (Class 7)
-        {"teacher_idx": 1, "student_idx": 4},  # Olivia (Class 9)
-        {"teacher_idx": 1, "student_idx": 5},  # Ethan (Class 11)
-        
-        # Lisa Wang (Science) - Mixed levels
-        {"teacher_idx": 2, "student_idx": 2},  # Sophia (Class 5)
         {"teacher_idx": 2, "student_idx": 3},  # Liam (Class 7)
         {"teacher_idx": 2, "student_idx": 4},  # Olivia (Class 9)
+        {"teacher_idx": 2, "student_idx": 5},  # Ethan (Class 11)
+        
+        # Lisa Wang (Science) - Mixed levels
+        {"teacher_idx": 3, "student_idx": 2},  # Sophia (Class 5)
+        {"teacher_idx": 3, "student_idx": 3},  # Liam (Class 7)
+        {"teacher_idx": 3, "student_idx": 4},  # Olivia (Class 9)
     ]
     
     for link_data in teacher_student_links:
@@ -183,34 +182,34 @@ def create_seed_data():
     # Create Lesson Updates
     print("📝 Creating lesson updates...")
     lessons_data = [
-        # Math lessons by Sarah Johnson
-        {"teacher_idx": 0, "class_": 1, "day": "Monday", "subject": "Math", "lesson": "Addition Basics", "activity": "Practice adding single-digit numbers with colorful blocks and worksheets."},
-        {"teacher_idx": 0, "class_": 1, "day": "Wednesday", "subject": "Math", "lesson": "Counting to 100", "activity": "Count objects in groups and practice writing numbers 1-100."},
-        {"teacher_idx": 0, "class_": 3, "day": "Tuesday", "subject": "Math", "lesson": "Multiplication Tables", "activity": "Learn times tables 2, 5, and 10 through songs and games."},
-        {"teacher_idx": 0, "class_": 3, "day": "Friday", "subject": "Math", "lesson": "Word Problems", "activity": "Solve simple addition and subtraction word problems using real-world examples."},
-        {"teacher_idx": 0, "class_": 5, "day": "Monday", "subject": "Math", "lesson": "Fractions Introduction", "activity": "Understand halves, quarters, and thirds using pizza and pie models."},
-        {"teacher_idx": 0, "class_": 5, "day": "Thursday", "subject": "Math", "lesson": "Decimal Numbers", "activity": "Learn about tenths and hundredths using money examples and place value charts."},
+        # Math lessons by Sarah Johnson (now index 1)
+        {"teacher_idx": 1, "class_": 1, "day": "Monday", "subject": "Math", "lesson": "Addition Basics", "activity": "Practice adding single-digit numbers with colorful blocks and worksheets."},
+        {"teacher_idx": 1, "class_": 1, "day": "Wednesday", "subject": "Math", "lesson": "Counting to 100", "activity": "Count objects in groups and practice writing numbers 1-100."},
+        {"teacher_idx": 1, "class_": 3, "day": "Tuesday", "subject": "Math", "lesson": "Multiplication Tables", "activity": "Learn times tables 2, 5, and 10 through songs and games."},
+        {"teacher_idx": 1, "class_": 3, "day": "Friday", "subject": "Math", "lesson": "Word Problems", "activity": "Solve simple addition and subtraction word problems using real-world examples."},
+        {"teacher_idx": 1, "class_": 5, "day": "Monday", "subject": "Math", "lesson": "Fractions Introduction", "activity": "Understand halves, quarters, and thirds using pizza and pie models."},
+        {"teacher_idx": 1, "class_": 5, "day": "Thursday", "subject": "Math", "lesson": "Decimal Numbers", "activity": "Learn about tenths and hundredths using money examples and place value charts."},
         
-        # English lessons by Mike Davis
-        {"teacher_idx": 1, "class_": 7, "day": "Monday", "subject": "English", "lesson": "Shakespeare Introduction", "activity": "Read Romeo and Juliet Act 1, Scene 1 and discuss Elizabethan language."},
-        {"teacher_idx": 1, "class_": 7, "day": "Wednesday", "subject": "English", "lesson": "Creative Writing", "activity": "Write a short story using descriptive language and dialogue techniques."},
-        {"teacher_idx": 1, "class_": 9, "day": "Tuesday", "subject": "English", "lesson": "Poetry Analysis", "activity": "Analyze themes and literary devices in Robert Frost's 'The Road Not Taken'."},
-        {"teacher_idx": 1, "class_": 9, "day": "Friday", "subject": "English", "lesson": "Debate Skills", "activity": "Practice persuasive speaking through structured debates on current topics."},
-        {"teacher_idx": 1, "class_": 11, "day": "Monday", "subject": "English", "lesson": "College Essay Writing", "activity": "Draft personal statements and practice college application essay techniques."},
-        {"teacher_idx": 1, "class_": 11, "day": "Thursday", "subject": "English", "lesson": "Advanced Grammar", "activity": "Master complex sentence structures and advanced punctuation rules."},
+        # English lessons by Mike Davis (now index 2)
+        {"teacher_idx": 2, "class_": 7, "day": "Monday", "subject": "English", "lesson": "Shakespeare Introduction", "activity": "Read Romeo and Juliet Act 1, Scene 1 and discuss Elizabethan language."},
+        {"teacher_idx": 2, "class_": 7, "day": "Wednesday", "subject": "English", "lesson": "Creative Writing", "activity": "Write a short story using descriptive language and dialogue techniques."},
+        {"teacher_idx": 2, "class_": 9, "day": "Tuesday", "subject": "English", "lesson": "Poetry Analysis", "activity": "Analyze themes and literary devices in Robert Frost's 'The Road Not Taken'."},
+        {"teacher_idx": 2, "class_": 9, "day": "Friday", "subject": "English", "lesson": "Debate Skills", "activity": "Practice persuasive speaking through structured debates on current topics."},
+        {"teacher_idx": 2, "class_": 11, "day": "Monday", "subject": "English", "lesson": "College Essay Writing", "activity": "Draft personal statements and practice college application essay techniques."},
+        {"teacher_idx": 2, "class_": 11, "day": "Thursday", "subject": "English", "lesson": "Advanced Grammar", "activity": "Master complex sentence structures and advanced punctuation rules."},
         
-        # Science lessons by Lisa Wang
-        {"teacher_idx": 2, "class_": 5, "day": "Tuesday", "subject": "Science", "lesson": "Plant Life Cycles", "activity": "Observe bean seeds germination and document plant growth stages."},
-        {"teacher_idx": 2, "class_": 5, "day": "Friday", "subject": "Science", "lesson": "Weather Patterns", "activity": "Create a weather station and track daily temperature, humidity, and precipitation."},
-        {"teacher_idx": 2, "class_": 7, "day": "Wednesday", "subject": "Science", "lesson": "Cell Structure", "activity": "Use microscopes to observe plant and animal cells, draw and label parts."},
-        {"teacher_idx": 2, "class_": 7, "day": "Thursday", "subject": "Science", "lesson": "Ecosystems", "activity": "Build a terrarium ecosystem and study predator-prey relationships."},
-        {"teacher_idx": 2, "class_": 9, "day": "Monday", "subject": "Science", "lesson": "Chemical Reactions", "activity": "Conduct safe experiments to observe acids, bases, and chemical changes."},
-        {"teacher_idx": 2, "class_": 9, "day": "Wednesday", "subject": "Science", "lesson": "Physics Laws", "activity": "Explore Newton's laws through hands-on experiments with motion and force."},
+        # Science lessons by Lisa Wang (now index 3)
+        {"teacher_idx": 3, "class_": 5, "day": "Tuesday", "subject": "Science", "lesson": "Plant Life Cycles", "activity": "Observe bean seeds germination and document plant growth stages."},
+        {"teacher_idx": 3, "class_": 5, "day": "Friday", "subject": "Science", "lesson": "Weather Patterns", "activity": "Create a weather station and track daily temperature, humidity, and precipitation."},
+        {"teacher_idx": 3, "class_": 7, "day": "Wednesday", "subject": "Science", "lesson": "Cell Structure", "activity": "Use microscopes to observe plant and animal cells, draw and label parts."},
+        {"teacher_idx": 3, "class_": 7, "day": "Thursday", "subject": "Science", "lesson": "Ecosystems", "activity": "Build a terrarium ecosystem and study predator-prey relationships."},
+        {"teacher_idx": 3, "class_": 9, "day": "Monday", "subject": "Science", "lesson": "Chemical Reactions", "activity": "Conduct safe experiments to observe acids, bases, and chemical changes."},
+        {"teacher_idx": 3, "class_": 9, "day": "Wednesday", "subject": "Science", "lesson": "Physics Laws", "activity": "Explore Newton's laws through hands-on experiments with motion and force."},
         
         # Additional cross-curricular lessons
-        {"teacher_idx": 0, "class_": 2, "day": "Tuesday", "subject": "Math", "lesson": "Shapes and Geometry", "activity": "Identify 2D and 3D shapes in the classroom and create shape art projects."},
-        {"teacher_idx": 1, "class_": 8, "day": "Friday", "subject": "English", "lesson": "Research Skills", "activity": "Learn to evaluate sources and cite information for research projects."},
-        {"teacher_idx": 2, "class_": 6, "day": "Monday", "subject": "Science", "lesson": "Solar System", "activity": "Create a scale model of the solar system and learn planet characteristics."},
+        {"teacher_idx": 1, "class_": 2, "day": "Tuesday", "subject": "Math", "lesson": "Shapes and Geometry", "activity": "Identify 2D and 3D shapes in the classroom and create shape art projects."},
+        {"teacher_idx": 2, "class_": 8, "day": "Friday", "subject": "English", "lesson": "Research Skills", "activity": "Learn to evaluate sources and cite information for research projects."},
+        {"teacher_idx": 3, "class_": 6, "day": "Monday", "subject": "Science", "lesson": "Solar System", "activity": "Create a scale model of the solar system and learn planet characteristics."},
     ]
     
     for lesson_data in lessons_data:
@@ -549,7 +548,9 @@ if __name__ == "__main__":
         
         print("\n🎉 Database migration and seeding completed!")
         print("\n📋 Login Credentials:")
-        print("Admin: admin@school.edu / admin123")
-        print("Teacher: sarah.johnson@school.edu / teacher123")
-        print("Student: emma.brown@student.edu / student123") 
+        print("Principal: principal@school.edu / teacher123")
+        print("Teacher 1: teacher1@school.edu / teacher123")
+        print("Teacher 2: teacher2@school.edu / teacher123") 
+        print("Teacher 3: teacher3@school.edu / teacher123")
+        print("Student: emma.brown@student.edu / student123")
         print("Parent: parent1@example.com / parent123")

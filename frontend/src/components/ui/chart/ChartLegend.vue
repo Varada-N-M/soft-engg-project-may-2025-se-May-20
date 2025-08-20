@@ -22,7 +22,13 @@ function keepStyling() {
     const elements = elRef.value?.querySelectorAll(selector)
     const classes = buttonVariants({ variant: "ghost", size: "xs" }).split(" ")
 
-    elements?.forEach(el => el.classList.add(...classes, "!inline-flex", "!mr-2"))
+    elements?.forEach(el => el.classList.add(...classes, "!inline-flex", "!mr-2", "!mb-1"))
+    
+    // Add flex-wrap to the legend container
+    const legendContainer = elRef.value?.querySelector('.vis-bullet-legend')
+    if (legendContainer) {
+      legendContainer.classList.add('!flex', '!flex-wrap', '!justify-center', '!gap-1')
+    }
   })
 }
 
@@ -48,7 +54,7 @@ function onLegendItemClick(d: BulletLegendItemInterface, i: number) {
 
 <template>
   <div
-    ref="elRef" class="w-max" :style="{
+    ref="elRef" class="w-full max-w-full" :style="{
       '--vis-legend-bullet-size': '16px',
     }"
   >

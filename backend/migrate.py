@@ -348,54 +348,54 @@ def create_seed_data():
     
     # Create Student Badges
     print("🏆 Creating student badges...")
-    badges_data = [
-        # Emma Brown badges (child_id = 1)
-        {"child_idx": 0, "badge": "Reading Star", "level": "Bronze", "is_earned": True, "badge_xp": 100},
-        {"child_idx": 0, "badge": "Math Whiz", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 0, "badge": "Homework Hero", "level": "Bronze", "is_earned": True, "badge_xp": 100},
-        {"child_idx": 0, "badge": "Creative Writer", "level": "Bronze", "is_earned": False, "badge_xp": 100},
+    # badges_data = [
+    #     # Emma Brown badges (child_id = 1)
+    #     {"child_idx": 0, "badge": "Reading Star", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     {"child_idx": 0, "badge": "Math Whiz", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 0, "badge": "Homework Hero", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     {"child_idx": 0, "badge": "Creative Writer", "level": "Bronze", "is_earned": False, "badge_xp": 100},
         
-        # Noah Wilson badges (child_id = 2)
-        {"child_idx": 1, "badge": "Fitness Champion", "level": "Gold", "is_earned": True, "badge_xp": 200},
-        {"child_idx": 1, "badge": "Helper Badge", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 1, "badge": "Math Master", "level": "Bronze", "is_earned": True, "badge_xp": 100},
-        {"child_idx": 1, "badge": "Science Explorer", "level": "Bronze", "is_earned": False, "badge_xp": 100},
+    #     # Noah Wilson badges (child_id = 2)
+    #     {"child_idx": 1, "badge": "Fitness Champion", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    #     {"child_idx": 1, "badge": "Helper Badge", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 1, "badge": "Math Master", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     {"child_idx": 1, "badge": "Science Explorer", "level": "Bronze", "is_earned": False, "badge_xp": 100},
         
-        # Sophia Garcia badges (child_id = 3)
-        {"child_idx": 2, "badge": "Artist Extraordinaire", "level": "Gold", "is_earned": True, "badge_xp": 200},
-        {"child_idx": 2, "badge": "Science Genius", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 2, "badge": "Journal Keeper", "level": "Bronze", "is_earned": True, "badge_xp": 100},
-        {"child_idx": 2, "badge": "Leadership Star", "level": "Silver", "is_earned": False, "badge_xp": 150},
+    #     # Sophia Garcia badges (child_id = 3)
+    #     {"child_idx": 2, "badge": "Artist Extraordinaire", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    #     {"child_idx": 2, "badge": "Science Genius", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 2, "badge": "Journal Keeper", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     {"child_idx": 2, "badge": "Leadership Star", "level": "Silver", "is_earned": False, "badge_xp": 150},
         
-        # Liam Martinez badges (child_id = 4)
-        {"child_idx": 3, "badge": "Tech Pioneer", "level": "Gold", "is_earned": True, "badge_xp": 200},
-        {"child_idx": 3, "badge": "News Hound", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 3, "badge": "Critical Thinker", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     # Liam Martinez badges (child_id = 4)
+    #     {"child_idx": 3, "badge": "Tech Pioneer", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    #     {"child_idx": 3, "badge": "News Hound", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 3, "badge": "Critical Thinker", "level": "Bronze", "is_earned": True, "badge_xp": 100},
         
-        # Olivia Lee badges (child_id = 5)
-        {"child_idx": 4, "badge": "Community Champion", "level": "Gold", "is_earned": True, "badge_xp": 200},
-        {"child_idx": 4, "badge": "Mindfulness Master", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 4, "badge": "Compassion Award", "level": "Bronze", "is_earned": True, "badge_xp": 100},
+    #     # Olivia Lee badges (child_id = 5)
+    #     {"child_idx": 4, "badge": "Community Champion", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    #     {"child_idx": 4, "badge": "Mindfulness Master", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 4, "badge": "Compassion Award", "level": "Bronze", "is_earned": True, "badge_xp": 100},
         
-        # Ethan Taylor badges (child_id = 6)
-        {"child_idx": 5, "badge": "Future Leader", "level": "Gold", "is_earned": True, "badge_xp": 200},
-        {"child_idx": 5, "badge": "College Bound", "level": "Silver", "is_earned": True, "badge_xp": 150},
-        {"child_idx": 5, "badge": "Academic Excellence", "level": "Gold", "is_earned": True, "badge_xp": 200},
-    ]
+    #     # Ethan Taylor badges (child_id = 6)
+    #     {"child_idx": 5, "badge": "Future Leader", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    #     {"child_idx": 5, "badge": "College Bound", "level": "Silver", "is_earned": True, "badge_xp": 150},
+    #     {"child_idx": 5, "badge": "Academic Excellence", "level": "Gold", "is_earned": True, "badge_xp": 200},
+    # ]
     
-    badges = []
-    for badge_data in badges_data:
-        earned_at = datetime.now(timezone.utc) - timedelta(days=random.randint(1, 90)) if badge_data["is_earned"] else None
-        badge = Badge(
-            child_id=students[badge_data["child_idx"]].child_id,
-            badge=badge_data["badge"],
-            level=badge_data["level"],
-            is_earned=badge_data["is_earned"],
-            badge_xp=badge_data["badge_xp"],
-            earned_at=earned_at
-        )
-        badges.append(badge)
-        db.session.add(badge)
+    # badges = []
+    # for badge_data in badges_data:
+    #     earned_at = datetime.now(timezone.utc) - timedelta(days=random.randint(1, 90)) if badge_data["is_earned"] else None
+    #     badge = Badge(
+    #         child_id=students[badge_data["child_idx"]].child_id,
+    #         badge=badge_data["badge"],
+    #         level=badge_data["level"],
+    #         is_earned=badge_data["is_earned"],
+    #         badge_xp=badge_data["badge_xp"],
+    #         earned_at=earned_at
+    #     )
+    #     badges.append(badge)
+    #     db.session.add(badge)
     
     # Create Student To-Do Lists
     print("📝 Creating student to-do lists...")
@@ -490,16 +490,16 @@ def create_seed_data():
     for i, student in enumerate(students):
         # Calculate XP from habits, badges, and skills
         student_habits = [h for h in habits if h.child_id == student.child_id]
-        student_badges = [b for b in badges if b.child_id == student.child_id and b.is_earned]
+        # student_badges = [b for b in badges if b.child_id == student.child_id and b.is_earned]
         
         total_habit_xp = sum(h.habit_xp for h in student_habits) * random.randint(5, 15)  # Multiple completions
-        total_badge_xp = sum(b.badge_xp for b in student_badges)
+        # total_badge_xp = sum(b.badge_xp for b in student_badges)
         skill_xp = 200 if student.child_id in [2] else random.randint(0, 100)  # Some students completed skills
         
-        total_xp = total_habit_xp + total_badge_xp + skill_xp + random.randint(50, 200)
+        # total_xp = total_habit_xp + total_badge_xp + skill_xp + random.randint(50, 200)
         streak = random.randint(1, 15)  # Current active streak
         
-        student.xp_points = total_xp
+        # student.xp_points = total_xp
         student.streak = streak
 
     # Commit all data
@@ -515,7 +515,7 @@ def create_seed_data():
     print(f"   • {len(lessons_data)} lesson updates")
     print(f"   • {len(habits)} student habits")
     print(f"   • {len(habit_completions)} habit completion records")
-    print(f"   • {len(badges)} student badges")
+    # print(f"   • {len(badges)} student badges")
     print(f"   • {len(todos)} todo items")
     print(f"   • {len(gratitude_entries)} gratitude journal entries")
     print(f"   • Teacher-student and parent-child relationships")

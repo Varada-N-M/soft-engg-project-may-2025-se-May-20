@@ -41,8 +41,7 @@ proto-plus==1.26.1
 protobuf==5.29.5
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
-pydantic==2.11.7   ✅
-# REMOVE pydantic_core ❌
+pydantic==2.11.7
 pydot==4.0.1
 Pygments==2.19.2
 PyJWT==2.10.1

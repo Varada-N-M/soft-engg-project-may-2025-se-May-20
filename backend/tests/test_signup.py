@@ -7,7 +7,7 @@ import pytest
 
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
 from models import Child, Users, UserRole  
-from main import db, create_app 
+from backend.app import db, create_app 
 
 
 def test_signup_child_success(client, child_payload):

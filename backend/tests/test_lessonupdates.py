@@ -5,7 +5,7 @@ from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import create_app
+from backend.app import create_app
 from models import db, LessonUpdates, Users, Teacher, UserRole
 from flask_jwt_extended import create_access_token
 

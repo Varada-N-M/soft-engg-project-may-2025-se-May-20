@@ -1,7 +1,7 @@
 import pytest
 from flask_jwt_extended import create_access_token
 from datetime import datetime
-from main import db
+from backend.app import db
 from models import Parent, Child, ParentChild, UserRole
 
 

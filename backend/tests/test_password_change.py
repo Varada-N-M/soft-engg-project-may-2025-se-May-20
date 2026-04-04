@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash
 
 from models import Users, UserRole
-from main import db
+from backend.app import db
 
 # ---------------------------
 # Forgot Password Tests

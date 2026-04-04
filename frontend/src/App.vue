@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 
 </script>
 
@@ -7,9 +7,16 @@
   <!-- <auth-navbar v-if="true" :user-type="'student'"/> -->
   <!-- Navbar for for guest user -->
   <!-- <guest-navbar v-else /> -->
-  <router-view></router-view>
-</template>
+  <!-- <router-view></router-view> -->
+<!-- </template> -->
 
 <style scoped>
 
-</style>
+</style> -->
+<template>
+  <FriendlyCharacter />
+</template>
+
+<script setup>
+import FriendlyCharacter from "./pages/student/FunnyCharacter.vue";
+</script>

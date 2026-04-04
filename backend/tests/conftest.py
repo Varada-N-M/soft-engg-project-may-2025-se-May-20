@@ -14,8 +14,8 @@ from werkzeug.security import generate_password_hash
 # Add backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from main import create_app
-from main import db as _db
+from backend.app import create_app
+from backend.app import db as _db
 from models import Child, UserRole, Users
 
 

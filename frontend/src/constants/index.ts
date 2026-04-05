@@ -1,1 +1,1 @@
-export const BACKEND_BASE_URL = 'http://127.0.0.1:5000';
+export const BACKEND_BASE_URL = 'https://soft-engg-project-may-2025-se-may-20-10.onrender.com';

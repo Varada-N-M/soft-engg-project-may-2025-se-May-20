@@ -16,9 +16,17 @@ def create_app(config_name='default', testing=False):
     if testing:
         app.config['TESTING'] = True
 
-    # Setup CORS - Allow all origins (can be restricted to specific domain in production)
+    # Setup CORS - Allow specific frontend origins
+    allowed_origins = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://localhost:5174',
+        'https://growwise-o79a.onrender.com',  # Production frontend
+        config[config_name].FRONTEND_URL,  # Load from config
+    ]
     CORS(app, 
-         resources={r"/*": {"origins": "*"}},
+         origins=allowed_origins,
          supports_credentials=True,
          allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
          methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])

@@ -10,7 +10,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or 'dev'
 
-    FRONTEND_URL = os.environ.get("FRONTEND_URL") or 'http://localhost:5173'
+    FRONTEND_URL = os.environ.get("FRONTEND_URL") or 'https://growwise-o79a.onrender.com'
 
     # db config
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')

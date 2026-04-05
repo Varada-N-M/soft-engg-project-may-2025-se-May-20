@@ -1,21 +1,49 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: growwise_postgres
+    environment:
+      POSTGRES_DB: growwise_db
+      POSTGRES_USER: growwise_user
+      POSTGRES_PASSWORD: growwise_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U growwise_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
+    container_name: growwise_backend
     ports:
       - "5000:5000"
     volumes:
       - ./backend:/app
     environment:
       - FLASK_ENV=development
+      - DATABASE_URL=postgresql://growwise_user:growwise_password@postgres:5432/growwise_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python run.py
 
   frontend:
     image: node:16
+    container_name: growwise_frontend
     working_dir: /app
     volumes:
       - ./frontend:/app
     ports:
       - "3000:3000"
     command: ["npm", "run", "dev"]
+
+volumes:
+  postgres_data:

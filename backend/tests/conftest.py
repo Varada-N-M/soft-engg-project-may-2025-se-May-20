@@ -24,10 +24,19 @@ def app():
     """Create application for testing"""
     app = create_app(testing=True)
     
+    # Use in-memory SQLite for tests (fast and isolated)
+    # or PostgreSQL if TEST_DATABASE_URL is provided
+    test_db_url = os.environ.get('TEST_DATABASE_URL')
+    if test_db_url:
+        test_db_uri = test_db_url
+    else:
+        # Default to in-memory SQLite for fast, isolated tests
+        test_db_uri = 'sqlite:///:memory:'
+    
     # Set test configuration
     app.config.update({
         'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'SQLALCHEMY_DATABASE_URI': test_db_uri,
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'JWT_SECRET_KEY': 'test-secret-key',
         'WTF_CSRF_ENABLED': False,

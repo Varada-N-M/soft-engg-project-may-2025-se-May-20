@@ -12,8 +12,15 @@ class Config:
 
     FRONTEND_URL = os.environ.get("FRONTEND_URL") or 'https://growwise-o79a.onrender.com'
 
-    # db config
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    # db config - Support both PostgreSQL and SQLite
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    if DATABASE_URL:
+        # Use PostgreSQL if DATABASE_URL is provided
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    else:
+        # Fallback to SQLite for local development
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.environ.get("JWT_KEY") or 'dev'

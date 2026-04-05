@@ -8,6 +8,7 @@ Flask-SQLAlchemy>=3.1
 
 SQLAlchemy>=2.0
 alembic>=1.13
+psycopg2-binary>=2.9
 
 pydantic>=2.6
 typing_extensions>=4.8

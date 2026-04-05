@@ -522,12 +522,25 @@ def create_seed_data():
     print(f"   • Realistic progress tracking with XP points and streaks")
 
 if __name__ == "__main__":
-    db_path = os.path.join(os.path.dirname(__file__), 'database.db')
-    if os.path.exists(db_path):
-        confirm = input("WARNING: This will DELETE and RECREATE the database. Type 'yes' to continue: ")
+    # Handle database migration based on environment
+    db_url = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    
+    # If using SQLite, handle file deletion
+    if 'sqlite' in db_url.lower():
+        db_path = os.path.join(os.path.dirname(__file__), 'database.db')
+        if os.path.exists(db_path):
+            confirm = input("WARNING: This will DELETE and RECREATE the database. Type 'yes' to continue: ")
+            if confirm.lower() == 'yes':
+                os.remove(db_path)
+                print("Old SQLite database removed.")
+            else:
+                print("Migration cancelled.")
+                exit(0)
+    else:
+        # For PostgreSQL or other databases
+        confirm = input("WARNING: This will DROP and RECREATE all database tables. Type 'yes' to continue: ")
         if confirm.lower() == 'yes':
-            os.remove(db_path)
-            print("Old database removed.")
+            print("Proceeding with database recreation...")
         else:
             print("Migration cancelled.")
             exit(0)

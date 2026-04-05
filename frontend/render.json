@@ -1,9 +1,18 @@
 {
   "routes": [
     {
-      "path": "/*",
-      "methods": ["GET"],
-      "route": "/index.html",
+      "src": "^/static/(.*)$",
+      "dest": "/static/$1",
+      "methods": ["GET"]
+    },
+    {
+      "src": "^/index.html$",
+      "dest": "/index.html",
+      "methods": ["GET"]
+    },
+    {
+      "src": ".*",
+      "dest": "/index.html",
       "status": 200
     }
   ]

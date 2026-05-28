@@ -71,12 +71,15 @@ class SignupAdmin(Resource):
 class SignupChild(Resource):
     def post(self):
         try:
+            print("[DEBUG] Child registration request received")
             data = request.get_json()
+            print(f"[DEBUG] Request data: {data}")
 
             # Required fields for child
             user_fields = ['email', 'password', 'first_name', 'last_name', 'dob', 'class', 'school_name', 'gender']
             for field in user_fields:
                 if not data.get(field):
+                    print(f"[ERROR] Missing required field: {field}")
                     return {'error': f'{field} is required'}, 400
 
             email = data['email'].lower().strip()
@@ -86,12 +89,15 @@ class SignupChild(Resource):
 
             # Validate email and password
             if not validate_email(email):
+                print(f"[ERROR] Invalid email format: {email}")
                 return {'error': 'Invalid email format'}, 400
             is_valid_password, msg = validate_password(password)
             if not is_valid_password:
+                print(f"[ERROR] Invalid password: {msg}")
                 return {'error': msg}, 400
 
             if Users.query.filter_by(email=email).first():
+                print(f"[ERROR] User already exists with email: {email}")
                 return {'error': 'User with this email already exists'}, 409
 
             hashed_password = generate_password_hash(password)
@@ -104,6 +110,7 @@ class SignupChild(Resource):
             )
             db.session.add(new_user)
             db.session.flush()  # Get user_id
+            print(f"[DEBUG] User created with ID: {new_user.user_id}")
 
             # Create Child
             new_child = Child(
@@ -116,11 +123,13 @@ class SignupChild(Resource):
             )
             db.session.add(new_child)
             db.session.commit()
+            print(f"[DEBUG] Child created with ID: {new_child.child_id}")
 
             # Tokens
             access_token = create_access_token(identity=str(new_user.user_id))
             refresh_token = create_refresh_token(identity=str(new_user.user_id))
 
+            print(f"[SUCCESS] Child registration successful for email: {email}")
             return {
                 'message': 'Child registered successfully',
                 'user_email': new_user.email,
@@ -129,8 +138,15 @@ class SignupChild(Resource):
                 'refresh_token': refresh_token
             }, 201
 
+        except ValueError as ve:
+            db.session.rollback()
+            print(f"[ERROR] ValueError: {str(ve)}")
+            return {'error': 'Invalid data format', 'details': str(ve)}, 400
         except Exception as e:
             db.session.rollback()
+            print(f"[ERROR] Exception: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {'error': 'Internal server error', 'details': str(e)}, 500
 
 

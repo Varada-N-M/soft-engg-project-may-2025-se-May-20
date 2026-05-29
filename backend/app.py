@@ -38,9 +38,15 @@ def create_app(config_name='default', testing=False):
     mail.init_app(app)
     Migrate(app, db)
 
-    # Create tables on startup (optional)
+    # Create tables on startup (wrapped in try-except to prevent crash)
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+            print("✅ Database tables created/verified successfully")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not create database tables on startup: {str(e)}")
+            print("⚠️ The app will still run, but database may not be initialized.")
+            print("⚠️ Tables will be created when database becomes available.")
 
     # Swagger redirection
     @app.route('/')

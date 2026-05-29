@@ -23,17 +23,21 @@ class Config:
             parts = DATABASE_URL.rsplit("/", 1)
             DATABASE_URL = parts[0] + ":5432/" + parts[1]
         
+        print(f"🔧 Using PostgreSQL database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'config'}")
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
         SQLALCHEMY_ENGINE_OPTIONS = {
             "pool_pre_ping": True,
             "pool_recycle": 300,
+            "pool_size": 10,
+            "max_overflow": 20,
             "echo_pool": False,
             "connect_args": {"connect_timeout": 10}
         }
     else:
-        # Development: SQLite (localhost)
-        # Automatically uses SQLite when DATABASE_URL is not set
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+        # Development: SQLite (automatic fallback)
+        db_path = os.path.join(basedir, 'database.db')
+        print(f"📁 Using SQLite database: {db_path}")
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + db_path
         SQLALCHEMY_ENGINE_OPTIONS = {}
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False

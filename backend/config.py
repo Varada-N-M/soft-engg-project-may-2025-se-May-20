@@ -16,10 +16,17 @@ class Config:
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if DATABASE_URL:
         # Use PostgreSQL if DATABASE_URL is provided
+        # For Render: ensure connection pool settings handle timeouts
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "pool_pre_ping": True,
+            "pool_recycle": 300,
+            "echo_pool": False,
+        }
     else:
-        # Fallback to SQLite for local development
+        # Fallback to SQLite for local development and cloud deployment
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
+        SQLALCHEMY_ENGINE_OPTIONS = {}
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

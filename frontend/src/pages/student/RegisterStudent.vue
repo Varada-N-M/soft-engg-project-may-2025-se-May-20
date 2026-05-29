@@ -188,21 +188,59 @@
                   <EyeOffIcon v-else class="w-5 h-5"/>
                 </button>
               </div>
-              <p v-if="errors.password" class="text-xs text-red-500 mt-1">{{ errors.password }}</p>
 
               <!-- Password strength indicator -->
-              <div v-if="formData.password" class="mt-2">
-                <div class="flex space-x-1">
+              <div v-if="formData.password" class="mt-3">
+                <div class="flex space-x-1 mb-2">
                   <div
                       v-for="i in 4"
                       :key="i"
-                      class="h-1 flex-1 rounded-full transition-colors"
+                      class="h-2 flex-1 rounded-full transition-colors"
                       :class="getPasswordStrengthColor(i)"
                   ></div>
                 </div>
-                <p class="text-xs mt-1" :class="passwordStrengthTextColor">
+                <p class="text-xs font-semibold mb-3" :class="passwordStrengthTextColor">
                   {{ passwordStrengthText }}
                 </p>
+
+                <!-- Password requirements checklist -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200 space-y-2">
+                  <p class="text-xs font-semibold text-gray-700 mb-2">Password requirements:</p>
+                  <div class="space-y-1.5">
+                    <div class="flex items-center text-xs" :class="passwordChecks.minLength.met ? 'text-green-600' : 'text-gray-500'">
+                      <span :class="passwordChecks.minLength.met ? 'text-green-500' : 'text-gray-400'" class="mr-2 font-bold">
+                        {{ passwordChecks.minLength.met ? '✓' : '○' }}
+                      </span>
+                      <span>At least 6 characters</span>
+                    </div>
+                    <div class="flex items-center text-xs" :class="passwordChecks.hasLower.met ? 'text-green-600' : 'text-gray-500'">
+                      <span :class="passwordChecks.hasLower.met ? 'text-green-500' : 'text-gray-400'" class="mr-2 font-bold">
+                        {{ passwordChecks.hasLower.met ? '✓' : '○' }}
+                      </span>
+                      <span>Lowercase letter (a-z)</span>
+                    </div>
+                    <div class="flex items-center text-xs" :class="passwordChecks.hasUpper.met ? 'text-green-600' : 'text-gray-500'">
+                      <span :class="passwordChecks.hasUpper.met ? 'text-green-500' : 'text-gray-400'" class="mr-2 font-bold">
+                        {{ passwordChecks.hasUpper.met ? '✓' : '○' }}
+                      </span>
+                      <span>Uppercase letter (A-Z)</span>
+                    </div>
+                    <div class="flex items-center text-xs" :class="passwordChecks.hasNumber.met ? 'text-green-600' : 'text-gray-500'">
+                      <span :class="passwordChecks.hasNumber.met ? 'text-green-500' : 'text-gray-400'" class="mr-2 font-bold">
+                        {{ passwordChecks.hasNumber.met ? '✓' : '○' }}
+                      </span>
+                      <span>Number (0-9)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Server error message -->
+              <div v-if="errors.password" class="mt-3 bg-red-50 border-l-4 border-red-500 rounded-md p-3">
+                <div class="flex items-start">
+                  <AlertCircleIcon class="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5"/>
+                  <p class="text-sm text-red-700 font-semibold">{{ errors.password }}</p>
+                </div>
               </div>
             </div>
 
@@ -344,6 +382,24 @@ const passwordStrength = computed(() => {
   return strength
 })
 
+const passwordChecks = computed(() => {
+  const password = formData.value.password
+  return {
+    minLength: {
+      met: password.length >= 6
+    },
+    hasLower: {
+      met: /[a-z]/.test(password)
+    },
+    hasUpper: {
+      met: /[A-Z]/.test(password)
+    },
+    hasNumber: {
+      met: /\d/.test(password)
+    }
+  }
+})
+
 const passwordStrengthText = computed(() => {
   const strength = passwordStrength.value
   const texts = ['Too weak 😟', 'Weak 😐', 'Good 😊', 'Strong 💪', 'Super strong! 🦸‍♂️']
@@ -365,7 +421,6 @@ const isFormValid = computed(() => {
       formData.value.school_name &&
       formData.value.gender &&
       formData.value.password &&
-      passwordStrength.value >= 2 &&
       Object.keys(errors.value).length === 0
 })
 
@@ -393,8 +448,36 @@ const getInputClasses = (field) => {
 }
 
 
-const handleSubmit = async () => {
+const validatePassword = () => {
+  const checks = passwordChecks.value
+  const unmetRequirements = []
 
+  if (!checks.minLength.met) unmetRequirements.push('at least 6 characters')
+  if (!checks.hasLower.met) unmetRequirements.push('lowercase letter')
+  if (!checks.hasUpper.met) unmetRequirements.push('uppercase letter')
+  if (!checks.hasNumber.met) unmetRequirements.push('number')
+
+  if (unmetRequirements.length > 0) {
+    return {
+      valid: false,
+      message: `Password must contain: ${unmetRequirements.join(', ')}`
+    }
+  }
+
+  return { valid: true }
+}
+
+const handleSubmit = async () => {
+  // Validate password requirements
+  const passwordValidation = validatePassword()
+  if (!passwordValidation.valid) {
+    errors.value.password = passwordValidation.message
+    response.value = {
+      success: false,
+      message: passwordValidation.message
+    }
+    return
+  }
 
   isLoading.value = true
   response.value = null

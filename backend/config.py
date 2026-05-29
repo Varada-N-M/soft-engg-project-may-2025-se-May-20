@@ -12,19 +12,27 @@ class Config:
 
     FRONTEND_URL = os.environ.get("FRONTEND_URL") or 'https://growwise-o79a.onrender.com'
 
-    # db config - Support both PostgreSQL and SQLite
+    # db config - Support both PostgreSQL (production) and SQLite (development)
     DATABASE_URL = os.environ.get("DATABASE_URL")
+    
     if DATABASE_URL:
-        # Use PostgreSQL if DATABASE_URL is provided
-        # For Render: ensure connection pool settings handle timeouts
+        # Production: PostgreSQL
+        # Ensure PostgreSQL connection includes port if missing
+        if DATABASE_URL.startswith("postgresql://") and ":5432" not in DATABASE_URL and "//" in DATABASE_URL:
+            # Add default PostgreSQL port if not specified
+            parts = DATABASE_URL.rsplit("/", 1)
+            DATABASE_URL = parts[0] + ":5432/" + parts[1]
+        
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
         SQLALCHEMY_ENGINE_OPTIONS = {
             "pool_pre_ping": True,
             "pool_recycle": 300,
             "echo_pool": False,
+            "connect_args": {"connect_timeout": 10}
         }
     else:
-        # Fallback to SQLite for local development and cloud deployment
+        # Development: SQLite (localhost)
+        # Automatically uses SQLite when DATABASE_URL is not set
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database.db')
         SQLALCHEMY_ENGINE_OPTIONS = {}
     
